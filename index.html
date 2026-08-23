@@ -1134,7 +1134,8 @@ function closeDetail() { document.getElementById('detail-ov').classList.remove('
 
 function attachHtml(raw) {
   const txt = spText(raw);
-  if (!txt) return '<div style="font-size:.8rem;color:#a19f9d">첨부파일 없음</div>';
+  // 첨부가 없을 때는 「결재 이력이 없습니다.」와 같은 규칙(가운데 정렬 · 패딩)으로 표시한다.
+  if (!txt) return '<div style="padding:12px;text-align:center;color:#a19f9d;font-size:.78rem">첨부파일이 없습니다.</div>';
   return txt.split(';').filter(x => x.trim()).map(entry => {
     const p = entry.split('||');
     const name = (p[0] || '').trim();
