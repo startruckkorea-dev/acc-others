@@ -31,10 +31,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 
 /* 탭 */
 .cats{display:flex;gap:0;background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;margin:0}
-.cat{padding:15px 24px;cursor:pointer;font-size:14px;font-weight:500;color:#605e5c;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.cat{padding:15px 24px;cursor:pointer;font-size:14px;font-weight:500;color:#605e5c;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:8px}
 .cat.on{color:#0078d4;border-bottom-color:#0078d4;font-weight:700}
 .cat:hover:not(.on){background:#f3f2f1;color:#323130}
-.cat-count{background:#edebe9;color:#605e5c;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:600;margin-left:8px}
+.cat-count{background:#edebe9;color:#605e5c;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:600}
 .cat-count.has-item{background:#a4262c;color:#fff}
 .tabs{display:flex;gap:2px;padding:0;background:transparent;margin:0 0 40px}
 .tab{padding:8px 18px;line-height:1.5;cursor:pointer;font-size:14px;font-weight:400;color:#605e5c;background:#fff;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;white-space:nowrap}
@@ -166,8 +166,8 @@ tbody tr:hover{background:#f8f9fb}
 
   <div class="navcard">
     <div class="cats">
-      <div class="cat on" data-cat="dev" onclick="switchCat('dev')">Deviation Report <span class="cat-count" id="cat-badge-dev"></span></div>
-      <div class="cat" data-cat="ccl" onclick="switchCat('ccl')">Credit Card Limit <span class="cat-count" id="cat-badge-ccl"></span></div>
+      <div class="cat on" data-cat="dev" onclick="switchCat('dev')"><span>Deviation Report</span><span class="cat-count" id="cat-badge-dev"></span></div>
+      <div class="cat" data-cat="ccl" onclick="switchCat('ccl')"><span>Credit Card Limit</span><span class="cat-count" id="cat-badge-ccl"></span></div>
     </div>
 
     <div class="tabs">
