@@ -770,8 +770,10 @@ async function boot(account) {
       IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
       const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '-' }));
       document.getElementById('contact-email').textContent = 'BU Admin 문의 Email: ' + contact.email;
-      Object.assign(DEV_CFO, cfgVal(cfg, 'DEV_CFO', DEV_CFO));
-      Object.assign(CCL_CFO, cfgVal(cfg, 'CCL_CFO', CCL_CFO));
+      // 키 이름은 시스템 접두어(ACC-OTHERS_)를 붙인 쪽이 정식이다.
+      // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
+      Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
+      Object.assign(CCL_CFO, cfgVal(cfg, 'ACC-OTHERS_CCL_CFO', cfgVal(cfg, 'CCL_CFO', CCL_CFO)));
       const show = v => v.name ? (v.name + ' · ' + v.email) : (v.email || '(설정 필요)');
       const setFixed = (pfx, a) => {
         const nEl = document.getElementById(pfx + '-name'), eEl = document.getElementById(pfx + '-view');
