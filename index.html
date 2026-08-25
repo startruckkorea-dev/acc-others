@@ -9,7 +9,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
+body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
 .wrap{max-width:960px;margin:0 auto;padding:24px 16px 48px}
 .card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:22px 26px;margin-bottom:16px}
 
@@ -47,6 +47,18 @@ body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:#f3f2f1;color:
 .sec:first-of-type{margin-top:4px}
 .row{display:flex;gap:16px;flex-wrap:wrap}
 .fld{flex:1;min-width:200px;margin-bottom:13px}
+.appr-block{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:8px}
+.appr-fixed{background:#f0f6ff;border:1px solid #c7e0f4}
+.appr-title{font-size:.78rem;font-weight:600;color:#323130;margin-bottom:8px}
+.appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+.appr-grid select{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#fff}
+.appr-grid select:disabled{background:#f3f2f1;color:#a19f9d}
+.appr-info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.appr-info input{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#f3f2f1;color:#605e5c;width:100%;box-sizing:border-box}
+.appr-hint{font-size:.7rem;color:#605e5c;font-weight:400}
+.line-preview{background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem;color:#323130}
+.line-preview-title{font-weight:600;color:#0078d4;margin-bottom:6px;font-size:.75rem}
+.line-step{display:inline-block;background:#0078d4;color:#fff;border-radius:9px;padding:1px 8px;font-size:.68rem;font-weight:700;margin-right:5px}
 .fld.full{flex:0 0 100%}
 label{display:block;font-size:.76rem;font-weight:600;color:#323130;margin-bottom:5px}
 label .req{color:#a4262c;margin-left:2px}
@@ -217,17 +229,46 @@ tbody tr:hover{background:#f8f9fb}
         <input type="file" id="dev-file" multiple style="display:none" onchange="onPickFile('dev',this)">
         <div id="dev-filelist"></div>
 
-        <div class="sec">6. 결재선</div>
-        <div class="row">
-          <div class="fld"><label>1차 결재자 — Team Leader<span class="req">*</span></label>
-            <select id="dev-a1-dept" onchange="onDeptChange('dev')"><option value="">부서 선택</option></select></div>
-          <div class="fld"><label>&nbsp;</label>
-            <select id="dev-a1-sel" onchange="onApproverPick('dev')"><option value="">결재자 선택</option></select></div>
+        <div class="sec">6. 결재자 지정 (Approvers)</div>
+        <div class="line-preview">
+          <div class="line-preview-title">📋 결재 라인</div>
+          <span class="line-step">1차</span>Team Leader (직접 지정) →
+          <span class="line-step">2차</span>MC (직접 지정) →
+          <span class="line-step">3차</span>CFO (고정)
         </div>
-        <input type="hidden" id="dev-a1-name"><input type="hidden" id="dev-a1-email">
-        <div class="row">
-          <div class="fld"><label>2차 결재자 — MC</label><input type="text" id="dev-a2-view" disabled></div>
-          <div class="fld"><label>3차 결재자 — CFO</label><input type="text" id="dev-a3-view" disabled></div>
+
+        <div class="appr-block">
+          <div class="appr-title">1차 결재자 <span class="req">*</span> <span class="appr-hint">— Team Leader</span></div>
+          <div class="appr-grid">
+            <select id="dev-a1-dept" onchange="apprDept('dev',1)"><option value="">부서</option></select>
+            <select id="dev-a1-team" onchange="apprTeam('dev',1)" disabled><option value="">팀</option></select>
+            <select id="dev-a1-sel" onchange="apprPick('dev',1)" disabled><option value="">직원 선택</option></select>
+          </div>
+          <div class="appr-info">
+            <input type="text" id="dev-a1-name" readonly placeholder="이름">
+            <input type="email" id="dev-a1-email" readonly placeholder="이메일">
+          </div>
+        </div>
+
+        <div class="appr-block">
+          <div class="appr-title">2차 결재자 <span class="req">*</span> <span class="appr-hint">— MC</span></div>
+          <div class="appr-grid">
+            <select id="dev-a2-dept" onchange="apprDept('dev',2)"><option value="">부서</option></select>
+            <select id="dev-a2-team" onchange="apprTeam('dev',2)" disabled><option value="">팀</option></select>
+            <select id="dev-a2-sel" onchange="apprPick('dev',2)" disabled><option value="">직원 선택</option></select>
+          </div>
+          <div class="appr-info">
+            <input type="text" id="dev-a2-name" readonly placeholder="이름">
+            <input type="email" id="dev-a2-email" readonly placeholder="이메일">
+          </div>
+        </div>
+
+        <div class="appr-block appr-fixed">
+          <div class="appr-title">3차 결재자 <span class="appr-hint">— CFO (자동 지정)</span></div>
+          <div class="appr-info">
+            <input type="text" id="dev-a3-name" readonly placeholder="이름">
+            <input type="email" id="dev-a3-view" readonly placeholder="이메일">
+          </div>
         </div>
 
         <div style="text-align:right;margin-top:20px">
@@ -273,17 +314,32 @@ tbody tr:hover{background:#f8f9fb}
         <input type="file" id="ccl-file" multiple style="display:none" onchange="onPickFile('ccl',this)">
         <div id="ccl-filelist"></div>
 
-        <div class="sec">4. 결재선</div>
-        <div class="row">
-          <div class="fld"><label>1차 결재자 — Department Head<span class="req">*</span></label>
-            <select id="ccl-a1-dept" onchange="onDeptChange('ccl')"><option value="">부서 선택</option></select></div>
-          <div class="fld"><label>&nbsp;</label>
-            <select id="ccl-a1-sel" onchange="onApproverPick('ccl')"><option value="">결재자 선택</option></select></div>
+        <div class="sec">4. 결재자 지정 (Approvers)</div>
+        <div class="line-preview">
+          <div class="line-preview-title">📋 결재 라인</div>
+          <span class="line-step">1차</span>Department Head (직접 지정) →
+          <span class="line-step">2차</span>CFO (고정)
         </div>
-        <input type="hidden" id="ccl-a1-name"><input type="hidden" id="ccl-a1-email">
-        <div class="row">
-          <div class="fld"><label>2차 결재자 — CFO</label><input type="text" id="ccl-a2-view" disabled></div>
-          <div class="fld"></div>
+
+        <div class="appr-block">
+          <div class="appr-title">1차 결재자 <span class="req">*</span> <span class="appr-hint">— Department Head</span></div>
+          <div class="appr-grid">
+            <select id="ccl-a1-dept" onchange="apprDept('ccl',1)"><option value="">부서</option></select>
+            <select id="ccl-a1-team" onchange="apprTeam('ccl',1)" disabled><option value="">팀</option></select>
+            <select id="ccl-a1-sel" onchange="apprPick('ccl',1)" disabled><option value="">직원 선택</option></select>
+          </div>
+          <div class="appr-info">
+            <input type="text" id="ccl-a1-name" readonly placeholder="이름">
+            <input type="email" id="ccl-a1-email" readonly placeholder="이메일">
+          </div>
+        </div>
+
+        <div class="appr-block appr-fixed">
+          <div class="appr-title">2차 결재자 <span class="appr-hint">— CFO (자동 지정)</span></div>
+          <div class="appr-info">
+            <input type="text" id="ccl-a2-name" readonly placeholder="이름">
+            <input type="email" id="ccl-a2-view" readonly placeholder="이메일">
+          </div>
         </div>
 
         <div style="text-align:right;margin-top:20px">
@@ -394,7 +450,7 @@ const MASTER_FILE = 'acc_others_master.xlsx';
 // 설정에서 채워진다. 코드에 실제 값을 두지 않는다.
 let ADMIN_EMAILS = [];
 let IT_EMAILS    = [];
-const DEV_MC  = { name: '', email: '', role: 'MC',  order: 2 };
+// Team Leader·MC 는 신청자가 화면에서 직접 지정한다. CFO 만 설정 파일 고정.
 const DEV_CFO = { name: '', email: '', role: 'CFO', order: 3 };
 const CCL_CFO = { name: '', email: '', role: 'CFO', order: 2 };
 
@@ -640,27 +696,53 @@ async function loadEmployees() {
     console.log('[Employee] 로드:', employeeData.length, '명');
   } catch (e) { console.warn('[Employee] 로드 실패:', e.message); }
 }
+const APPR_SLOTS = { dev: [1, 2], ccl: [1] };   // 직접 지정하는 결재 차수
 function initDept(cat) {
-  const el = document.getElementById(cat + '-a1-dept');
-  if (!el) return;
   const depts = [...new Set(employeeData.map(e => e.dept).filter(Boolean))].sort();
-  el.innerHTML = '<option value="">부서 선택</option>' +
+  const opt = '<option value="">부서</option>' +
     depts.map(d => '<option value="' + esc(d) + '">' + esc(d) + '</option>').join('');
+  APPR_SLOTS[cat].forEach(n => {
+    const el = document.getElementById(cat + '-a' + n + '-dept');
+    if (el) el.innerHTML = opt;
+  });
 }
-function onDeptChange(cat) {
-  const dept = document.getElementById(cat + '-a1-dept').value;
-  const sel = document.getElementById(cat + '-a1-sel');
-  const list = employeeData.filter(e => e.dept === dept).sort((a, b) => a.name.localeCompare(b.name));
-  sel.innerHTML = '<option value="">결재자 선택</option>' +
-    list.map(e => '<option value="' + esc(e.email) + '">' + esc(e.name) + ' · ' + esc(e.email) + '</option>').join('');
-  document.getElementById(cat + '-a1-name').value = '';
-  document.getElementById(cat + '-a1-email').value = '';
+// 부서 -> 팀 -> 직원 3단 선택. GW(Goodwill-Approval)와 동일한 방식.
+function apprDept(cat, n) {
+  const dept = document.getElementById(cat + '-a' + n + '-dept').value;
+  const tSel = document.getElementById(cat + '-a' + n + '-team');
+  const pSel = document.getElementById(cat + '-a' + n + '-sel');
+  document.getElementById(cat + '-a' + n + '-name').value = '';
+  document.getElementById(cat + '-a' + n + '-email').value = '';
+  const teams = [...new Set(employeeData.filter(e => e.dept === dept).map(e => e.team).filter(Boolean))].sort();
+  tSel.innerHTML = '<option value="">팀</option>' +
+    teams.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join('');
+  pSel.innerHTML = '<option value="">직원 선택</option>';
+  pSel.disabled = true;
+  // 팀 값이 비어 있는 부서는 팀 단계를 건너뛰고 바로 직원을 고를 수 있게 한다.
+  tSel.disabled = !dept || !teams.length;
+  if (dept && !teams.length) fillPersons(cat, n, dept, '');
 }
-function onApproverPick(cat) {
-  const email = document.getElementById(cat + '-a1-sel').value;
-  const emp = employeeData.find(e => e.email === email);
-  document.getElementById(cat + '-a1-name').value = emp ? emp.name : '';
-  document.getElementById(cat + '-a1-email').value = email || '';
+function apprTeam(cat, n) {
+  const dept = document.getElementById(cat + '-a' + n + '-dept').value;
+  const team = document.getElementById(cat + '-a' + n + '-team').value;
+  document.getElementById(cat + '-a' + n + '-name').value = '';
+  document.getElementById(cat + '-a' + n + '-email').value = '';
+  fillPersons(cat, n, dept, team);
+}
+function fillPersons(cat, n, dept, team) {
+  const pSel = document.getElementById(cat + '-a' + n + '-sel');
+  const list = employeeData
+    .filter(e => e.dept === dept && (!team || e.team === team))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  pSel.innerHTML = '<option value="">직원 선택</option>' +
+    list.map(e => '<option value="' + esc(e.email) + '">' + esc(e.name) + '</option>').join('');
+  pSel.disabled = !list.length;
+}
+function apprPick(cat, n) {
+  const email = document.getElementById(cat + '-a' + n + '-sel').value;
+  const p = employeeData.find(e => e.email === email);
+  document.getElementById(cat + '-a' + n + '-name').value = p ? p.name : '';
+  document.getElementById(cat + '-a' + n + '-email').value = p ? p.email : '';
 }
 
 /* ── 부팅 ─────────────────────────────────────────────────── */
@@ -688,13 +770,16 @@ async function boot(account) {
       IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
       const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '-' }));
       document.getElementById('contact-email').textContent = 'BU Admin 문의 Email: ' + contact.email;
-      Object.assign(DEV_MC,  cfgVal(cfg, 'DEV_MC',  DEV_MC));
       Object.assign(DEV_CFO, cfgVal(cfg, 'DEV_CFO', DEV_CFO));
       Object.assign(CCL_CFO, cfgVal(cfg, 'CCL_CFO', CCL_CFO));
       const show = v => v.name ? (v.name + ' · ' + v.email) : (v.email || '(설정 필요)');
-      document.getElementById('dev-a2-view').value = show(DEV_MC);
-      document.getElementById('dev-a3-view').value = show(DEV_CFO);
-      document.getElementById('ccl-a2-view').value = show(CCL_CFO);
+      const setFixed = (pfx, a) => {
+        const nEl = document.getElementById(pfx + '-name'), eEl = document.getElementById(pfx + '-view');
+        if (nEl) nEl.value = a.name || '';
+        if (eEl) eEl.value = a.email || '';
+      };
+      setFixed('dev-a3', DEV_CFO);
+      setFixed('ccl-a2', CCL_CFO);
       if (isAdmin() || isIT()) document.getElementById('tab-admin').style.display = '';
     } else {
       document.getElementById('cfg-warn').style.display = 'block';
@@ -829,14 +914,24 @@ function resetForm(cat) {
   if (!confirm('작성 중인 내용을 모두 지우시겠습니까?')) return;
   const ids = cat === 'dev'
     ? ['dev-policy', 'dev-category', 'dev-incident', 'dev-exptype', 'dev-amount', 'dev-desc',
-       'dev-immediate', 'dev-longterm', 'dev-recommend', 'dev-a1-dept', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email']
-    : ['ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks', 'ccl-a1-dept', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
+       'dev-immediate', 'dev-longterm', 'dev-recommend',
+       'dev-a1-dept', 'dev-a1-team', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email',
+       'dev-a2-dept', 'dev-a2-team', 'dev-a2-sel', 'dev-a2-name', 'dev-a2-email']
+    : ['ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks',
+       'ccl-a1-dept', 'ccl-a1-team', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById(cat + '-date').value = kstToday();
   if (cat === 'dev') document.getElementById('dev-writer').value = user.name || '';
   else document.getElementById('ccl-holder').value = user.name || '';
   _files[cat] = []; renderFiles(cat);
   onDeptChange(cat);
+  // 부서 선택이 풀렸으므로 팀·직원 드롭다운을 초기 상태로 되돌린다.
+  APPR_SLOTS[cat].forEach(n => {
+    const t = document.getElementById(cat + '-a' + n + '-team');
+    const p2 = document.getElementById(cat + '-a' + n + '-sel');
+    if (t) { t.innerHTML = '<option value="">팀</option>'; t.disabled = true; }
+    if (p2) { p2.innerHTML = '<option value="">직원 선택</option>'; p2.disabled = true; }
+  });
 }
 
 /* ── 상신 ─────────────────────────────────────────────────── */
@@ -856,6 +951,7 @@ function validate(cat) {
     if (!val('dev-immediate')) miss.push('Immediate Actions (즉시조치)');
     if (!val('dev-longterm')) miss.push('Long-Term Corrective Measures (장기 개선조치)');
     if (!val('dev-a1-email')) miss.push('1차 결재자 (Team Leader)');
+    if (!val('dev-a2-email')) miss.push('2차 결재자 (MC)');
     if (Number(val('dev-amount')) < 0) miss.push('금액은 0 이상이어야 합니다');
     if (val('dev-incident') && val('dev-date') && val('dev-incident') > val('dev-date'))
       miss.push('발생일이 작성일보다 뒤일 수 없습니다');
@@ -872,13 +968,25 @@ function validate(cat) {
 }
 
 function buildApprovers(cat) {
-  const a1 = { name: val(cat + '-a1-name'), email: val(cat + '-a1-email'),
-               role: cat === 'dev' ? 'Team Leader' : 'Department Head', order: 1 };
-  const rest = cat === 'dev' ? [DEV_MC, DEV_CFO] : [CCL_CFO];
-  const missing = rest.filter(a => !a.email).map(a => a.role);
+  // 직접 지정 구간(dev: Team Leader·MC / ccl: Department Head)을 화면 선택값에서 읽는다.
+  const ROLES = { dev: ['Team Leader', 'MC'], ccl: ['Department Head'] };
+  const picked = APPR_SLOTS[cat].map((n, i) => ({
+    name: val(cat + '-a' + n + '-name'),
+    email: val(cat + '-a' + n + '-email'),
+    role: ROLES[cat][i], order: n
+  }));
+  const notPicked = picked.filter(a => !a.email).map(a => a.role);
+  if (notPicked.length) throw new Error('결재자를 지정해 주세요: ' + notPicked.join(', '));
+  // 같은 사람을 두 단계에 넣으면 앞 단계 승인 시 뒷 단계가 자기 결재가 된다.
+  const emails = picked.map(a => a.email.toLowerCase());
+  if (new Set(emails).size !== emails.length) throw new Error('같은 사람을 두 단계에 지정할 수 없습니다.');
+  // CFO 는 설정 파일 고정.
+  const fixed = cat === 'dev' ? [DEV_CFO] : [CCL_CFO];
+  const missing = fixed.filter(a => !a.email).map(a => a.role);
   if (missing.length) throw new Error('결재자 정보를 불러오지 못했습니다: ' + missing.join(', ') +
     '\nsystem_config_final.xlsx 설정을 확인해 주세요.');
-  return [a1, ...rest.map((a, i) => ({ name: a.name, email: a.email, role: a.role, order: i + 2 }))];
+  const base = picked.length;
+  return [...picked, ...fixed.map((a, i) => ({ name: a.name, email: a.email, role: a.role, order: base + i + 1 }))];
 }
 
 async function submitForm(cat) {
@@ -966,8 +1074,11 @@ async function submitForm(cat) {
 function resetFormSilent(cat) {
   const ids = cat === 'dev'
     ? ['dev-policy', 'dev-category', 'dev-incident', 'dev-exptype', 'dev-amount', 'dev-desc',
-       'dev-immediate', 'dev-longterm', 'dev-recommend', 'dev-a1-dept', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email']
-    : ['ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks', 'ccl-a1-dept', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
+       'dev-immediate', 'dev-longterm', 'dev-recommend',
+       'dev-a1-dept', 'dev-a1-team', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email',
+       'dev-a2-dept', 'dev-a2-team', 'dev-a2-sel', 'dev-a2-name', 'dev-a2-email']
+    : ['ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks',
+       'ccl-a1-dept', 'ccl-a1-team', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   _files[cat] = []; renderFiles(cat);
   onDeptChange(cat);
