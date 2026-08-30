@@ -17,6 +17,24 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 /* 헤더 */
 .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 24px;margin-bottom:16px;border:1px solid #edebe9}
 .hd h1{font-size:1.1rem;color:#323130;font-weight:700}
+
+/* ── 헤더 · BU Admin 연락처 / 계정 정보 (APS 공통) ───────────────────
+   연락처가 글자로만 나열돼 제목·부제와 구분되지 않던 것을 프레임으로 묶는다.
+   클래스 이름에 시스템 이름을 넣지 않아 전 시스템이 같은 정의를 쓴다. */
+.hdr-contact{display:inline-flex;flex-direction:column;gap:3px;margin-top:10px;
+  background:#f4f8fd;border:1px solid #dbe7f5;border-radius:10px;padding:9px 14px 9px 12px}
+.hdr-contact-row{display:flex;align-items:center;gap:8px;font-size:.72rem;line-height:1.5;color:#5a6472}
+/* 역할 배지 — 폭을 고정해 여러 줄의 이메일 시작 위치가 세로로 맞는다 */
+.hdr-contact-tag{flex-shrink:0;min-width:46px;text-align:center;
+  background:#e3edfa;color:#2b5c9e;border-radius:5px;padding:1px 7px;
+  font-size:.66rem;font-weight:700;letter-spacing:.02em}
+.hdr-contact-mail{color:#3d4756;font-weight:500}
+.hdr-contact-mail a{color:#2b5c9e;text-decoration:none}
+.hdr-contact-mail a:hover{text-decoration:underline}
+/* 계정 정보 — 이름은 진하게, 이메일은 옅게 두 줄로 */
+.hdr-user{display:flex;flex-direction:column;align-items:flex-end;line-height:1.35}
+.hdr-user-name{font-size:.8rem;font-weight:600;color:#323130}
+.hdr-user-mail{font-size:.7rem;color:#8a8886}
 .hd .sub{font-size:.72rem;color:#605e5c;margin-top:3px}
 .hd .who{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .hd .who>div:first-child{display:flex;align-items:center;gap:10px;font-size:.8rem;color:#605e5c}
@@ -156,10 +174,15 @@ tbody tr:hover{background:#f8f9fb}
     <div>
       <h1>STK Accounting — Others</h1>
       <div class="sub">Deviation Report &nbsp;·&nbsp; Credit Card Limit Increase</div>
-      <div class="sub" id="contact-email" style="margin-top:1px">BU Admin 문의 Email: -</div>
+            <div class="hdr-contact">
+          <div class="hdr-contact-row">
+            <span class="hdr-contact-tag">BU Admin</span>
+            <span class="hdr-contact-mail" id="contact-email">-</span>
+          </div>
+      </div>
     </div>
     <div class="who">
-      <div><span id="user-name"></span><button class="btn btn-g" style="padding:4px 12px;font-size:.78rem;font-weight:400" onclick="signOut()">로그아웃</button></div>
+      <div><span id="user-name" class="hdr-user"></span><button class="btn btn-g" style="padding:4px 12px;font-size:.78rem;font-weight:400" onclick="signOut()">로그아웃</button></div>
       <a href="https://aps.startruckkorea.com/" target="_self" class="btn-back"><span style="font-size:1rem;line-height:1">📬</span><span>돌아가기</span></a>
     </div>
   </div>
@@ -529,6 +552,31 @@ window.addEventListener('load', async () => {
   }
 });
 async function signIn() { if (msalApp) { try { await msalApp.loginRedirect({ scopes: SCOPES }); } catch (e) { alert(e.message); } } }
+
+// ── 헤더 표시 헬퍼 (APS 공통) ─────────────────────────────────────────
+// 설정 파일 값을 화면에 그대로 넣지 않는다. textContent·createElement 로만 넣어
+// 값이 바뀌어도 마크업이 깨지거나 태그가 살아나지 않게 한다.
+function setHdrContact(id, email){
+  const el = document.getElementById(id);
+  if (!el) return;
+  const v = String(email || '').trim();
+  if (!v) { el.textContent = '-'; return; }
+  const a = document.createElement('a');
+  a.href = 'mailto:' + v;
+  a.textContent = v;
+  el.textContent = '';
+  el.appendChild(a);
+}
+function setHdrUser(name, mail){
+  const el = document.getElementById('user-name');
+  if (!el) return;
+  el.classList.add('hdr-user');
+  el.textContent = '';
+  const n = document.createElement('span'); n.className = 'hdr-user-name'; n.textContent = String(name || '');
+  const m = document.createElement('span'); m.className = 'hdr-user-mail'; m.textContent = String(mail || '');
+  el.appendChild(n); el.appendChild(m);
+}
+
 function signOut() { msalApp.logoutRedirect(); }
 
 async function token() {
@@ -750,7 +798,7 @@ async function boot(account) {
   // MSAL 계정에는 email 속성이 없다. Graph /me 로 실제 메일 주소를 받아
   // UPN과 메일이 다른 계정(게스트·별칭)에서도 결재자 매칭이 되게 한다.
   user = { name: account.name, email: (account.username || '').toLowerCase() };
-  document.getElementById('user-name').textContent = user.name + ' (' + user.email + ')';
+  setHdrUser(user.name, user.email);
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   try {
@@ -760,7 +808,7 @@ async function boot(account) {
       const me = await api('/me?$select=mail,userPrincipalName,displayName');
       user.email = (me.mail || me.userPrincipalName || account.username || '').toLowerCase();
       if (me.displayName) user.name = me.displayName;
-      document.getElementById('user-name').textContent = user.name + ' (' + user.email + ')';
+      setHdrUser(user.name, user.email);
     } catch (e) { console.warn('[Me] 조회 실패, UPN 사용:', e.message); }
 
     const cfg = await loadSystemConfig();
@@ -769,7 +817,7 @@ async function boot(account) {
       ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP']);
       IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
       const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '-' }));
-      document.getElementById('contact-email').textContent = 'BU Admin 문의 Email: ' + contact.email;
+      setHdrContact('contact-email', contact.email);
       // 키 이름은 시스템 접두어(ACC-OTHERS_)를 붙인 쪽이 정식이다.
       // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
       Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
