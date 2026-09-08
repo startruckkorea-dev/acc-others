@@ -149,10 +149,18 @@ tbody tr:hover{background:#f8f9fb}
 .pg button:disabled{opacity:.4;cursor:not-allowed}
 
 /* 로그인 / 로딩 */
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#101B34}
-.lg{background:#fff;border-radius:10px;padding:44px 46px;text-align:center;max-width:400px;width:100%}
-.lg h2{font-size:1.4rem;color:#101B34;margin-bottom:6px}
-.lg p{font-size:.8rem;color:#605e5c;margin-bottom:24px}
+/* ── Login (ACC Voucher 표준, 09-08 통일) ── */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(145deg,#0f2744 0%,#0078d4 100%)}
+.login-card{background:#fff;border-radius:20px;padding:52px 48px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.22);max-width:400px;width:100%}
+.login-logo{width:64px;height:64px;background:linear-gradient(135deg,#0078d4,#00bcf2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin:0 auto 20px;box-shadow:0 8px 20px rgba(0,120,212,.3)}
+.login-title{font-size:1.2rem;font-weight:700;color:#0f2744;margin-bottom:4px}
+.login-co{font-size:.82rem;color:#94a3b8;margin-bottom:4px}
+.login-guide{font-size:.82rem;color:#94a3b8;margin-bottom:28px}
+.btn-login{background:linear-gradient(135deg,#0078d4,#005a9e);color:#fff;border:none;border-radius:10px;padding:13px 0;font-size:.92rem;font-weight:600;cursor:pointer;width:100%;font-family:inherit;transition:all .2s}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,120,212,.4)}
+.btn-login:disabled{background:#cbd5e0;cursor:not-allowed;transform:none;box-shadow:none}
+#login-err{color:#e53e3e;font-size:.78rem;margin-top:10px;display:none}
+.login-page-footer{position:fixed;bottom:0;left:0;right:0;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.18)}
 #loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.75);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 #loading.on{display:flex}
 .lbox{background:#fff;border-radius:8px;padding:22px 30px;box-shadow:0 8px 28px rgba(0,0,0,.16);display:flex;align-items:center;gap:13px;font-size:.85rem}
@@ -165,10 +173,18 @@ tbody tr:hover{background:#f8f9fb}
 <body>
 
 <div id="login">
-  <div class="lg">
-    <h2>STK Accounting — Others</h2>
-    <p>Deviation Report · Credit Card Limit Increase</p>
-    <button id="btn-login" class="btn btn-p" style="width:100%;padding:11px" onclick="signIn()" disabled>로그인 준비 중...</button>
+  <div class="login-card">
+    <div class="login-logo">🧾</div>
+    <div class="login-title">Accounting — Others</div>
+    <div class="login-co">STK Deviation Report · Credit Card Limit Increase</div>
+    <div class="login-guide">Hyosung M365 계정으로 로그인하세요</div>
+    <button class="btn-login" id="btn-login" onclick="signIn()" disabled>로딩 중...</button>
+    <div id="login-err"></div>
+    <div style="font-size:.75rem;color:#a19f9d;margin-top:24px;text-align:center">© Star Truck Korea · acc-others</div>
+  </div>
+  <div class="login-page-footer">
+    <span>© 2026 Star Truck Korea · ACC Others</span>
+    <span>This system is internally developed by Star Truck Korea IT Dept. Unauthorized access is strictly prohibited.</span>
   </div>
 </div>
 
