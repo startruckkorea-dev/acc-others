@@ -1642,6 +1642,7 @@ async function exportExcel() {
       : ['번호', 'Title', '신청자', 'Card Holder', '신청일자', 'Increase Type', 'Reason',
          'Increase Amount(KRW)', 'Duration', 'Remarks', '상태', '신청일', '결재 이력'];
     const rows = [head];
+    let _xlNo = 0;   // 번호는 목록 ID 가 아니라 내보낸 순서(09-10)
     (data.value || []).sort((a, b) => a.id - b.id).forEach(it => {
       const f = it.fields;
       const hist = (byReq[String(it.id)] || [])
@@ -1650,11 +1651,11 @@ async function exportExcel() {
           (a.ApprovalDate ? ' ' + fmtDate(a.ApprovalDate) : ''))
         .join(' / ');
       rows.push(cat === 'dev'
-        ? [it.id, f.Title || '', f.RequesterEmail || '', f.ReportPreparedBy || f.RequesterName || '', fmtDay(f.ReportDate),
+        ? [++_xlNo, f.Title || '', f.RequesterEmail || '', f.ReportPreparedBy || f.RequesterName || '', fmtDay(f.ReportDate),
            f.PolicyTitle || '', f.DeviationCategory || '', fmtDay(f.IncidentDate), f.ExpenseType || '',
            Number(f.Amount || 0), spText(f.Description), spText(f.ImmediateActions), spText(f.LongTermMeasures),
            spText(f.Recommendations), f.Status || '', fmtDate(f.RequestDate), hist]
-        : [it.id, f.Title || '', f.RequesterEmail || '', f.CardHolder || f.RequesterName || '', fmtDay(f.ApplicationDate),
+        : [++_xlNo, f.Title || '', f.RequesterEmail || '', f.CardHolder || f.RequesterName || '', fmtDay(f.ApplicationDate),
            f.IncreaseType || '', spText(f.ReasonForRequest), Number(f.IncreaseAmount || 0), f.Duration || '',
            spText(f.Remarks), f.Status || '', fmtDate(f.RequestDate), hist]);
     });
