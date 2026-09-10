@@ -1642,7 +1642,7 @@ async function exportExcel() {
       : ['번호', 'Title', '신청자', 'Card Holder', '신청일자', 'Increase Type', 'Reason',
          'Increase Amount(KRW)', 'Duration', 'Remarks', '상태', '신청일', '결재 이력'];
     const rows = [head];
-    let _xlNo = 0;   // 번호는 목록 ID 가 아니라 내보낸 순서(09-10)
+    let _xlNo = 0;   // 번호 = 신청 순서(ID 오름차순 정렬 뒤 1부터) — 가장 오래된 건이 1 (09-10)
     (data.value || []).sort((a, b) => a.id - b.id).forEach(it => {
       const f = it.fields;
       const hist = (byReq[String(it.id)] || [])
