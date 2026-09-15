@@ -514,6 +514,40 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+
+/* ── 대리 처리 표기 (AAC 연동) ────────────────────────────────────────
+   AAC(결재 대리 지정)가 대리인이 처리한 결재행의 ApproverRole 뒤에
+   '· 대리(이름 <메일>)' 를 덧붙인다. 그 꼬리를 그대로 화면에 뿌리면
+   '1차결재자 · 대리(Jimmy Lee <jimmy.lee@hyosung.com>)' 처럼 날값이 노출된다.
+   본래 역할만 남기고, 대리였다는 사실은 알약으로 따로 보여준다.
+   IT-Ticket(1877행 부근)·Goodwill-Approval·aps 와 같은 표기·같은 색이다.
+   대리가 아니면 aacRolePill 이 빈 문자열을 돌려주므로 호출부에 조건이 필요 없다. */
+function _aacRoleParse(role){
+  const m = String(role == null ? '' : role).match(/^([\s\S]*?)\s*\u00B7\s*대리\(([\s\S]+)\)\s*$/);
+  if(!m) return null;
+  const im = m[2].match(/^([\s\S]*?)\s*<([^>]+)>\s*$/);
+  return { base: m[1].trim(), name: (im ? im[1] : m[2]).trim(), email: im ? im[2].trim() : '' };
+}
+function aacRoleBase(role){
+  const p = _aacRoleParse(role);
+  return p ? p.base : String(role == null ? '' : role);
+}
+function aacRolePill(role, status){
+  const p = _aacRoleParse(role);
+  if(!p) return '';
+  const s = String(status == null ? '' : status).trim();
+  const verb = (s === '승인' || s === '승인완료') ? 'Approved on behalf of'
+             : s === '반려' ? 'Rejected on behalf of'
+             : s.indexOf('철회') === 0 ? 'Withdrawn on behalf of' : 'On behalf of';
+  return ' <span title="' + esc(verb + ' ' + p.name + (p.email ? ' (' + p.email + ')' : ''))
+    + '" style="background:#fff4ce;border:1px solid #f2d68c;color:#8a5a00;font-size:10px;'
+    + 'font-weight:600;letter-spacing:.1px;border-radius:10px;padding:1px 9px;margin-left:6px;'
+    + 'white-space:nowrap;vertical-align:1px">'
+    + '<span style="font-weight:400;opacity:.8">' + verb + ' </span>'
+    + '<b style="font-weight:700">' + esc(p.name) + '</b>'
+    + (p.email ? '<span style="font-weight:400;opacity:.75"> &middot; ' + esc(p.email) + '</span>' : '')
+    + '</span>';
+}
 function spText(s) {
   // SharePoint 여러 줄 텍스트가 HTML로 저장된 경우 평문으로 되돌린다
   return String(s == null ? '' : s)
@@ -1394,7 +1428,7 @@ async function openDetail(cat, reqId) {
       const st = (a.Status || '').trim();
       const color = st === '승인' ? '#107c10' : st === '반려' ? '#a4262c' : st === '대기' ? '#7d5700' : '#a19f9d';
       body += '<div class="apr-row"><div class="apr-top">' +
-        '<div><div class="apr-role">' + esc(a.ApprovalOrder + '차 결재자 (' + (a.ApproverRole || '') + ')') + '</div>' +
+        '<div><div class="apr-role">' + esc(a.ApprovalOrder + '차 결재자 (' + aacRoleBase(a.ApproverRole) + ')') + aacRolePill(a.ApproverRole, a.Status) + '</div>' +
         '<div class="apr-who">' + esc(a.ApproverName || '') + ' · ' + esc(a.ApproverEmail || '') + '</div>' +
         (a.ApprovalDate ? '<div class="apr-when">' + fmtDate(a.ApprovalDate) + '</div>' : '') + '</div>' +
         '<div style="font-weight:700;font-size:.82rem;color:' + color + '">' + esc(st) + '</div></div>' +
