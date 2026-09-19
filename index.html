@@ -79,10 +79,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 /* 자동 지정이라 고칠 수 없는 값 — 흰 바탕에 회색 글자로 둬서 읽기는 쉽게, 입력칸처럼은 보이지 않게 */
 .appr-block.appr-fixed .appr-info input{background:#f3f2f1;color:#605e5c;border-color:#d2d0ce}
 .appr-title{font-size:.78rem;font-weight:600;color:#323130;margin-bottom:6px}
-.appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+.appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:4px}
 .appr-grid select{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#fff}
 .appr-grid select:disabled{background:#f3f2f1;color:#a19f9d}
-.appr-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
+.appr-info{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:0}
 
 /* 자동으로 채워져 고칠 수 없는 칸(작성일·작성자 등)은 회색으로 — GW 와 같은 규칙 */
 .fld input[readonly],.fld input:disabled,.fld textarea[readonly],.fld select:disabled{background:#f3f2f1;color:#605e5c;cursor:default}
@@ -96,11 +96,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .fld.full{flex:0 0 100%}
 label{display:block;font-size:.76rem;font-weight:600;color:#323130;margin-bottom:5px}
 label .req{color:#a4262c;margin-left:2px}
-input[type=text],input[type=date],input[type=number],select,textarea{
+input[type=text],input[type=email],input[type=date],input[type=number],select,textarea{
   width:100%;padding:8px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:.82rem;font-family:inherit;background:#fff}
 /* 결재자 블록의 이름·이메일 칸은 읽기 전용 표시용이라 낮게 둔다(IT Ticket 과 같은 6px 10px · 13px).
    공통 입력 규칙(.fld …)이 뒤에 와서 이기던 탓에 40px 가까이 높아져 있었다(09-19). */
-.appr-info input{padding:6px 10px;font-size:13px;background:#f3f2f1;color:#605e5c;width:100%;box-sizing:border-box}
+.appr-info input{padding:5px 10px;font-size:13px;line-height:1.4;background:#f3f2f1;color:#605e5c;border:1px solid #d2d0ce;border-radius:4px;width:100%;box-sizing:border-box}
 textarea{resize:vertical;min-height:76px;line-height:1.55}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#0078d4}
 input:disabled,select:disabled,textarea:disabled{background:#f3f2f1;color:#605e5c}
