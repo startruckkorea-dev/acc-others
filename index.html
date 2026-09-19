@@ -72,10 +72,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .row{display:flex;gap:16px;flex-wrap:wrap}
 .fld{flex:1;min-width:200px;margin-bottom:13px}
 .appr-block{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:8px}
-.appr-block.appr-fixed{background:#edebe9;border:1px solid #d2d0ce}
-.appr-block.appr-fixed .appr-title{color:#605e5c}
+/* 자동 지정 결재자 — 블록 자체는 다른 결재자 블록과 같게 두고, 값 칸만 회색으로 둬서
+   「고칠 수 없는 값」 임을 보여 준다(읽기 전용 입력칸과 같은 색). */
+.appr-block.appr-fixed{background:#f9f9f9;border:1px solid #edebe9}
 /* 자동 지정이라 고칠 수 없는 값 — 흰 바탕에 회색 글자로 둬서 읽기는 쉽게, 입력칸처럼은 보이지 않게 */
-.appr-block.appr-fixed .appr-info input{background:#fff;color:#605e5c;border-color:#d2d0ce}
+.appr-block.appr-fixed .appr-info input{background:#f3f2f1;color:#605e5c;border-color:#d2d0ce}
 .appr-title{font-size:.78rem;font-weight:600;color:#323130;margin-bottom:8px}
 .appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
 .appr-grid select{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#fff}
