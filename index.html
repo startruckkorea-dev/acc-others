@@ -81,7 +81,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .appr-hint{font-size:.7rem;color:#605e5c;font-weight:400}
 .line-preview{background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem;color:#323130}
 .line-preview-title{font-weight:600;color:#0078d4;margin-bottom:6px;font-size:.75rem}
-.line-step{display:inline-block;background:#0078d4;color:#fff;border-radius:9px;padding:1px 8px;font-size:.68rem;font-weight:700;margin-right:5px}
+.line-step{display:inline-flex;align-items:center;gap:4px;margin-right:6px;margin-bottom:4px}
+.line-step-badge{background:#0078d4;color:#fff;border-radius:10px;padding:1px 8px;font-size:.68rem;font-weight:700}
+.line-step-badge.fixed{background:#605e5c}
+.line-arrow{color:#8a8886;margin:0 2px}
 .fld.full{flex:0 0 100%}
 label{display:block;font-size:.76rem;font-weight:600;color:#323130;margin-bottom:5px}
 label .req{color:#a4262c;margin-left:2px}
@@ -195,12 +198,6 @@ tbody tr:hover{background:#f8f9fb}
     <div>
       <h1>STK Accounting — Others</h1>
       <div class="sub">Deviation Report &nbsp;·&nbsp; Credit Card Limit Increase</div>
-            <div class="hdr-contact">
-          <div class="hdr-contact-row">
-            <span class="hdr-contact-tag">BU Admin</span>
-            <span class="hdr-contact-mail" id="contact-email">-</span>
-          </div>
-      </div>
     </div>
     <div class="who">
       <div><span id="user-name" class="hdr-user"></span><button class="btn btn-g" style="padding:4px 12px;font-size:.78rem;font-weight:400" onclick="signOut()">로그아웃</button></div>
@@ -231,16 +228,10 @@ tbody tr:hover{background:#f8f9fb}
 
       <!-- ── Deviation Report ── -->
       <div id="form-dev">
-        <div class="note">
-          <b>Deviation Report — Employee Expense</b><br>
-          비용 처리 과정에서 발생한 규정 위반 사항을 보고하고 조치 계획을 기록합니다.
-          결재선은 <b>Team Leader → MC → CFO</b> 순으로 진행됩니다.
-        </div>
-
         <div class="sec">1. 기본 정보</div>
         <div class="row">
           <div class="fld"><label>Date (작성일)<span class="req">*</span></label><input type="date" id="dev-date"></div>
-          <div class="fld"><label>Report Prepared By (작성자)<span class="req">*</span></label><input type="text" id="dev-writer" maxlength="60" placeholder="작성자 이름"></div>
+          <div class="fld"><label>Report Prepared By (작성자)<span class="req">*</span></label><input type="text" id="dev-writer" readonly title="로그인한 사용자 이름이 자동으로 들어갑니다"></div>
         </div>
 
         <div class="sec">2. Deviation Summary (정책위반 내용)</div>
@@ -276,9 +267,9 @@ tbody tr:hover{background:#f8f9fb}
         <div class="sec">6. 결재자 지정 (Approvers)</div>
         <div class="line-preview">
           <div class="line-preview-title">📋 결재 라인</div>
-          <span class="line-step">1차</span>Team Leader (직접 지정) →
-          <span class="line-step">2차</span>MC (직접 지정) →
-          <span class="line-step">3차</span>CFO (고정)
+          <span class="line-step"><span class="line-step-badge">1차</span><span>Team Leader</span><span class="line-arrow">→</span></span>
+          <span class="line-step"><span class="line-step-badge">2차</span><span>MC</span><span class="line-arrow">→</span></span>
+          <span class="line-step"><span class="line-step-badge fixed">3차</span><span>CFO (자동 지정)</span></span>
         </div>
 
         <div class="appr-block">
@@ -323,11 +314,6 @@ tbody tr:hover{background:#f8f9fb}
 
       <!-- ── Credit Card Limit Increase ── -->
       <div id="form-ccl" style="display:none">
-        <div class="note">
-          <b>Credit Card Limit Increase Application</b><br>
-          법인카드 한도 증액을 신청합니다. 결재선은 <b>Department Head → CFO</b> 순으로 진행됩니다.
-        </div>
-
         <div class="sec">1. 기본 정보</div>
         <div class="row">
           <div class="fld"><label>Application Date (신청일)<span class="req">*</span></label><input type="date" id="ccl-date"></div>
@@ -361,8 +347,8 @@ tbody tr:hover{background:#f8f9fb}
         <div class="sec">4. 결재자 지정 (Approvers)</div>
         <div class="line-preview">
           <div class="line-preview-title">📋 결재 라인</div>
-          <span class="line-step">1차</span>Department Head (직접 지정) →
-          <span class="line-step">2차</span>CFO (고정)
+          <span class="line-step"><span class="line-step-badge">1차</span><span>Department Head</span><span class="line-arrow">→</span></span>
+          <span class="line-step"><span class="line-step-badge fixed">2차</span><span>CFO (자동 지정)</span></span>
         </div>
 
         <div class="appr-block">
@@ -980,8 +966,7 @@ async function boot(account) {
       _configLoaded = true;
       ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP']);
       IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
-      const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '-' }));
-      setHdrContact('contact-email', contact.email);
+      // 헤더의 BU Admin 연락처 알약은 제거했다(09-19). 설정 키는 다른 화면 안내에 쓸 수 있어 그대로 둔다.
       // 키 이름은 시스템 접두어(ACC-OTHERS_)를 붙인 쪽이 정식이다.
       // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
       Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
