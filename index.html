@@ -176,6 +176,7 @@ tbody tr:hover{background:#f8f9fb}
 .it-alert-sub{font-size:.8rem;color:#64748b;margin-bottom:20px;word-break:break-all}
 .it-alert-btn{background:#0078d4;color:#fff;border:none;border-radius:8px;padding:9px 32px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
 .it-alert-btn:hover{background:#0062b1}
+#no-auth-modal.show{display:flex!important}
 /* 영구 증액처럼 꼭 채워야 하는 칸 앞에 두는 안내 — 눈에 띄되 경고창처럼 요란하지 않게 */
 .need-note{display:flex;align-items:flex-start;gap:8px;background:#fdf3f4;border:1px solid #f3c1c6;border-left:3px solid #a4262c;
   border-radius:6px;padding:8px 12px;margin:0 0 8px;font-size:.78rem;line-height:1.55;color:#a4262c}
@@ -519,6 +520,26 @@ tbody tr:hover{background:#f8f9fb}
         <button class="btn btn-p" id="appr-ok" style="margin-left:6px">확인</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 권한 없음 팝업 (GW 와 같은 구성) -->
+<div id="no-auth-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,39,68,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:40px 44px;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.18)">
+    <div style="width:52px;height:52px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div style="font-size:1rem;font-weight:700;color:#0f2744;margin-bottom:8px">접근 권한 없음</div>
+    <div style="font-size:.83rem;color:#64748b;line-height:1.7;margin-bottom:20px">관리자 전용 메뉴입니다.<br>접근 권한이 없습니다.</div>
+    <div style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin-bottom:24px;text-align:left">
+      <div style="font-size:.75rem;font-weight:700;color:#1d4ed8;margin-bottom:6px">접근 권한 신청 방법</div>
+      <div style="font-size:.78rem;color:#374151;line-height:1.8">
+        1. BU Admin에게 권한 요청<br>
+        2. BU Admin이 아래 시스템으로 티켓 생성<br>
+        <a href="https://itsm-ticket.startruckkorea.com/" target="_blank" style="color:#1d4ed8;font-weight:600;word-break:break-all">itsm-ticket.startruckkorea.com</a>
+      </div>
+    </div>
+    <button onclick="document.getElementById('no-auth-modal').classList.remove('show')" style="background:#0078d4;color:#fff;border:none;border-radius:8px;padding:10px 32px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">확인</button>
   </div>
 </div>
 
@@ -1081,7 +1102,8 @@ async function boot(account) {
       };
       setFixed('dev-a3', DEV_CFO);
       setFixed('ccl-a2', CCL_CFO);
-      if (isAdmin() || isIT()) document.getElementById('tab-admin').style.display = '';
+      // 관리자 탭은 APS 계열 공통으로 늘 보여 주고, 권한이 없으면 눌렀을 때 안내 팝업을 띄운다(GW 방식).
+      document.getElementById('tab-admin').style.display = '';
     } else {
       document.getElementById('cfg-warn').style.display = 'block';
     }
@@ -1103,13 +1125,19 @@ window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_
 
 /* ── 탭 전환 ──────────────────────────────────────────────── */
 function switchCat(cat) {
+  // 종류를 바꾸면 결재함 배지도 그 종류 기준으로 다시 그린다.
   _currentCat = cat;
   document.querySelectorAll('.cat').forEach(el => el.classList.toggle('on', el.dataset.cat === cat));
   document.getElementById('form-dev').style.display = cat === 'dev' ? '' : 'none';
   document.getElementById('form-ccl').style.display = cat === 'ccl' ? '' : 'none';
+  renderBadge();
   switchTab(_currentTab);
 }
 function switchTab(tab) {
+  if (tab === 'admin' && !isAdmin() && !isIT()) {   // 권한 없음 — 탭은 그대로 두고 안내만 띄운다
+    document.getElementById('no-auth-modal').classList.add('show');
+    return;
+  }
   _currentTab = tab;
   document.querySelectorAll('.tab').forEach(el => el.classList.toggle('on', el.dataset.tab === tab));
   ['new', 'my', 'apr', 'admin'].forEach(t => {
@@ -1553,7 +1581,12 @@ async function loadApr() {
     const apr = await apiAll('/sites/' + siteId + '/lists/' + L.apr +
       "/items?$expand=fields&$filter=fields/Status eq '대기'&$top=500");
     const mine = (apr.value || []).filter(a => isMyAppr(a.fields.ApproverEmail));
-    if (!mine.length) { _cache[cat].apr = []; renderPaged('apr', [], null, 6); return; }
+    if (!mine.length) {
+      _cache[cat].apr = [];
+      renderHead('apr', cat, 'apr');                       // 비어 있어도 열은 보여 준다(09-19)
+      renderAprList();
+      return;
+    }
     const reqs = await apiAll('/sites/' + siteId + '/lists/' + L.req + '/items?$expand=fields&$top=999');
     const reqMap = {}; (reqs.value || []).forEach(r => reqMap[String(r.id)] = r);
     // 요청 자체가 이미 철회·반려된 건은 결재함에서 제외한다.
@@ -1586,23 +1619,35 @@ function renderAprList() {
 }
 
 
+/* 결재함 배지 — 신청 종류(Deviation·Credit Card Limit)마다 따로 센다.
+   예전에는 두 종류를 합산해, Credit Card Limit 로 바꿔도 Deviation 건수가 그대로 남아 보였다(09-19). */
+const _aprCount = { dev: 0, ccl: 0 };
 async function loadBadge() {
   if (!siteId) return;
-  let total = 0;
   for (const cat of Object.keys(LISTS)) {
     try {
       const apr = await apiAll('/sites/' + siteId + '/lists/' + LISTS[cat].apr +
         "/items?$expand=fields&$filter=fields/Status eq '대기'&$top=500");
-      total += (apr.value || []).filter(a => isMyAppr(a.fields.ApproverEmail)).length;
+      _aprCount[cat] = (apr.value || []).filter(a => isMyAppr(a.fields.ApproverEmail)).length;
     } catch (e) { /* 배지는 부가 기능이므로 실패해도 화면에 영향 주지 않는다 */ }
   }
+  renderBadge();
+}
+/* 현재 보고 있는 종류의 건수만 배지에 보여 준다. 종류를 바꿀 때도 다시 부른다. */
+function renderBadge() {
   const el = document.getElementById('apr-badge');
-  el.textContent = total;
-  el.style.display = total > 0 ? '' : 'none';
+  if (!el) return;
+  const n = _aprCount[_currentCat] || 0;
+  el.textContent = n;
+  el.style.display = n > 0 ? '' : 'none';
+  Object.keys(LISTS).forEach(c => {
+    const b = document.getElementById('cat-badge-' + c);
+    if (b) { const v = _aprCount[c] || 0; b.textContent = v > 0 ? v : ''; }
+  });
 }
 
 async function loadAdmin() {
-  if (!isAdmin() && !isIT()) return;
+  if (!isAdmin() && !isIT()) return;   // 권한 없음 — switchTab 에서 이미 팝업으로 안내한다
   const cat = _currentCat, L = LISTS[cat];
   const tb = document.getElementById('adm-body');
   tb.innerHTML = '<tr><td colspan="7" class="empty">불러오는 중...</td></tr>';
