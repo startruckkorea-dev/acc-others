@@ -110,10 +110,18 @@ input:disabled,select:disabled,textarea:disabled{background:#f3f2f1;color:#605e5
 
 /* 표 */
 table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{background:#1F3864;color:#fff;padding:9px 8px;text-align:left;font-weight:600;font-size:.76rem}
+/* 표 머리 — 진한 남색 단색은 BP·GW 와 달리 무거웠다. 옅은 회색 바탕 + 진한 글자에 아래 선만 둔다(09-19). */
+th{background:#faf9f8;color:#323130;padding:9px 10px;text-align:left;font-weight:600;font-size:.74rem;
+  white-space:nowrap;border-bottom:1px solid #edebe9}
+tbody tr:hover td{background:#f9fbfd}
 td{padding:9px 8px;border-bottom:1px solid #edebe9;vertical-align:top}
 tbody tr:hover{background:#f8f9fb}
 .tbl-wrap{overflow-x:auto}
+/* 목록 위 도구 줄 — 상태·검색·건수 (BP Master 와 같은 배치) */
+.list-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.list-bar select{width:auto}
+.list-bar input[type=text]{flex:1;min-width:200px;max-width:420px}
+.list-count{margin-left:auto;font-size:.8rem;color:#605e5c;white-space:nowrap}
 .empty{text-align:center;color:#a19f9d;padding:26px;font-size:.82rem}
 
 /* 상태 */
@@ -421,6 +429,12 @@ tbody tr:hover{background:#f8f9fb}
 
     <!-- ══════════════ 내 신청 목록 ══════════════ -->
     <div id="pane-my" style="display:none">
+      <!-- BP Master 와 같은 구성: 상태 · 통합 검색 · 건수 -->
+      <div class="list-bar">
+        <select id="my-status" onchange="renderMyList()" style="width:auto"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option><option>철회</option></select>
+        <input type="text" id="my-search" oninput="renderMyList()" placeholder="Title / 구분 / 금액 검색..." maxlength="60">
+        <span id="my-count" class="list-count"></span>
+      </div>
       <div class="tbl-wrap"><table>
         <thead><tr><th style="width:52px">번호</th><th>Title</th><th style="width:130px">구분</th><th style="width:120px">금액</th><th style="width:92px">상태</th><th style="width:140px">신청일</th><th style="width:90px"></th></tr></thead>
         <tbody id="my-body"><tr><td colspan="7" class="empty">불러오는 중...</td></tr></tbody>
@@ -430,6 +444,10 @@ tbody tr:hover{background:#f8f9fb}
 
     <!-- ══════════════ 결재함 ══════════════ -->
     <div id="pane-apr" style="display:none">
+      <div class="list-bar">
+        <input type="text" id="apr-search" oninput="renderAprList()" placeholder="Title / 신청자 검색..." maxlength="60">
+        <span id="apr-count" class="list-count"></span>
+      </div>
       <div class="tbl-wrap"><table>
         <thead><tr><th style="width:52px">번호</th><th>Title</th><th style="width:210px">신청자</th><th style="width:120px">금액</th><th style="width:120px">내 결재순서</th><th style="width:140px">신청일</th></tr></thead>
         <tbody id="apr-body"><tr><td colspan="6" class="empty">불러오는 중...</td></tr></tbody>
@@ -1445,7 +1463,29 @@ async function loadMy() {
     }
     items.sort((a, b) => (new Date(b.fields.RequestDate) - new Date(a.fields.RequestDate)) || (b.id - a.id));
     _cache[cat].my = items;
-    renderPaged('my', items, (it) => {
+    _pg.my = 1;
+    renderMyList();
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message) + '</td></tr>';
+  }
+}
+
+/* 내 신청 목록 그리기 — 상태·검색을 적용한다(조회는 loadMy 가 한 번만 한다). */
+function renderMyList() {
+  const cat = _currentCat;
+  const items = (_cache[cat] && _cache[cat].my) || [];
+  const st = (document.getElementById('my-status') || {}).value || '';
+  const q  = ((document.getElementById('my-search') || {}).value || '').trim().toLowerCase();
+  const rows = items.filter(it => {
+    const f = it.fields;
+    if (st && (f.Status || '').trim() !== st) return false;
+    if (!q) return true;
+    return [f.Title, kindOf(cat, f), String(amountOf(cat, f) || ''), f.RequestTitle]
+      .some(v => String(v || '').toLowerCase().includes(q));
+  });
+  const cnt = document.getElementById('my-count');
+  if (cnt) cnt.textContent = '총 ' + rows.length + '건' + (rows.length !== items.length ? ' / 전체 ' + items.length + '건' : '');
+  renderPaged('my', rows, (it) => {
       const f = it.fields;
       const canWithdraw = (f.Status || '').trim() === '대기';
       return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + it.id + ')">' +
@@ -1457,10 +1497,7 @@ async function loadMy() {
         '<td>' + fmtDate(f.RequestDate) + '</td>' +
         '<td>' + (canWithdraw ? '<button class="btn btn-g" style="padding:3px 9px;font-size:.72rem" onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')">철회</button>' : '') + '</td>' +
         '</tr>';
-    });
-  } catch (e) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message) + '</td></tr>';
-  }
+  });
 }
 
 async function loadApr() {
@@ -1480,7 +1517,26 @@ async function loadApr() {
       .filter(x => x.req && ['대기'].includes((x.req.fields.Status || '').trim()));
     rows.sort((a, b) => (new Date(b.req.fields.RequestDate) - new Date(a.req.fields.RequestDate)) || (b.req.id - a.req.id));
     _cache[cat].apr = rows;
-    renderPaged('apr', rows, (x) => {
+    _pg.apr = 1;
+    renderAprList();
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty">불러오기 실패: ' + esc(e.message) + '</td></tr>';
+  }
+}
+
+/* 결재함 그리기 — Title·신청자 검색을 적용한다(조회는 loadApr 가 한 번만 한다). */
+function renderAprList() {
+  const cat = _currentCat;
+  const all = (_cache[cat] && _cache[cat].apr) || [];
+  const q = ((document.getElementById('apr-search') || {}).value || '').trim().toLowerCase();
+  const rows = q ? all.filter(x => {
+    const f = x.req.fields;
+    return [f.Title, f.RequesterName, f.RequesterEmail, f.RequestTitle]
+      .some(v => String(v || '').toLowerCase().includes(q));
+  }) : all;
+  const cnt = document.getElementById('apr-count');
+  if (cnt) cnt.textContent = '총 ' + rows.length + '건' + (rows.length !== all.length ? ' / 전체 ' + all.length + '건' : '');
+  renderPaged('apr', rows, (x) => {
       const f = x.req.fields;
       return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + x.req.id + ')">' +
         '<td>' + x.req.id + '</td>' +
@@ -1489,10 +1545,7 @@ async function loadApr() {
         '<td style="text-align:right">' + money(amountOf(cat, f)) + '</td>' +
         '<td>' + esc(x.apr.fields.ApprovalOrder + '차 · ' + (x.apr.fields.ApproverRole || '')) + '</td>' +
         '<td>' + fmtDate(f.RequestDate) + '</td></tr>';
-    }, 6);
-  } catch (e) {
-    tb.innerHTML = '<tr><td colspan="6" class="empty">불러오기 실패: ' + esc(e.message) + '</td></tr>';
-  }
+  }, 6);
 }
 
 async function loadBadge() {
