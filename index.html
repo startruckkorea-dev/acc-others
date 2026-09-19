@@ -157,13 +157,6 @@ tbody tr:hover{background:#f8f9fb}
 .need-note{display:flex;align-items:flex-start;gap:8px;background:#fdf3f4;border:1px solid #f3c1c6;border-left:3px solid #a4262c;
   border-radius:6px;padding:8px 12px;margin:0 0 8px;font-size:.78rem;line-height:1.55;color:#a4262c}
 .need-note b{font-weight:700}
-/* 고정된 값 안내 — 자물쇠 아이콘을 앞에 두고 옅은 회색 칩으로 (경고가 아니라 「바꿀 수 없다」 는 설명) */
-.lock-hint{display:inline-flex;align-items:center;gap:5px;background:#f3f2f1;border:1px solid #e1dfdd;border-radius:999px;
-  padding:3px 10px;margin-top:6px;font-size:.72rem;color:#605e5c;line-height:1.4}
-.lock-hint::before{content:'🔒';font-size:.72rem;line-height:1}
-.lock-hint b{color:#323130;font-weight:700}
-.lock-hint.plain{background:none;border:none;border-radius:0;padding:0;color:#605e5c}
-.lock-hint.plain::before{content:none}
 .need-note-ic{flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#a4262c;color:#fff;font-size:.66rem;font-weight:700;
   display:flex;align-items:center;justify-content:center;margin-top:1px}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
@@ -381,7 +374,7 @@ tbody tr:hover{background:#f8f9fb}
                 <input type="date" id="ccl-to" onchange="onCclDuration()" style="flex:1">
               </div>
             </div>
-            <div class="hint lock-hint" id="ccl-dur-hint">기간이 <b>Permanent</b> 로 자동 설정됩니다</div></div>
+            <div class="hint" id="ccl-dur-hint" style="display:none"></div></div>
         </div>
         <div class="fld full"><label>Remarks (비고)</label>
           <textarea id="ccl-remarks" maxlength="1000" style="min-height:60px" placeholder="추가로 언급이 필요한 부분이 있다면 적어 주세요. (선택)"></textarea></div>
@@ -1178,7 +1171,7 @@ function onCclType() {
     range.style.display = 'block';
     document.getElementById('ccl-reason-note').style.display = 'none';
     const h1 = document.getElementById('ccl-dur-hint');
-    h1.classList.add('plain'); h1.textContent = '시작일과 종료일을 함께 선택해 주세요.';
+    h1.style.display = ''; h1.textContent = '시작일과 종료일을 함께 선택해 주세요.';
   } else {
     const perm = all.find(v => PERM_LABEL_RE.test(v)) || 'Permanent (영구 증액)';
     sel.innerHTML = '<option value="' + esc(perm) + '">' + esc(perm) + '</option>';
@@ -1189,15 +1182,15 @@ function onCclType() {
     document.getElementById('ccl-to').value = '';
     document.getElementById('ccl-reason-note').style.display = 'flex';
     const h2 = document.getElementById('ccl-dur-hint');
-    h2.classList.remove('plain'); h2.innerHTML = '기간이 <b>Permanent</b> 로 자동 설정됩니다';
+    h2.style.display = 'none'; h2.textContent = '';   // 잠긴 Permanent 값만으로 충분해 안내는 두지 않는다
   }
 }
 /* 기간 입력 안내 — 종료일이 시작일보다 빠르면 바로 알려 준다. */
 function onCclDuration() {
   const f = val('ccl-from'), t2 = val('ccl-to');
   const hint = document.getElementById('ccl-dur-hint');
-  if (f && t2 && t2 < f) { hint.classList.add('plain'); hint.textContent = '종료일이 시작일보다 빠릅니다.'; hint.style.color = '#a4262c'; }
-  else { hint.style.color = ''; if (document.getElementById('ccl-range').style.display !== 'none') { hint.classList.add('plain'); hint.textContent = '시작일과 종료일을 함께 선택해 주세요.'; } }
+  if (f && t2 && t2 < f) { hint.style.display = ''; hint.textContent = '종료일이 시작일보다 빠릅니다.'; hint.style.color = '#a4262c'; }
+  else { hint.style.color = ''; if (document.getElementById('ccl-range').style.display !== 'none') { hint.style.display = ''; hint.textContent = '시작일과 종료일을 함께 선택해 주세요.'; } }
 }
 /* 저장·표시에 쓰는 적용 기간 문자열 */
 function cclDurationValue() {
