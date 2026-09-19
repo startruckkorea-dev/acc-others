@@ -149,6 +149,12 @@ tbody tr:hover{background:#f8f9fb}
 
 /* 첨부 */
 .opt-danger{color:#a4262c;font-weight:700}
+/* 영구 증액처럼 꼭 채워야 하는 칸 앞에 두는 안내 — 눈에 띄되 경고창처럼 요란하지 않게 */
+.need-note{display:flex;align-items:flex-start;gap:8px;background:#fdf3f4;border:1px solid #f3c1c6;border-left:3px solid #a4262c;
+  border-radius:6px;padding:8px 12px;margin:0 0 8px;font-size:.78rem;line-height:1.55;color:#a4262c}
+.need-note b{font-weight:700}
+.need-note-ic{flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#a4262c;color:#fff;font-size:.66rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:1px}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
 .drop:hover{border-color:#0078d4;background:#f0f6ff;color:#0078d4}
 .fitem{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f8f9fb;border:1px solid #edebe9;border-radius:4px;margin-top:6px;font-size:.78rem}
@@ -361,8 +367,13 @@ tbody tr:hover{background:#f8f9fb}
             </div>
             <div class="hint" id="ccl-dur-hint">영구 증액은 Permanent를 선택하세요.</div></div>
         </div>
-        <div class="fld full"><label>Remarks (비고)</label>
-          <textarea id="ccl-remarks" maxlength="1000" style="min-height:60px"></textarea></div>
+        <div class="fld full"><label>Remarks (비고)<span class="req" id="ccl-remarks-req" style="display:none">*</span></label>
+          <!-- 영구 증액은 한 번 올리면 한도가 계속 유지되므로 사유를 남겨야 한다. 한시 증액일 때는 숨긴다. -->
+          <div class="need-note" id="ccl-remarks-note" style="display:none">
+            <span class="need-note-ic">!</span>
+            <span><b>영구 증액</b>은 한도가 계속 유지됩니다. 아래 <b>Remarks (비고)</b> 란에 <b>영구 증액이 필요한 사유</b>를 자세히 적어 주세요.</span>
+          </div>
+          <textarea id="ccl-remarks" maxlength="1000" style="min-height:60px" placeholder="예) 월 정기 결제 금액 증가로 기존 한도로는 승인 거절이 발생합니다. 대상 가맹점·월 예상 사용액을 함께 적어 주세요."></textarea></div>
 
         <div class="sec">3. 첨부파일</div>
         <div class="drop" onclick="document.getElementById('ccl-file').click()">📎 클릭하여 파일 첨부 (파일당 최대 20MB)</div>
@@ -1154,6 +1165,8 @@ function onCclType() {
       items.map(v => '<option value="' + esc(v) + '"' +
         (/^others|^기타/i.test(v) ? ' class="opt-danger"' : '') + '>' + esc(v) + '</option>').join('');
     range.style.display = 'block';
+    document.getElementById('ccl-remarks-note').style.display = 'none';
+    document.getElementById('ccl-remarks-req').style.display = 'none';
     document.getElementById('ccl-dur-hint').textContent = '한시 증액은 기간(시작일 ~ 종료일)을 함께 입력해 주세요.';
   } else {
     const perm = all.find(v => PERM_LABEL_RE.test(v)) || 'Permanent (영구 증액)';
@@ -1163,6 +1176,8 @@ function onCclType() {
     range.style.display = 'none';
     document.getElementById('ccl-from').value = '';
     document.getElementById('ccl-to').value = '';
+    document.getElementById('ccl-remarks-note').style.display = 'flex';
+    document.getElementById('ccl-remarks-req').style.display = '';
     document.getElementById('ccl-dur-hint').textContent = '영구 증액은 기간이 Permanent 로 고정됩니다.';
   }
 }
@@ -1236,6 +1251,9 @@ function validate(cat) {
     if (!val('ccl-reason')) miss.push('Reason for Request (신청 사유)');
     if (!val('ccl-amount')) miss.push('Increase Amount (증액 금액)');
     if (!val('ccl-duration')) miss.push('Duration (적용 기간)');
+    if (document.querySelector('input[name="ccl-type"]:checked').value === 'Permanent' && !val('ccl-remarks')) {
+      miss.push('Remarks (비고) — 영구 증액 사유를 적어 주세요');
+    }
     if (document.querySelector('input[name="ccl-type"]:checked').value === 'Temporary') {
       if (!val('ccl-from') || !val('ccl-to')) miss.push('적용 기간 (시작일 ~ 종료일)');
       else if (val('ccl-to') < val('ccl-from')) miss.push('적용 기간 — 종료일이 시작일보다 빠릅니다');
