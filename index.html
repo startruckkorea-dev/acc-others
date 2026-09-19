@@ -28,11 +28,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
    .hdr-contact-row 는 display:contents 로 두어 마크업을 바꾸지 않고 칸만 넘긴다. */
 .hdr-contact{display:inline-grid;grid-template-columns:max-content 1fr;align-items:center;
   row-gap:0;margin-top:7px;font-size:.66rem;line-height:1.45;color:#5a6472;
-  background:#f4f8fd;border:1px solid #dbe7f5;border-radius:7px;padding:4px 10px 4px 9px}
+  padding:0}
 .hdr-contact-row{display:contents}
 /* 위아래 여백을 0 으로 두어 줄마다의 구분선이 하나로 이어져 보인다. */
 .hdr-contact-tag{color:#2b5c9e;font-weight:700;letter-spacing:-.01em;white-space:nowrap;
-  padding:1px 7px 1px 0;margin-right:7px;border-right:1px solid #cfdff2}
+  padding:1px 0;margin-right:9px}
 .hdr-contact-mail{color:#3d4756;font-weight:500}
 .hdr-contact-mail a{color:#2b5c9e;text-decoration:none}
 .hdr-contact-mail a:hover{text-decoration:underline}
@@ -72,10 +72,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .row{display:flex;gap:16px;flex-wrap:wrap}
 .fld{flex:1;min-width:200px;margin-bottom:13px}
 .appr-block{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:8px}
-.appr-fixed{background:#f3f2f1;border:1px solid #e1dfdd}
-.appr-fixed .appr-title{color:#605e5c}
+.appr-block.appr-fixed{background:#edebe9;border:1px solid #d2d0ce}
+.appr-block.appr-fixed .appr-title{color:#605e5c}
 /* 자동 지정이라 고칠 수 없는 값 — 흰 바탕에 회색 글자로 둬서 읽기는 쉽게, 입력칸처럼은 보이지 않게 */
-.appr-fixed .appr-info input{background:#fff;color:#605e5c;border-color:#e1dfdd}
+.appr-block.appr-fixed .appr-info input{background:#fff;color:#605e5c;border-color:#d2d0ce}
 .appr-title{font-size:.78rem;font-weight:600;color:#323130;margin-bottom:8px}
 .appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
 .appr-grid select{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#fff}
