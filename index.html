@@ -53,15 +53,16 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* 탭 */
-.cats{display:flex;gap:0;background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;margin:0}
+.cats{display:flex;gap:0;background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;margin:0 0 14px;border-radius:8px 8px 0 0}
 .cat{padding:15px 24px;cursor:pointer;font-size:14px;font-weight:500;color:#605e5c;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:8px}
-.cat.on{color:#0078d4;border-bottom-color:#0078d4;font-weight:700}
+.cat.on{color:#0078d4;border-bottom-color:#0078d4;font-weight:700;background:#f7fbff}
 .cat:hover:not(.on){background:#f3f2f1;color:#323130}
 .cat-count{background:#edebe9;color:#605e5c;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:600}
 .cat-count.has-item{background:#a4262c;color:#fff}
-.tabs{display:flex;gap:2px;padding:0;background:transparent;margin:0 0 40px}
-.tab{padding:8px 18px;line-height:1.5;cursor:pointer;font-size:14px;font-weight:400;color:#605e5c;background:#fff;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;white-space:nowrap}
-.tab.on{background:#fff;color:#0078d4;border-bottom-color:#0078d4;font-weight:500}
+.tabs{display:flex;gap:2px;padding:0 24px;background:transparent;margin:0 0 20px;flex-wrap:wrap}
+.tab{padding:8px 18px;line-height:1.5;cursor:pointer;font-size:14px;font-weight:400;color:#605e5c;background:#fff;border:none;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s}
+.tab:hover:not(.on){color:#323130;background:#faf9f8}
+.tab.on{background:#fff;color:#0078d4;border-bottom:3px solid #0078d4;font-weight:500}
 .tab .badge{background:#a4262c;color:#fff;border-radius:9px;padding:1px 6px;font-size:.68rem;margin-left:5px}
 .navcard{background:transparent;border-radius:0;margin:0;box-shadow:none}
 
@@ -78,6 +79,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .appr-grid select:disabled{background:#f3f2f1;color:#a19f9d}
 .appr-info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .appr-info input{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#f3f2f1;color:#605e5c;width:100%;box-sizing:border-box}
+/* 자동으로 채워져 고칠 수 없는 칸(작성일·작성자 등)은 회색으로 — GW 와 같은 규칙 */
+.fld input[readonly],.fld input:disabled,.fld textarea[readonly],.fld select:disabled{background:#f3f2f1;color:#605e5c;cursor:default}
 .appr-hint{font-size:.7rem;color:#605e5c;font-weight:400}
 .line-preview{background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem;color:#323130}
 .line-preview-title{font-weight:600;color:#0078d4;margin-bottom:6px;font-size:.75rem}
@@ -230,7 +233,7 @@ tbody tr:hover{background:#f8f9fb}
       <div id="form-dev">
         <div class="sec">1. 기본 정보</div>
         <div class="row">
-          <div class="fld"><label>Date (작성일)<span class="req">*</span></label><input type="date" id="dev-date"></div>
+          <div class="fld"><label>Date (작성일)<span class="req">*</span></label><input type="date" id="dev-date" readonly title="오늘 날짜가 자동으로 들어갑니다"></div>
           <div class="fld"><label>Report Prepared By (작성자)<span class="req">*</span></label><input type="text" id="dev-writer" readonly title="로그인한 사용자 이름이 자동으로 들어갑니다"></div>
         </div>
 
@@ -316,7 +319,7 @@ tbody tr:hover{background:#f8f9fb}
       <div id="form-ccl" style="display:none">
         <div class="sec">1. 기본 정보</div>
         <div class="row">
-          <div class="fld"><label>Application Date (신청일)<span class="req">*</span></label><input type="date" id="ccl-date"></div>
+          <div class="fld"><label>Application Date (신청일)<span class="req">*</span></label><input type="date" id="ccl-date" readonly title="오늘 날짜가 자동으로 들어갑니다"></div>
           <div class="fld"><label>Card Holder (카드 사용자)<span class="req">*</span></label><input type="text" id="ccl-holder" maxlength="60" placeholder="카드 사용자 이름"></div>
         </div>
         <div class="fld full"><label>Increase Type (증액 구분)<span class="req">*</span></label>
@@ -406,7 +409,7 @@ tbody tr:hover{background:#f8f9fb}
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span id="adm-count" style="font-size:.8rem;color:#605e5c"></span>
-          <button class="btn btn-s" onclick="exportExcel()">Excel 내보내기</button>
+          <button onclick="exportExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
         </div>
       </div>
       <div id="adm-stuck" style="display:none" class="warn"></div>
