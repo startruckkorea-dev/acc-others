@@ -148,8 +148,9 @@ tbody tr:hover{background:#f8f9fb}
 .cfgwarn{display:none;background:#fff4ce;border:1px solid #f0d9a0;border-radius:6px;padding:9px 12px;font-size:.76rem;color:#7d5700;margin-bottom:14px}
 
 /* 첨부 */
-.drop{border:2px dashed #d2d0ce;border-radius:6px;padding:18px;text-align:center;cursor:pointer;font-size:.8rem;color:#605e5c;background:#fafafa}
-.drop:hover{border-color:#0078d4;color:#0078d4}
+.opt-danger{color:#a4262c;font-weight:700}
+.drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
+.drop:hover{border-color:#0078d4;background:#f0f6ff;color:#0078d4}
 .fitem{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f8f9fb;border:1px solid #edebe9;border-radius:4px;margin-top:6px;font-size:.78rem}
 .fitem button{background:none;border:none;color:#a4262c;cursor:pointer;font-size:.8rem;font-family:inherit}
 
@@ -255,7 +256,7 @@ tbody tr:hover{background:#f8f9fb}
         <div class="row">
           <div class="fld"><label>Date of Incident (발생일)<span class="req">*</span></label><input type="date" id="dev-incident"></div>
           <div class="fld"><label>Expense Type (비용 항목)<span class="req">*</span></label><select id="dev-exptype"><option value="">Select (선택)</option></select></div>
-          <div class="fld"><label>Amount (KRW) (금액)<span class="req">*</span></label><input type="number" id="dev-amount" min="0" max="9999999999" step="1" placeholder="0"></div>
+          <div class="fld"><label>Amount (KRW) (금액)<span class="req">*</span></label><input type="text" id="dev-amount" inputmode="numeric" maxlength="15" placeholder="0" oninput="fmtMoneyInput(this)"></div>
         </div>
         <div class="fld full"><label>Request Title (요청 제목)<span class="req">*</span></label>
           <input type="text" id="dev-title" maxlength="250" placeholder="한 줄로 요약해 주세요. 결재자 화면과 APS 목록에 이 제목이 보입니다."></div>
@@ -275,7 +276,7 @@ tbody tr:hover{background:#f8f9fb}
           <textarea id="dev-recommend" maxlength="1000" placeholder="해당 없으면 비워두거나 NA로 입력하세요."></textarea></div>
 
         <div class="sec">5. 첨부파일</div>
-        <div class="drop" onclick="document.getElementById('dev-file').click()">클릭하여 파일 첨부 (파일당 최대 20MB)</div>
+        <div class="drop" onclick="document.getElementById('dev-file').click()">📎 클릭하여 파일 첨부 (파일당 최대 20MB)</div>
         <input type="file" id="dev-file" multiple style="display:none" onchange="onPickFile('dev',this)">
         <div id="dev-filelist"></div>
 
@@ -348,16 +349,23 @@ tbody tr:hover{background:#f8f9fb}
           <textarea id="ccl-reason" maxlength="2000" placeholder="증액이 필요한 사유를 구체적으로 작성해 주세요."></textarea></div>
         <div class="row">
           <div class="fld"><label>Increase Amount (KRW) (증액 금액)<span class="req">*</span></label>
-            <input type="number" id="ccl-amount" min="0" max="9999999999" step="1" placeholder="0"></div>
+            <input type="text" id="ccl-amount" inputmode="numeric" maxlength="15" placeholder="0" oninput="fmtMoneyInput(this)"></div>
           <div class="fld"><label>Duration (적용 기간)<span class="req">*</span></label>
-            <select id="ccl-duration"><option value="">Select (선택)</option></select>
+            <select id="ccl-duration" onchange="onCclDuration()"><option value="">Select (선택)</option></select>
+            <div id="ccl-range" style="display:none;margin-top:6px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <input type="date" id="ccl-from" onchange="onCclDuration()" style="flex:1">
+                <span style="color:#605e5c">~</span>
+                <input type="date" id="ccl-to" onchange="onCclDuration()" style="flex:1">
+              </div>
+            </div>
             <div class="hint" id="ccl-dur-hint">영구 증액은 Permanent를 선택하세요.</div></div>
         </div>
         <div class="fld full"><label>Remarks (비고)</label>
           <textarea id="ccl-remarks" maxlength="1000" style="min-height:60px"></textarea></div>
 
         <div class="sec">3. 첨부파일</div>
-        <div class="drop" onclick="document.getElementById('ccl-file').click()">클릭하여 파일 첨부 (파일당 최대 20MB)</div>
+        <div class="drop" onclick="document.getElementById('ccl-file').click()">📎 클릭하여 파일 첨부 (파일당 최대 20MB)</div>
         <input type="file" id="ccl-file" multiple style="display:none" onchange="onPickFile('ccl',this)">
         <div id="ccl-filelist"></div>
 
@@ -678,6 +686,13 @@ function fmtDate(v) {
 }
 function fmtDay(v) { return v ? String(v).slice(0, 10) : ''; }
 function money(v) { const n = Number(v); return isNaN(n) ? '-' : n.toLocaleString('ko-KR'); }
+/* 금액 입력칸 — 1,000,000 처럼 천 단위로 끊어 보여 준다. 저장·검증은 numVal() 로 숫자만 뽑아 쓴다.
+   number 입력은 콤마를 넣을 수 없어 text + inputmode=numeric 으로 바꿨다(모바일에서도 숫자 키패드). */
+function fmtMoneyInput(el) {
+  const digits = String(el.value || '').replace(/[^0-9]/g, '').slice(0, 13);
+  el.value = digits ? Number(digits).toLocaleString('ko-KR') : '';
+}
+function numVal(id) { return Number(String(val(id)).replace(/[^0-9]/g, '')) || 0; }
 function loading(on, msg) {
   document.getElementById('loading-msg').textContent = msg || '처리 중입니다...';
   document.getElementById('loading').classList.toggle('on', !!on);
@@ -888,6 +903,7 @@ function renderMasterSelects() {
   fill('dev-category', MASTER.category, 'Select (선택)');
   fill('dev-exptype',  MASTER.expense,  'Select (선택)');
   fill('ccl-duration', MASTER.duration, 'Select (선택)');
+  if (document.getElementById('ccl-range')) onCclType();   // 마스터 로드 후 증액 구분에 맞춰 다시 구성
 }
 
 /* ── 직원 목록 (결재자 선택) ───────────────────────────────── */
@@ -1121,11 +1137,49 @@ async function downloadAttach(driveId, itemId, name) {
 }
 
 /* ── 폼 초기화 / 부가 동작 ─────────────────────────────────── */
+/* 증액 구분에 따라 적용 기간 칸을 바꾼다.
+   · 영구 증액  → Permanent 로 고정하고 회색 잠금. 기간 달력은 숨긴다.
+   · 한시 증액  → 선택 목록에서 Permanent 를 빼고, 시작일·종료일 달력을 함께 받는다.
+     저장값(Duration)은 「선택값 · 시작일 ~ 종료일」 로 합쳐 넣는다(목록에 열을 더 만들지 않기 위함). */
+const PERM_LABEL_RE = /^permanent/i;
 function onCclType() {
   const temp = document.querySelector('input[name="ccl-type"]:checked').value === 'Temporary';
-  document.getElementById('ccl-dur-hint').textContent = temp
-    ? '한시 증액은 적용 기간을 반드시 선택해 주세요.'
-    : '영구 증액은 Permanent를 선택하세요.';
+  const sel = document.getElementById('ccl-duration');
+  const range = document.getElementById('ccl-range');
+  const all = (MASTER.duration || []);
+  if (temp) {
+    const items = all.filter(v => !PERM_LABEL_RE.test(v));
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">Select (선택)</option>' +
+      items.map(v => '<option value="' + esc(v) + '"' +
+        (/^others|^기타/i.test(v) ? ' class="opt-danger"' : '') + '>' + esc(v) + '</option>').join('');
+    range.style.display = 'block';
+    document.getElementById('ccl-dur-hint').textContent = '한시 증액은 기간(시작일 ~ 종료일)을 함께 입력해 주세요.';
+  } else {
+    const perm = all.find(v => PERM_LABEL_RE.test(v)) || 'Permanent (영구 증액)';
+    sel.innerHTML = '<option value="' + esc(perm) + '">' + esc(perm) + '</option>';
+    sel.value = perm;
+    sel.disabled = true;                         // 회색(.fld select:disabled) 으로 잠긴다
+    range.style.display = 'none';
+    document.getElementById('ccl-from').value = '';
+    document.getElementById('ccl-to').value = '';
+    document.getElementById('ccl-dur-hint').textContent = '영구 증액은 기간이 Permanent 로 고정됩니다.';
+  }
+}
+/* 기간 입력 안내 — 종료일이 시작일보다 빠르면 바로 알려 준다. */
+function onCclDuration() {
+  const f = val('ccl-from'), t2 = val('ccl-to');
+  const hint = document.getElementById('ccl-dur-hint');
+  if (f && t2 && t2 < f) { hint.textContent = '종료일이 시작일보다 빠릅니다.'; hint.style.color = '#a4262c'; }
+  else { hint.style.color = ''; if (document.getElementById('ccl-range').style.display !== 'none') hint.textContent = '한시 증액은 기간(시작일 ~ 종료일)을 함께 입력해 주세요.'; }
+}
+/* 저장·표시에 쓰는 적용 기간 문자열 */
+function cclDurationValue() {
+  const temp = document.querySelector('input[name="ccl-type"]:checked').value === 'Temporary';
+  const sel = val('ccl-duration');
+  if (!temp) return sel;
+  const f = val('ccl-from'), t2 = val('ccl-to');
+  return f && t2 ? sel + ' · ' + f + ' ~ ' + t2 : sel;
 }
 document.querySelectorAll('input[name="ccl-type"]').forEach(el => el.addEventListener('change', onCclType));
 
@@ -1136,7 +1190,7 @@ function resetForm(cat) {
        'dev-immediate', 'dev-longterm', 'dev-recommend',
        'dev-a1-dept', 'dev-a1-team', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email',
        'dev-a2-dept', 'dev-a2-team', 'dev-a2-sel', 'dev-a2-name', 'dev-a2-email']
-    : ['ccl-title', 'ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks',
+    : ['ccl-title', 'ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-from', 'ccl-to', 'ccl-remarks',
        'ccl-a1-dept', 'ccl-a1-team', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById(cat + '-date').value = kstToday();
@@ -1172,7 +1226,7 @@ function validate(cat) {
     if (!val('dev-longterm')) miss.push('Long-Term Corrective Measures (장기 개선조치)');
     if (!val('dev-a1-email')) miss.push('1차 결재자 (Team Leader)');
     if (!val('dev-a2-email')) miss.push('2차 결재자 (MC)');
-    if (Number(val('dev-amount')) < 0) miss.push('금액은 0 이상이어야 합니다');
+    if (numVal('dev-amount') < 0) miss.push('금액은 0 이상이어야 합니다');
     if (val('dev-incident') && val('dev-date') && val('dev-incident') > val('dev-date'))
       miss.push('발생일이 작성일보다 뒤일 수 없습니다');
   } else {
@@ -1182,8 +1236,12 @@ function validate(cat) {
     if (!val('ccl-reason')) miss.push('Reason for Request (신청 사유)');
     if (!val('ccl-amount')) miss.push('Increase Amount (증액 금액)');
     if (!val('ccl-duration')) miss.push('Duration (적용 기간)');
+    if (document.querySelector('input[name="ccl-type"]:checked').value === 'Temporary') {
+      if (!val('ccl-from') || !val('ccl-to')) miss.push('적용 기간 (시작일 ~ 종료일)');
+      else if (val('ccl-to') < val('ccl-from')) miss.push('적용 기간 — 종료일이 시작일보다 빠릅니다');
+    }
     if (!val('ccl-a1-email')) miss.push('1차 결재자 (Department Head)');
-    if (Number(val('ccl-amount')) <= 0) miss.push('증액 금액은 0보다 커야 합니다');
+    if (numVal('ccl-amount') <= 0) miss.push('증액 금액은 0보다 커야 합니다');
   }
   return miss;
 }
@@ -1229,7 +1287,7 @@ async function submitForm(cat) {
       RequesterEmail: user.email, RequesterName: user.name,
       ReportDate: val('dev-date'), PolicyTitle: val('dev-policy'),
       DeviationCategory: val('dev-category'), IncidentDate: val('dev-incident'),
-      ExpenseType: val('dev-exptype'), Amount: Number(val('dev-amount')),
+      ExpenseType: val('dev-exptype'), Amount: numVal('dev-amount'),
       RequestTitle: val('dev-title'),
       Description: val('dev-desc'), ImmediateActions: val('dev-immediate'),
       LongTermMeasures: val('dev-longterm'), Recommendations: val('dev-recommend'),
@@ -1240,8 +1298,8 @@ async function submitForm(cat) {
       ApplicationDate: val('ccl-date'), CardHolder: val('ccl-holder'),
       IncreaseType: document.querySelector('input[name="ccl-type"]:checked').value,
       RequestTitle: val('ccl-title'),
-      ReasonForRequest: val('ccl-reason'), IncreaseAmount: Number(val('ccl-amount')),
-      Duration: val('ccl-duration'), Remarks: val('ccl-remarks'),
+      ReasonForRequest: val('ccl-reason'), IncreaseAmount: numVal('ccl-amount'),
+      Duration: cclDurationValue(), Remarks: val('ccl-remarks'),
       Status: '대기', RequestDate: new Date().toISOString()
     };
 
@@ -1301,7 +1359,7 @@ function resetFormSilent(cat) {
        'dev-immediate', 'dev-longterm', 'dev-recommend',
        'dev-a1-dept', 'dev-a1-team', 'dev-a1-sel', 'dev-a1-name', 'dev-a1-email',
        'dev-a2-dept', 'dev-a2-team', 'dev-a2-sel', 'dev-a2-name', 'dev-a2-email']
-    : ['ccl-title', 'ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-remarks',
+    : ['ccl-title', 'ccl-reason', 'ccl-amount', 'ccl-duration', 'ccl-from', 'ccl-to', 'ccl-remarks',
        'ccl-a1-dept', 'ccl-a1-team', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   _files[cat] = []; renderFiles(cat);
@@ -1819,6 +1877,15 @@ async function exportExcel() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(rows);
     ws['!cols'] = head.map((h, i) => ({ wch: i === 0 ? 6 : (h.length > 14 ? 30 : 18) }));
+    /* 금액 열은 숫자로 넣고 서식만 「#,##0」 으로 준다 — 엑셀에서 합계·정렬이 되면서 1,000,000 처럼 보인다.
+       (글자로 넣으면 콤마는 보이지만 계산이 안 된다) */
+    const moneyCol = head.findIndex(h => /Amount\(KRW\)/.test(h));
+    if (moneyCol >= 0) {
+      for (let r = 1; r < rows.length; r++) {
+        const ref = XLSX.utils.encode_cell({ r, c: moneyCol });
+        if (ws[ref] && typeof ws[ref].v === 'number') { ws[ref].t = 'n'; ws[ref].z = '#,##0'; }
+      }
+    }
     XLSX.utils.book_append_sheet(wb, ws, L.prefix);
     const n = kstNow(); const p = x => String(x).padStart(2, '0');
     XLSX.writeFile(wb, L.prefix + '_Export_' + n.getUTCFullYear() + p(n.getUTCMonth() + 1) + p(n.getUTCDate()) +
