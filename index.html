@@ -366,7 +366,7 @@ tbody tr:hover{background:#f8f9fb}
           <div class="fld"><label>Increase Amount (KRW) (증액 금액)<span class="req">*</span></label>
             <input type="text" id="ccl-amount" inputmode="numeric" maxlength="15" placeholder="0" oninput="fmtMoneyInput(this)"></div>
           <div class="fld"><label>Duration (적용 기간)<span class="req">*</span></label>
-            <select id="ccl-duration" onchange="onCclDuration()"><option value="">Select (선택)</option></select>
+            <select id="ccl-duration" onchange="fillCclRange(); onCclDuration();"><option value="">Select (선택)</option></select>
             <div id="ccl-range" style="display:none;margin-top:6px">
               <div style="display:flex;align-items:center;gap:6px">
                 <input type="date" id="ccl-from" onchange="onCclDuration()" style="flex:1">
@@ -1185,12 +1185,50 @@ function onCclType() {
     h2.style.display = 'none'; h2.textContent = '';   // 잠긴 Permanent 값만으로 충분해 안내는 두지 않는다
   }
 }
+/* 선택한 기간(1·2·3·6개월, 연말까지)에 맞춰 시작일·종료일을 오늘 기준으로 채운다.
+   · 시작일은 오늘(KST), 종료일은 시작일 + n개월 - 1일. 월말 보정 포함(1/31 + 1개월 → 2/28).
+   · 「연말까지」 는 12월 31일, 「기타」 는 채우지 않고 직접 고르게 둔다.
+   · 사람이 날짜를 직접 고친 뒤에는 덮어쓰지 않는다 — 선택 상자를 다시 바꿀 때만 채운다. */
+function fillCclRange() {
+  const label = val('ccl-duration');
+  const from = document.getElementById('ccl-from');
+  const to   = document.getElementById('ccl-to');
+  if (!label || /^others|^기타/i.test(label)) return;          // 기타는 직접 입력
+  const base = kstToday();                                      // YYYY-MM-DD
+  const [y, m, d] = base.split('-').map(Number);
+  let endY = y, endM = m, endD = d;
+  const mm = label.match(/(\d+)\s*month/i);
+  if (mm) {
+    const add = parseInt(mm[1], 10);
+    endM = m + add; endY = y + Math.floor((endM - 1) / 12); endM = ((endM - 1) % 12) + 1;
+    const last = new Date(Date.UTC(endY, endM, 0)).getUTCDate();   // 그 달의 마지막 날
+    endD = Math.min(d, last);
+    const end = new Date(Date.UTC(endY, endM - 1, endD));
+    end.setUTCDate(end.getUTCDate() - 1);                          // 시작일 포함 n개월 → 하루 앞
+    endY = end.getUTCFullYear(); endM = end.getUTCMonth() + 1; endD = end.getUTCDate();
+  } else if (/year-end|연말/i.test(label)) {
+    endM = 12; endD = 31;
+  } else return;
+  const p2 = n => String(n).padStart(2, '0');
+  from.value = base;
+  to.value   = endY + '-' + p2(endM) + '-' + p2(endD);
+}
+
 /* 기간 입력 안내 — 종료일이 시작일보다 빠르면 바로 알려 준다. */
 function onCclDuration() {
   const f = val('ccl-from'), t2 = val('ccl-to');
   const hint = document.getElementById('ccl-dur-hint');
   if (f && t2 && t2 < f) { hint.style.display = ''; hint.textContent = '종료일이 시작일보다 빠릅니다.'; hint.style.color = '#a4262c'; }
-  else { hint.style.color = ''; if (document.getElementById('ccl-range').style.display !== 'none') { hint.style.display = ''; hint.textContent = '시작일과 종료일을 함께 선택해 주세요.'; } }
+  else {
+    hint.style.color = '';
+    if (document.getElementById('ccl-range').style.display !== 'none') {
+      hint.style.display = '';
+      const sel = val('ccl-duration');
+      hint.textContent = (f && t2 && sel && !/^others|^기타/i.test(sel))
+        ? '선택한 기간에 맞춰 자동으로 넣었습니다. 필요하면 날짜를 직접 고칠 수 있습니다.'
+        : '시작일과 종료일을 함께 선택해 주세요.';
+    }
+  }
 }
 /* 저장·표시에 쓰는 적용 기간 문자열 */
 function cclDurationValue() {
