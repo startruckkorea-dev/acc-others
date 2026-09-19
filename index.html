@@ -1242,6 +1242,19 @@ async function submitForm(cat) {
     const title = L.prefix + '-' + kstToday() + '_ID-' + reqId;
     await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId, 'PATCH', { fields: { Title: title } });
 
+    /* APS 통합 결재함·내 신청 기록의 「요청 제목」 칸에 쓰는 값(GW·SCC 와 같은 RequestTitle).
+       요청 목록에 이 열이 아직 없을 수도 있으므로 상신 본문에 넣지 않고 따로 보낸다 —
+       열이 없으면 이 PATCH 만 실패하고 신청 자체는 정상으로 남는다. */
+    const reqTitle = (cat === 'dev'
+      ? [val('dev-policy'), val('dev-category')].filter(Boolean).join(' · ')
+      : [document.querySelector('input[name="ccl-type"]:checked').value, val('ccl-reason')].filter(Boolean).join(' · ')
+      ).slice(0, 250);
+    if (reqTitle) {
+      try {
+        await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId, 'PATCH', { fields: { RequestTitle: reqTitle } });
+      } catch (e) { console.warn('[상신] RequestTitle 저장 건너뜀:', e.message); }
+    }
+
     // 첨부 업로드 (실패해도 신청 자체는 살리고 사용자에게 알린다)
     let attachWarn = '';
     try {
