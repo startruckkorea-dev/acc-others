@@ -12,6 +12,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
 .wrap{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+/* 목록(내 신청·결재함·관리자)은 열이 많아 960px 로는 좁다. 목록 탭에서만 넓힌다(작성 화면은 그대로). */
+body.wide-list .wrap{max-width:1360px}
 .card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:22px 26px;margin-bottom:16px}
 .card.body{margin:0 16px 16px;padding:24px}
 
@@ -122,6 +124,10 @@ tbody tr:hover{background:#f8f9fb}
 .list-bar select{width:auto}
 .list-bar input[type=text]{flex:1;min-width:200px;max-width:420px}
 .list-count{margin-left:auto;font-size:.8rem;color:#605e5c;white-space:nowrap}
+/* 요청 제목·적용 기간은 길 수 있어 한 줄로 자르고, 전체 내용은 마우스를 올리면 보인다 */
+.c-rtit,.c-dur{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.c-rtit{max-width:320px}
+.c-dur{max-width:200px;color:#605e5c}
 .empty{text-align:center;color:#a19f9d;padding:26px;font-size:.82rem}
 
 /* 상태 */
@@ -436,8 +442,8 @@ tbody tr:hover{background:#f8f9fb}
         <span id="my-count" class="list-count"></span>
       </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th style="width:52px">번호</th><th>Title</th><th style="width:130px">구분</th><th style="width:120px">금액</th><th style="width:92px">상태</th><th style="width:140px">신청일</th><th style="width:90px"></th></tr></thead>
-        <tbody id="my-body"><tr><td colspan="7" class="empty">불러오는 중...</td></tr></tbody>
+        <thead id="my-head"></thead>
+        <tbody id="my-body"><tr><td colspan="9" class="empty">불러오는 중...</td></tr></tbody>
       </table></div>
       <div class="pg" id="my-pg"></div>
     </div>
@@ -449,8 +455,8 @@ tbody tr:hover{background:#f8f9fb}
         <span id="apr-count" class="list-count"></span>
       </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th style="width:52px">번호</th><th>Title</th><th style="width:210px">신청자</th><th style="width:120px">금액</th><th style="width:120px">내 결재순서</th><th style="width:140px">신청일</th></tr></thead>
-        <tbody id="apr-body"><tr><td colspan="6" class="empty">불러오는 중...</td></tr></tbody>
+        <thead id="apr-head"></thead>
+        <tbody id="apr-body"><tr><td colspan="9" class="empty">불러오는 중...</td></tr></tbody>
       </table></div>
       <div class="pg" id="apr-pg"></div>
     </div>
@@ -469,8 +475,8 @@ tbody tr:hover{background:#f8f9fb}
       </div>
       <div id="adm-stuck" style="display:none" class="warn"></div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th style="width:52px">번호</th><th style="width:210px">신청자</th><th>Title</th><th style="width:130px">구분</th><th style="width:120px">금액</th><th style="width:92px">상태</th><th style="width:140px">신청일</th></tr></thead>
-        <tbody id="adm-body"><tr><td colspan="7" class="empty">불러오는 중...</td></tr></tbody>
+        <thead id="adm-head"></thead>
+        <tbody id="adm-body"><tr><td colspan="9" class="empty">불러오는 중...</td></tr></tbody>
       </table></div>
       <div class="pg" id="adm-pg"></div>
     </div>
@@ -1083,6 +1089,8 @@ function switchTab(tab) {
     const el = document.getElementById('pane-' + t);
     if (el) el.style.display = t === tab ? '' : 'none';
   });
+  // 목록 탭은 열이 많아 화면을 넓게 쓴다(작성 화면은 읽기 폭을 유지).
+  document.body.classList.toggle('wide-list', tab !== 'new');
   if (tab === 'my') loadMy();
   if (tab === 'apr') loadApr();
   if (tab === 'admin') loadAdmin();
@@ -1485,20 +1493,10 @@ function renderMyList() {
   });
   const cnt = document.getElementById('my-count');
   if (cnt) cnt.textContent = '총 ' + rows.length + '건' + (rows.length !== items.length ? ' / 전체 ' + items.length + '건' : '');
-  renderPaged('my', rows, (it) => {
-      const f = it.fields;
-      const canWithdraw = (f.Status || '').trim() === '대기';
-      return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + it.id + ')">' +
-        '<td>' + it.id + '</td>' +
-        '<td style="color:#0078d4;font-weight:600">' + esc(f.Title || '') + '</td>' +
-        '<td>' + esc(kindOf(cat, f)) + '</td>' +
-        '<td style="text-align:right">' + money(amountOf(cat, f)) + '</td>' +
-        '<td><span class="st ' + stClass(f.Status) + '">' + esc(f.Status || '') + '</span></td>' +
-        '<td>' + fmtDate(f.RequestDate) + '</td>' +
-        '<td>' + (canWithdraw ? '<button class="btn btn-g" style="padding:3px 9px;font-size:.72rem" onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')">철회</button>' : '') + '</td>' +
-        '</tr>';
-  });
+  renderHead('my', cat, 'my');
+  renderPaged('my', rows, (it) => rowHtml(cat, 'my', it), listCols(cat, 'my').length);
 }
+
 
 async function loadApr() {
   const cat = _currentCat, L = LISTS[cat];
@@ -1536,17 +1534,10 @@ function renderAprList() {
   }) : all;
   const cnt = document.getElementById('apr-count');
   if (cnt) cnt.textContent = '총 ' + rows.length + '건' + (rows.length !== all.length ? ' / 전체 ' + all.length + '건' : '');
-  renderPaged('apr', rows, (x) => {
-      const f = x.req.fields;
-      return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + x.req.id + ')">' +
-        '<td>' + x.req.id + '</td>' +
-        '<td style="color:#0078d4;font-weight:600">' + esc(f.Title || '') + '</td>' +
-        '<td>' + esc(f.RequesterEmail || '') + '</td>' +
-        '<td style="text-align:right">' + money(amountOf(cat, f)) + '</td>' +
-        '<td>' + esc(x.apr.fields.ApprovalOrder + '차 · ' + (x.apr.fields.ApproverRole || '')) + '</td>' +
-        '<td>' + fmtDate(f.RequestDate) + '</td></tr>';
-  }, 6);
+  renderHead('apr', cat, 'apr');
+  renderPaged('apr', rows, (x) => rowHtml(cat, 'apr', null, x), listCols(cat, 'apr').length);
 }
+
 
 async function loadBadge() {
   if (!siteId) return;
@@ -1580,16 +1571,8 @@ async function loadAdmin() {
       (i.fields.Title || '').toLowerCase().includes(kw));
     _cache[cat].adm = items;
     document.getElementById('adm-count').textContent = '총 ' + items.length + '건';
-    renderPaged('adm', items, (it) => {
-      const f = it.fields;
-      return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + it.id + ')">' +
-        '<td>' + it.id + '</td><td>' + esc(f.RequesterEmail || '') + '</td>' +
-        '<td style="color:#0078d4;font-weight:600">' + esc(f.Title || '') + '</td>' +
-        '<td>' + esc(kindOf(cat, f)) + '</td>' +
-        '<td style="text-align:right">' + money(amountOf(cat, f)) + '</td>' +
-        '<td><span class="st ' + stClass(f.Status) + '">' + esc(f.Status || '') + '</span></td>' +
-        '<td>' + fmtDate(f.RequestDate) + '</td></tr>';
-    });
+    renderHead('adm', cat, 'adm');
+    renderPaged('adm', items, (it) => rowHtml(cat, 'adm', it), listCols(cat, 'adm').length);
     if (isIT()) detectStuck(cat, items);
   } catch (e) {
     tb.innerHTML = '<tr><td colspan="7" class="empty">불러오기 실패: ' + esc(e.message) + '</td></tr>';
@@ -1622,6 +1605,50 @@ async function detectStuck(cat, items) {
 }
 
 /* ── 페이지네이션 ─────────────────────────────────────────── */
+/* 목록 열 정의 — 신청 종류마다 보여 줄 값이 다르다(09-19).
+   · 공통: 번호 · Title · 요청 제목 · 상태 · 신청일 (+ 관리자·결재함은 신청자)
+   · Deviation Report: 발생일 · 금액
+   · Credit Card Limit: 증액 구분 · 증액 금액 · 적용 기간
+   head() 가 <thead> 를 만들고 row() 가 한 줄을 만든다. 둘이 같은 정의를 쓰므로 열이 어긋나지 않는다. */
+function listCols(cat, kind) {
+  const num   = { label: '번호',  w: '58px',  cell: (f, it) => it.id };
+  const who   = { label: '신청자', w: '200px', cell: (f) => esc(f.RequesterEmail || '') };
+  const title = { label: 'Title', w: '190px', cell: (f) => '<span style="color:#0078d4;font-weight:600">' + esc(f.Title || '') + '</span>' };
+  const rtit  = { label: '요청 제목', cell: (f) => '<span class="c-rtit" title="' + esc(f.RequestTitle || '') + '">' + esc(f.RequestTitle || '-') + '</span>' };
+  const stat  = { label: '상태',  w: '92px',  cell: (f) => '<span class="st ' + stClass(f.Status) + '">' + esc(f.Status || '') + '</span>' };
+  const rdate = { label: '신청일', w: '140px', cell: (f) => fmtDate(f.RequestDate) };
+  const cols = [num];
+  if (kind === 'adm' || kind === 'apr') cols.push(who);
+  cols.push(title, rtit);
+  if (cat === 'dev') {
+    cols.push({ label: '발생일', w: '108px', cell: (f) => fmtDay(f.IncidentDate) || '-' });
+    cols.push({ label: '금액', w: '120px', align: 'right', cell: (f) => money(f.Amount) });
+  } else {
+    cols.push({ label: '증액 구분', w: '104px', cell: (f) => esc(f.IncreaseType || '-') });
+    cols.push({ label: '증액 금액', w: '120px', align: 'right', cell: (f) => money(f.IncreaseAmount) });
+    cols.push({ label: '적용 기간', w: '210px', cell: (f) => '<span class="c-dur" title="' + esc(f.Duration || '') + '">' + esc(f.Duration || '-') + '</span>' });
+  }
+  if (kind === 'apr') cols.push({ label: '내 결재순서', w: '140px', cell: (f, it, x) => esc((x && x.apr) ? (x.apr.fields.ApprovalOrder + '차 · ' + (x.apr.fields.ApproverRole || '')) : '') });
+  cols.push(stat, rdate);
+  if (kind === 'my') cols.push({ label: '', w: '84px', cell: (f, it) =>
+    (f.Status || '').trim() === '대기'
+      ? '<button class="btn btn-g" style="padding:3px 9px;font-size:.72rem" onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')">철회</button>' : '' });
+  return cols;
+}
+function renderHead(key, cat, kind) {
+  const el = document.getElementById(key + '-head');
+  if (!el) return;
+  el.innerHTML = '<tr>' + listCols(cat, kind).map(c =>
+    '<th' + (c.w ? ' style="width:' + c.w + (c.align === 'right' ? ';text-align:right' : '') + '"' : '') + '>' + esc(c.label) + '</th>').join('') + '</tr>';
+}
+function rowHtml(cat, kind, it, x) {
+  const f = (x && x.req) ? x.req.fields : it.fields;
+  const id = (x && x.req) ? x.req.id : it.id;
+  return '<tr style="cursor:pointer" onclick="openDetail(\'' + cat + '\',' + id + ')">' +
+    listCols(cat, kind).map(c =>
+      '<td' + (c.align === 'right' ? ' style="text-align:right"' : '') + '>' + c.cell(f, { id }, x) + '</td>').join('') + '</tr>';
+}
+
 function renderPaged(key, items, rowFn, cols) {
   const tb = document.getElementById(key + '-body');
   const pgEl = document.getElementById(key + '-pg');
