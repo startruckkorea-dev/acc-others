@@ -53,13 +53,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* 탭 */
-.cats{display:flex;gap:0;background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;margin:0 0 6px}
+.cats{display:flex;gap:0;background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;margin:0 0 2px}
 .cat{padding:14px 24px 11px;cursor:pointer;font-size:14px;font-weight:500;color:#605e5c;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:8px}
 .cat.on{color:#0078d4;border-bottom-color:#0078d4;font-weight:700}
 .cat:hover:not(.on){background:#f3f2f1;color:#323130}
 .cat-count{background:#edebe9;color:#605e5c;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:600}
 .cat-count.has-item{background:#a4262c;color:#fff}
-.tabs{display:flex;gap:2px;padding:0;background:transparent;margin:2px 0 16px;flex-wrap:wrap}
+.tabs{display:flex;gap:2px;padding:0;background:transparent;margin:0 0 14px;flex-wrap:wrap}
 .tab{padding:8px 18px;line-height:1.5;cursor:pointer;font-size:14px;font-weight:400;color:#605e5c;background:#fff;border:none;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s}
 .tab:hover:not(.on){color:#323130;background:#faf9f8}
 .tab.on{background:#fff;color:#0078d4;border-bottom:3px solid #0078d4;font-weight:500}
@@ -74,6 +74,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-siz
 .appr-block{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:8px}
 .appr-fixed{background:#f3f2f1;border:1px solid #e1dfdd}
 .appr-fixed .appr-title{color:#605e5c}
+/* 자동 지정이라 고칠 수 없는 값 — 흰 바탕에 회색 글자로 둬서 읽기는 쉽게, 입력칸처럼은 보이지 않게 */
+.appr-fixed .appr-info input{background:#fff;color:#605e5c;border-color:#e1dfdd}
 .appr-title{font-size:.78rem;font-weight:600;color:#323130;margin-bottom:8px}
 .appr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
 .appr-grid select{border:1px solid #d2d0ce;border-radius:4px;padding:5px 8px;font-size:.75rem;font-family:inherit;background:#fff}
@@ -202,6 +204,12 @@ tbody tr:hover{background:#f8f9fb}
     <div>
       <h1>STK Accounting — Others</h1>
       <div class="sub">Deviation Report &nbsp;·&nbsp; Credit Card Limit Increase</div>
+      <div class="hdr-contact">
+        <div class="hdr-contact-row">
+          <span class="hdr-contact-tag">BU Admin</span>
+          <span class="hdr-contact-mail" id="contact-email">-</span>
+        </div>
+      </div>
     </div>
     <div class="who">
       <div><span id="user-name" class="hdr-user"></span><button class="btn btn-g" style="padding:4px 12px;font-size:.78rem;font-weight:400" onclick="signOut()">로그아웃</button></div>
@@ -321,7 +329,7 @@ tbody tr:hover{background:#f8f9fb}
         <div class="sec">1. 기본 정보</div>
         <div class="row">
           <div class="fld"><label>Application Date (신청일)<span class="req">*</span></label><input type="date" id="ccl-date" readonly title="오늘 날짜가 자동으로 들어갑니다"></div>
-          <div class="fld"><label>Card Holder (카드 사용자)<span class="req">*</span></label><input type="text" id="ccl-holder" maxlength="60" placeholder="카드 사용자 이름"></div>
+          <div class="fld"><label>Card Holder (카드 사용자)<span class="req">*</span></label><input type="text" id="ccl-holder" readonly title="로그인한 사용자 이름이 자동으로 들어갑니다"></div>
         </div>
         <div class="fld full"><label>Increase Type (증액 구분)<span class="req">*</span></label>
           <div style="padding:4px 0">
@@ -970,7 +978,10 @@ async function boot(account) {
       _configLoaded = true;
       ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP']);
       IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
-      // 헤더의 BU Admin 연락처 알약은 제거했다(09-19). 설정 키는 다른 화면 안내에 쓸 수 있어 그대로 둔다.
+      // 헤더 BU Admin 연락처 — GW·IT 와 같은 규칙으로 설정 파일에서 읽는다.
+      // 키: ACC-OTHERS_CONTACT (없으면 공통 CONTACT_EMAIL)
+      const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '' }));
+      setHdrContact('contact-email', contact.email);
       // 키 이름은 시스템 접두어(ACC-OTHERS_)를 붙인 쪽이 정식이다.
       // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
       Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
