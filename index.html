@@ -234,6 +234,16 @@ tbody tr:hover{background:#f8f9fb}
 .btn-approve:hover{background:#0e6b0e}
 .btn-reject{background:#a4262c;color:#fff;border:none;border-radius:4px;padding:6px 18px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-reject:hover{background:#8f1f24}
+/* 상세 모달 껍데기 — IT·GW·BP 와 같은 흰 상자(파란 머리띠 없음, 제목 + 오른쪽 버튼 + 모서리 ×).
+   결재 확인 팝업이 쓰는 .mod / .mod-hd 는 그대로 둔다. */
+.modal-box{background:#fff;border-radius:8px;padding:28px 32px;max-width:680px;width:95%;max-height:88vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#605e5c;font-family:inherit}
+.modal-title{font-size:1rem;font-weight:700;color:#323130;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #edebe9;display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* 여러 줄 입력은 라벨을 위에 두고 값을 아래 전체 폭으로 — IT 의 긴 항목과 같은 모양.
+   한 줄에 나란히 두면 라벨이 두 줄로 접혀 값과 어긋난다(09-20 사용자 지적). */
+.det-full{padding:7px 0;border-bottom:1px solid #f3f2f1}
+.det-full .det-lbl{display:block;width:auto;margin-bottom:3px;font-size:.72rem}
+.det-full .det-body{color:#323130;font-weight:500;font-size:.8rem;white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
@@ -522,9 +532,16 @@ tbody tr:hover{background:#f8f9fb}
 
 <!-- 상세 모달 -->
 <div class="ov" id="detail-ov">
-  <div class="mod">
-    <div class="mod-hd"><span id="detail-title">상세보기</span><button onclick="closeDetail()">&times;</button></div>
-    <div class="mod-bd" id="detail-body"></div>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeDetail()">&times;</button>
+    <div class="modal-title">
+      <span>신청 상세 내용</span>
+      <button onclick="printForm()" title="공식 양식 인쇄 / PDF" class="no-print" style="background:#0078d4;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .15s" onmouseover="this.style.background='#005a9e'" onmouseout="this.style.background='#0078d4'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        인쇄 / PDF
+      </button>
+    </div>
+    <div id="detail-body"></div>
   </div>
 </div>
 
@@ -1823,16 +1840,14 @@ async function openDetail(cat, reqId) {
     const rows = (apr.value || []).sort((a, b) => (a.fields.ApprovalOrder || 0) - (b.fields.ApprovalOrder || 0));
     _detail = { cat, reqId, fields: f, apr: rows };
 
-    document.getElementById('detail-title').textContent = f.Title || (L.prefix + ' ID-' + reqId);
-
     /* 화면 구성은 BP·GW·IT 와 같다 — 섹션 제목(det-sec) → 라벨·값 한 줄(det-row) →
        첨부파일 → 결재 이력(appr-item) → 승인·반려 버튼. 값은 모두 이스케이프한다. */
     const sec  = (t) => '<div class="det-sec">' + t + '</div>';
     const row  = (l, v) => '<div class="det-row"><span class="det-lbl">' + esc(l) +
       '</span><span class="det-val">' + esc(v == null || v === '' ? '-' : v) + '</span></div>';
-    // 여러 줄 입력(사유·조치·비고)은 줄바꿈을 살린다.
-    const rowP = (l, v) => '<div class="det-row"><span class="det-lbl">' + esc(l) +
-      '</span><span class="det-val" style="white-space:pre-wrap">' + esc(v == null || v === '' ? '-' : v) + '</span></div>';
+    // 여러 줄 입력(내용·사유·조치·비고)은 라벨을 위에 두고 값을 아래 전체 폭으로 편다.
+    const rowP = (l, v) => '<div class="det-full"><span class="det-lbl">' + esc(l) +
+      '</span><div class="det-body">' + esc(v == null || v === '' ? '-' : v) + '</div></div>';
     // 배지처럼 이미 HTML 인 값만 이쪽으로 넣는다.
     const rowH = (l, v) => '<div class="det-row"><span class="det-lbl">' + esc(l) +
       '</span><span class="det-val">' + (v || '-') + '</span></div>';
@@ -1927,8 +1942,6 @@ async function openDetail(cat, reqId) {
         '<button class="btn-approve" onclick="openApprModal(\'승인\',' + myTurn.id + ')">✅ 승인</button>' +
         '<button class="btn-reject" onclick="openApprModal(\'반려\',' + myTurn.id + ')">❌ 반려</button></div>';
     }
-    body += '<div style="text-align:right;margin-top:12px" class="no-print">' +
-      '<button class="btn btn-g" onclick="printForm()">공식 양식 인쇄 / PDF</button></div>';
 
     document.getElementById('detail-body').innerHTML = body;
     document.getElementById('detail-ov').classList.add('on');
