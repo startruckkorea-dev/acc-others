@@ -8,8 +8,11 @@
 <title>STK Accounting - Others</title>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<!-- PDF 출력용. 이 페이지의 CSP 는 script-src 를 jsdelivr·sheetjs 로만 열어 두었다.
+     IT Ticket 에서 쓰던 cdnjs·unpkg 주소를 그대로 가져왔더니 둘 다 차단되어
+     「PDFLib is not defined」 로 떨어졌다(09-20). 같은 버전을 jsdelivr 에서 받는다. -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
@@ -2096,6 +2099,10 @@ async function exportDetailPdf() {
   btn.disabled = true;
 
   try {
+    // 차단·지연으로 라이브러리가 없으면 원인을 알 수 있게 알린다.
+    if (typeof PDFLib === 'undefined' || typeof html2canvas === 'undefined') {
+      throw new Error('PDF 라이브러리를 불러오지 못했습니다. 새로고침(Ctrl+F5) 후 다시 시도해 주세요. 계속되면 IT팀(stk_it@hyosung.com)에 알려주세요.');
+    }
     const { PDFDocument } = PDFLib;
     const contentEl = document.getElementById('detail-body');
 
@@ -2133,9 +2140,14 @@ async function exportDetailPdf() {
       return hc.toDataURL('image/png');
     }
 
-    async function dataUrlToUint8(dataUrl) {
-      const res = await fetch(dataUrl);
-      return new Uint8Array(await res.arrayBuffer());
+    /* data: URL 을 fetch 로 읽으면 CSP connect-src 에 걸린다(이 페이지에는 data: 가 없다).
+       base64 부분만 직접 풀어 쓴다 — 결과는 같고 네트워크 요청이 없다. */
+    function dataUrlToUint8(dataUrl) {
+      const b64 = String(dataUrl).slice(String(dataUrl).indexOf(',') + 1);
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
     }
 
     const _catName = _detail.cat === 'dev' ? 'Deviation Report' : 'Credit Card Limit Increase';
