@@ -8,6 +8,8 @@
 <title>STK Accounting - Others</title>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
@@ -217,13 +219,15 @@ tbody tr:hover{background:#f8f9fb}
 /* 상세보기 — APS 공통 템플릿(BP·GW·IT 와 같은 클래스·같은 값).
    이 화면만 번호 붙은 .sec 와 .dl 을 써서 다른 시스템과 모양이 달랐다(09-20 사용자 지적).
    신청 폼에서 쓰는 .sec 는 그대로 두고, 상세보기만 아래 규칙으로 옮긴다. */
-.det-sec{font-size:.72rem;font-weight:700;color:#0078d4;background:#f0f6ff;padding:5px 10px;border-radius:4px;border-left:3px solid #0078d4;margin:14px 0 8px}
+.det-sec{font-size:13px;font-weight:700;color:#1F4E79;background:#EFF6FF;padding:6px 10px;border-radius:3px;border-left:3px solid #1F4E79;margin:16px 0 8px}
 .det-sec:first-of-type{margin-top:4px}
-.det-row{display:flex;padding:5px 0;border-bottom:1px solid #f3f2f1;font-size:.8rem}
+.det-row{display:flex;padding:7px 0;border-bottom:.5px solid #edebe9;font-size:13px}
 .det-row:last-child{border-bottom:none}
-.det-lbl{color:#605e5c;width:200px;flex-shrink:0}
-.det-val{color:#323130;font-weight:500;flex:1;word-break:break-word}
-.appr-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 10px;border-bottom:1px solid #edebe9;font-size:.8rem;gap:10px}
+/* 라벨·값 모두 보통 굵기 — IT 는 섹션 제목과 결재자 줄에만 굵게 쓴다.
+   500 으로 두니 값이 전부 굵어 보였다(09-20 사용자 지적). */
+.det-lbl{color:#605e5c;width:200px;flex-shrink:0;font-size:12px;font-weight:400}
+.det-val{color:#323130;font-weight:400;flex:1;word-break:break-word}
+.appr-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 10px;border-bottom:1px solid #edebe9;font-size:13px;gap:10px}
 .appr-item:last-child{border-bottom:none}
 .status-대기{color:#7d5700;font-weight:600}
 .status-승인{color:#107c10;font-weight:600}
@@ -241,9 +245,11 @@ tbody tr:hover{background:#f8f9fb}
 .modal-title{font-size:1rem;font-weight:700;color:#323130;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #edebe9;display:flex;align-items:center;justify-content:space-between;gap:10px}
 /* 여러 줄 입력은 라벨을 위에 두고 값을 아래 전체 폭으로 — IT 의 긴 항목과 같은 모양.
    한 줄에 나란히 두면 라벨이 두 줄로 접혀 값과 어긋난다(09-20 사용자 지적). */
-.det-full{padding:7px 0;border-bottom:1px solid #f3f2f1}
-.det-full .det-lbl{display:block;width:auto;margin-bottom:3px;font-size:.72rem}
-.det-full .det-body{color:#323130;font-weight:500;font-size:.8rem;white-space:pre-wrap;word-break:break-word}
+.det-full{padding:7px 0;border-bottom:.5px solid #edebe9}
+.det-full .det-lbl{display:block;width:auto;margin-bottom:3px;font-size:11px}
+.det-full .det-body{color:#323130;font-weight:400;font-size:13px;white-space:pre-wrap;word-break:break-word}
+/* 결재자 줄만 굵게 — IT 와 같다. */
+.appr-role{font-weight:600;font-size:13px;color:#323130}
 </style>
 </head>
 <body>
@@ -536,9 +542,9 @@ tbody tr:hover{background:#f8f9fb}
     <button class="modal-close" onclick="closeDetail()">&times;</button>
     <div class="modal-title">
       <span>신청 상세 내용</span>
-      <button onclick="printForm()" title="공식 양식 인쇄 / PDF" class="no-print" style="background:#0078d4;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .15s" onmouseover="this.style.background='#005a9e'" onmouseout="this.style.background='#0078d4'">
+      <button id="btn-export-pdf" onclick="exportDetailPdf()" title="결재내용 통합 PDF 출력" style="background:#0078d4;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .15s" onmouseover="this.style.background='#005a9e'" onmouseout="this.style.background='#0078d4'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        인쇄 / PDF
+        PDF 출력
       </button>
     </div>
     <div id="detail-body"></div>
@@ -1822,10 +1828,13 @@ function attachHtml(raw) {
     const name = (p[0] || '').trim();
     if (!name) return '';
     if (p.length === 3) {
-      return '<div style="padding:3px 0;font-size:.8rem">📎 <a href="#" style="color:#0078d4" onclick="event.preventDefault();downloadAttach(\'' +
+      /* class·data-* 는 PDF 출력이 첨부를 찾아 뒤에 붙일 때 쓴다(IT 와 같은 규칙). */
+      return '<div style="padding:3px 0;font-size:13px">📎 <a href="#" class="file-dl-link" style="color:#0078d4"' +
+        ' data-drive="' + encodeURIComponent(p[1].trim()) + '" data-id="' + encodeURIComponent(p[2].trim()) + '" data-name="' + encodeURIComponent(name) + '"' +
+        ' onclick="event.preventDefault();downloadAttach(\'' +
         encodeURIComponent(p[1].trim()) + '\',\'' + encodeURIComponent(p[2].trim()) + '\',\'' + encodeURIComponent(name) + '\')">' + esc(name) + '</a></div>';
     }
-    return '<div style="padding:3px 0;font-size:.8rem">📎 ' + esc(name) + '</div>';
+    return '<div style="padding:3px 0;font-size:13px">📎 ' + esc(name) + '</div>';
   }).join('');
 }
 
@@ -1911,12 +1920,12 @@ async function openDetail(cat, reqId) {
       const _p = _n.replace(/^결재자\s*/, '');
       const _q = _p.startsWith('(') ? _p : (_p ? '(' + _p + ')' : '');
       body += '<div class="appr-item"><div>' +
-        '<b>' + esc(_o) + '차</b> 결재자' + esc(_q) + aacRolePill(a.ApproverRole, a.Status) +
-        '<br><span style="font-size:.72rem;color:#605e5c">' + esc(a.ApproverName || '') + ' · ' + esc(a.ApproverEmail || '') + '</span>' +
-        (a.ApprovalDate ? '<br><span style="font-size:.72rem;color:#a19f9d">' + fmtDate(a.ApprovalDate) + '</span>' : '') +
-        (a.Comment ? '<br><span style="font-size:.72rem;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:2px 6px;display:inline-block;margin-top:2px">💬 ' +
-          esc(spText(a.Comment)) + '</span>' : '') +
-        '</div><span class="' + cls + '">' + esc(st) + '</span></div>';
+        '<div class="appr-role"><b>' + esc(_o) + '차</b> 결재자' + esc(_q) + aacRolePill(a.ApproverRole, a.Status) + '</div>' +
+        '<div style="font-size:12px;color:#605e5c;margin-top:2px">' + esc(a.ApproverName || '') + ' · ' + esc(a.ApproverEmail || '') + '</div>' +
+        (a.ApprovalDate ? '<div style="font-size:11px;color:#a19f9d;margin-top:2px">' + fmtDate(a.ApprovalDate) + '</div>' : '') +
+        (a.Comment ? '<div style="margin-top:4px;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:4px 8px;font-size:12px;color:#605e5c;white-space:pre-wrap">💬 ' +
+          esc(spText(a.Comment)) + '</div>' : '') +
+        '</div><span class="' + cls + '" style="white-space:nowrap;margin-left:8px">' + esc(st) + '</span></div>';
     });
     body += '</div>';
 
@@ -2075,69 +2084,166 @@ async function withdrawRequest(cat, reqId) {
 }
 
 /* ── 공식 양식 인쇄 ───────────────────────────────────────── */
-function printForm() {
+/* 결재내용 통합 PDF — IT Ticket 의 exportTicketPdf 와 같은 방식.
+   상세 화면을 그대로 캡처해 A4 로 자르고, 첨부파일을 뒤에 이어 붙인다.
+   (예전에는 브라우저 인쇄창으로 공식 양식을 뽑았는데, 다른 APS 시스템과
+    방식이 달라 결과물도 결재 기록도 서로 달랐다 — 09-20 사용자 요청) */
+async function exportDetailPdf() {
   if (!_detail) return;
-  const { cat, fields: f, apr } = _detail;
-  const cell = (l, v) => '<tr><th>' + esc(l) + '</th><td>' + esc(v == null || v === '' ? '' : v).replace(/\n/g, '<br>') + '</td></tr>';
-  let inner;
-  if (cat === 'dev') {
-    inner = '<h1>Deviation Report - Employee Expense</h1><table>' +
-      cell('Date (날짜)', fmtDay(f.ReportDate)) +
-      cell('Report Prepared By (작성자)', f.ReportPreparedBy || f.RequesterName) +
-      '<tr><th colspan="2" class="grp">1. Deviation summary (정책위반 내용)</th></tr>' +
-      cell('Policy Title (규정명)', f.PolicyTitle) +
-      cell('Deviation Category (위반사항)', f.DeviationCategory) +
-      cell('Date of Incident (발생일)', fmtDay(f.IncidentDate)) +
-      cell('Expense type (비용 항목)', f.ExpenseType) +
-      cell('Amount (KRW) (금액(원))', money(f.Amount)) +
-      cell('Description (내용)', spText(f.Description)) +
-      '<tr><th colspan="2" class="grp">2. Corrective Actions (조치사항)</th></tr>' +
-      cell('Immediate Actions (즉시조치)', spText(f.ImmediateActions)) +
-      cell('Long-Term Corrective Measures (장기 개선조치)', spText(f.LongTermMeasures)) +
-      '<tr><th colspan="2" class="grp">3. Recommendations (권고사항)</th></tr>' +
-      cell('Recommendations for Policy Improvement (규정 개선 권고사항)', spText(f.Recommendations)) +
-      '</table>';
-  } else {
-    inner = '<h1>STAR TRUCK KOREA LTD</h1>' +
-      '<div class="ctype">' +
-      (f.IncreaseType === 'Permanent' ? '☑' : '☐') + ' Permanent credit card limit increase &nbsp;&nbsp;&nbsp; ' +
-      (f.IncreaseType === 'Temporary' ? '☑' : '☐') + ' Temporary credit card limit increase</div>' +
-      '<table>' +
-      cell('Card Holder', f.CardHolder || f.RequesterName) +
-      cell('Application Date', fmtDay(f.ApplicationDate)) +
-      cell('Reason for Request', spText(f.ReasonForRequest)) +
-      cell('Increase amount', money(f.IncreaseAmount) + ' KRW') +
-      cell('Duration', f.Duration) +
-      cell('Remarks', spText(f.Remarks)) +
-      '</table>';
-  }
-  // 결재란
-  const signers = [{ ApproverRole: 'Requester', ApproverName: f.RequesterName || '', ApprovalDate: f.RequestDate, Status: '신청' }]
-    .concat(apr.map(a => a.fields));
-  let sign = '<h2>Approval</h2><table class="sign"><tr>' +
-    signers.map(s => '<th>' + esc(s.ApproverRole || '') + '</th>').join('') + '</tr><tr>' +
-    signers.map(s => '<td class="sg">' + ((s.Status === '승인' || s.Status === '신청') ? '<span class="stamp">' + esc(s.Status) + '</span>' : esc(s.Status || '')) + '</td>').join('') + '</tr><tr>' +
-    signers.map(s => '<td>' + esc(s.ApproverName || '') + '</td>').join('') + '</tr><tr>' +
-    signers.map(s => '<td>' + esc(s.ApprovalDate ? fmtDate(s.ApprovalDate).slice(0, 10) : '') + '</td>').join('') + '</tr></table>';
+  const btn = document.getElementById('btn-export-pdf');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ 생성 중...';
+  btn.disabled = true;
 
-  const w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>' +
-    esc(f.Title || '') + '</title><style>' +
-    'body{font-family:"Malgun Gothic",sans-serif;color:#111;padding:28px 34px;font-size:12px}' +
-    'h1{font-size:17px;margin-bottom:4px;color:#101B34}h2{font-size:13px;margin:22px 0 6px;color:#101B34}' +
-    '.meta{font-size:10.5px;color:#666;margin-bottom:14px}' +
-    '.ctype{font-size:12px;margin:10px 0 14px}' +
-    'table{width:100%;border-collapse:collapse;margin-bottom:6px}' +
-    'th,td{border:1px solid #999;padding:6px 8px;font-size:11px;text-align:left;vertical-align:top}' +
-    'th{background:#f0f2f5;width:230px;font-weight:600}' +
-    'th.grp{background:#dde3ec;width:auto;font-weight:700}' +
-    'table.sign th{width:auto;text-align:center}table.sign td{text-align:center;height:34px}' +
-    '.sg{height:44px}.stamp{display:inline-block;border:2px solid #a4262c;color:#a4262c;border-radius:50%;padding:5px 8px;font-size:10px;font-weight:700}' +
-    '@media print{body{padding:0}}</style></head><body>' +
-    inner.replace('<table>', '<div class="meta">' + esc(f.Title || '') + ' &nbsp;·&nbsp; Star Truck Korea</div><table>') +
-    sign + '</body></html>');
-  w.document.close();
-  setTimeout(() => { try { w.print(); } catch (e) {} }, 500);
+  try {
+    const { PDFDocument } = PDFLib;
+    const contentEl = document.getElementById('detail-body');
+
+    const now = new Date();
+    const _ds = '출력일시: ' + now.toLocaleDateString('ko-KR', {timeZone:'Asia/Seoul'}) + ' ' +
+      now.toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Seoul'});
+
+    // 승인·반려 버튼은 문서에 남기지 않는다
+    const procBtns = contentEl.querySelectorAll('.btn-approve, .btn-reject');
+    procBtns.forEach(b => b.style.display = 'none');
+
+    const cvs = await html2canvas(contentEl, {scale:2, useCORS:true, allowTaint:true, backgroundColor:'#fff', scrollY:0, windowWidth:700});
+
+    procBtns.forEach(b => b.style.display = '');
+
+    const mainDoc = await PDFDocument.create();
+    const A4W = 595, A4H = 842;
+    const marginPt = 34, hdrH = 22;
+    const printW_pt = A4W - marginPt * 2;
+    const printableH_pt = A4H - marginPt * 2 - hdrH;
+
+    function makeHdrPng(left, right) {
+      const hc = document.createElement('canvas');
+      hc.width = 1190; hc.height = 28;
+      const hx = hc.getContext('2d');
+      const g = hx.createLinearGradient(0, 0, hc.width, 0);
+      g.addColorStop(0, '#0f2744'); g.addColorStop(1, '#0a4a8a');
+      hx.fillStyle = g; hx.fillRect(0, 0, hc.width, hc.height);
+      hx.fillStyle = '#3b82f6'; hx.fillRect(0, hc.height - 2, hc.width, 2);
+      hx.fillStyle = '#fff';
+      hx.font = '500 13px "Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+      hx.textBaseline = 'middle'; hx.fillText(left, 14, 13);
+      hx.textAlign = 'right'; hx.font = '400 12px "Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+      hx.fillStyle = 'rgba(255,255,255,.6)'; hx.fillText(right, hc.width - 14, 13);
+      return hc.toDataURL('image/png');
+    }
+
+    async function dataUrlToUint8(dataUrl) {
+      const res = await fetch(dataUrl);
+      return new Uint8Array(await res.arrayBuffer());
+    }
+
+    const _catName = _detail.cat === 'dev' ? 'Deviation Report' : 'Credit Card Limit Increase';
+    const hdrBytes = await dataUrlToUint8(makeHdrPng('STK Accounting — Others · ' + _catName, _ds));
+
+    // 본문 캡처를 A4 높이만큼 잘라 페이지로 나눈다
+    const pxPerPt = cvs.width / A4W;
+    const sliceH_px = Math.round(printableH_pt * pxPerPt);
+    const numPages = Math.ceil(cvs.height / sliceH_px);
+
+    for (let i = 0; i < numPages; i++) {
+      const page = mainDoc.addPage([A4W, A4H]);
+      const hdrImg = await mainDoc.embedPng(hdrBytes);
+      page.drawImage(hdrImg, {x:0, y:A4H - hdrH, width:A4W, height:hdrH});
+
+      const srcY = i * sliceH_px;
+      const sliceActual_px = Math.min(sliceH_px, cvs.height - srcY);
+      const sliceActual_pt = sliceActual_px / pxPerPt;
+
+      const sc = document.createElement('canvas');
+      sc.width = cvs.width; sc.height = sliceActual_px;
+      sc.getContext('2d').drawImage(cvs, 0, srcY, cvs.width, sliceActual_px, 0, 0, cvs.width, sliceActual_px);
+
+      const sliceBytes = await dataUrlToUint8(sc.toDataURL('image/jpeg', 0.92));
+      const sliceImg = await mainDoc.embedJpg(sliceBytes);
+      page.drawImage(sliceImg, {
+        x: marginPt,
+        y: A4H - hdrH - marginPt - sliceActual_pt,
+        width: printW_pt,
+        height: sliceActual_pt
+      });
+    }
+
+    // 첨부파일 — 이미지는 그대로, 그 밖은 Graph 로 PDF 변환해 이어 붙인다
+    const fileLinks = contentEl.querySelectorAll('.file-dl-link');
+    const _t = await token();
+
+    for (const link of fileLinks) {
+      const name = decodeURIComponent(link.dataset.name || '');
+      if (!name) continue;
+      const dId = decodeURIComponent(link.dataset.drive || '');
+      const iId = decodeURIComponent(link.dataset.id || '');
+      if (!dId || !iId) continue;
+      const ext = name.split('.').pop().toLowerCase();
+      const imgExts = ['jpg','jpeg','png','gif','webp'];
+
+      btn.innerHTML = '⏳ ' + name.substring(0, 20) + '...';
+
+      try {
+        if (imgExts.includes(ext)) {
+          const res = await fetch(GRAPH + '/drives/' + dId + '/items/' + iId + '/content', {headers:{Authorization:'Bearer ' + _t}});
+          if (!res.ok) throw new Error(res.status);
+          const imgAb = await res.arrayBuffer();
+          const attachPage = mainDoc.addPage([A4W, A4H]);
+          const aHdrImg = await mainDoc.embedPng(await dataUrlToUint8(makeHdrPng('첨부파일: ' + name, _ds)));
+          attachPage.drawImage(aHdrImg, {x:0, y:A4H - hdrH, width:A4W, height:hdrH});
+          let embImg;
+          if (['jpg','jpeg'].includes(ext)) embImg = await mainDoc.embedJpg(new Uint8Array(imgAb));
+          else embImg = await mainDoc.embedPng(new Uint8Array(imgAb));
+          const {width:iW, height:iH} = embImg;
+          const ratio = Math.min(printW_pt / iW, (A4H - hdrH - marginPt * 2) / iH);
+          attachPage.drawImage(embImg, {x:marginPt, y:A4H - hdrH - marginPt - iH * ratio, width:iW * ratio, height:iH * ratio});
+
+        } else {
+          const convertUrl = ext === 'pdf'
+            ? GRAPH + '/drives/' + dId + '/items/' + iId + '/content'
+            : GRAPH + '/drives/' + dId + '/items/' + iId + '/content?format=pdf';
+          const res = await fetch(convertUrl, {headers:{Authorization:'Bearer ' + _t}});
+          if (!res.ok) throw new Error('변환실패 ' + res.status);
+          const pdfBytes = new Uint8Array(await res.arrayBuffer());
+          const srcDoc = await PDFDocument.load(pdfBytes, {ignoreEncryption:true});
+          const copiedPages = await mainDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+          const aHdrBytes2 = await dataUrlToUint8(makeHdrPng('첨부파일: ' + name, _ds));
+          for (const pg of copiedPages) {
+            mainDoc.addPage(pg);
+            const aHdrImg2 = await mainDoc.embedPng(aHdrBytes2);
+            const {width:pgW, height:pgH} = pg.getSize();
+            pg.drawImage(aHdrImg2, {x:0, y:pgH - hdrH, width:pgW, height:hdrH});
+          }
+        }
+      } catch(e) {
+        // 한 건이 실패해도 나머지는 그대로 만든다 — 실패 사실만 한 쪽으로 남긴다
+        console.warn('첨부파일 처리 실패:', name, e.message);
+        const errPage = mainDoc.addPage([A4W, A4H]);
+        const errHdrImg = await mainDoc.embedPng(await dataUrlToUint8(makeHdrPng('첨부파일: ' + name + ' (변환 실패)', _ds)));
+        errPage.drawImage(errHdrImg, {x:0, y:A4H - hdrH, width:A4W, height:hdrH});
+      }
+    }
+
+    const finalBytes = await mainDoc.save();
+    const finalBlob = new Blob([finalBytes], {type:'application/pdf'});
+    const f = _detail.fields || {};
+    const reqEmail = (f.RequesterEmail || 'unknown').replace(/[^a-z0-9]/gi, '_');
+    const fileName = 'ACC_Others_' + (_detail.cat === 'dev' ? 'DEV' : 'CCL') + '_' + (_detail.reqId || '') + '_' +
+      reqEmail + '_' + new Date(now.getTime() + 9*3600*1000).toISOString().substring(0, 10) + '.pdf';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(finalBlob);
+    a.download = fileName;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+
+  } catch(e) {
+    alert('PDF 생성 오류: ' + e.message);
+    console.error(e);
+  } finally {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
 }
 
 /* ── Excel 내보내기 ───────────────────────────────────────── */
