@@ -276,8 +276,8 @@ tbody tr:hover{background:#f8f9fb}
 
   <div class="navcard">
     <div class="cats">
-      <div class="cat on" data-cat="dev" onclick="switchCat('dev')"><span>Deviation Report</span><span class="cat-count" id="cat-badge-dev"></span></div>
-      <div class="cat" data-cat="ccl" onclick="switchCat('ccl')"><span>Credit Card Limit</span><span class="cat-count" id="cat-badge-ccl"></span></div>
+      <div class="cat on" data-cat="dev" onclick="switchCat('dev')"><span>Deviation Report</span><span class="cat-count" id="cat-badge-dev" style="display:none"></span></div>
+      <div class="cat" data-cat="ccl" onclick="switchCat('ccl')"><span>Credit Card Limit</span><span class="cat-count" id="cat-badge-ccl" style="display:none"></span></div>
     </div>
 
     <div class="tabs">
@@ -1663,7 +1663,15 @@ function renderBadge() {
   el.style.display = n > 0 ? '' : 'none';
   Object.keys(LISTS).forEach(c => {
     const b = document.getElementById('cat-badge-' + c);
-    if (b) { const v = _aprCount[c] || 0; b.textContent = v > 0 ? v : ''; }
+    if (b) {
+      /* 내가 결재할 건이 있으면 빨간 알약으로 보여 준다(GA·IT 와 같은 색).
+         has-item 규칙은 CSS 에 있었는데 붙여 주는 곳이 없어 늘 회색으로만 나왔다(09-20 사용자 지적).
+         0 건이면 빈 회색 알약이 남지 않게 아예 감춘다. */
+      const v = _aprCount[c] || 0;
+      b.textContent = v > 0 ? v : '';
+      b.classList.toggle('has-item', v > 0);
+      b.style.display = v > 0 ? '' : 'none';
+    }
   });
 }
 
