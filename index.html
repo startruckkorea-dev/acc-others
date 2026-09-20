@@ -540,7 +540,7 @@ tbody tr:hover{background:#f8f9fb}
 </div>
 
 <!-- 상세 모달 -->
-<div class="ov" id="detail-ov">
+<div class="ov" id="detail-ov" onclick="if(event.target===this)closeDetail()">
   <div class="modal-box">
     <button class="modal-close" onclick="closeDetail()">&times;</button>
     <div class="modal-title">
