@@ -126,9 +126,13 @@ td{padding:5px 8px;border-bottom:1px solid #edebe9;vertical-align:middle;line-he
 tbody tr:hover{background:#f8f9fb}
 .tbl-wrap{overflow-x:auto}
 /* 목록 위 도구 줄 — 상태·검색·건수 (BP Master 와 같은 배치) */
-.list-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.list-bar{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .list-bar select{width:auto}
 .list-bar input[type=text]{flex:1;min-width:200px;max-width:420px}
+/* 도구 줄의 칸은 신청서 폼보다 낮게 — 폼과 같은 8px 10px 을 쓰니 목록 위가 두툼했다(09-21).
+   신청서 입력 칸에는 영향이 없도록 도구 줄과 관리자 줄에만 건다. */
+.list-bar select,.list-bar input[type=text],#adm-status,#adm-search{
+  padding:4px 9px;font-size:.78rem;line-height:1.5}
 .list-count{margin-left:auto;font-size:.8rem;color:#605e5c;white-space:nowrap}
 /* 요청 제목·적용 기간은 길 수 있어 한 줄로 자르고, 전체 내용은 마우스를 올리면 보인다 */
 .c-rtit,.c-dur,.c-pol{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
@@ -503,8 +507,9 @@ tbody tr:hover{background:#f8f9fb}
 
     <!-- ══════════════ 결재함 ══════════════ -->
     <div id="pane-apr" style="display:none">
+      <!-- 결재함은 내 차례인 건만 모이는 곳이라 몇 건 되지 않는다.
+           검색 칸은 자리만 차지해 뺐다(09-21 요청). 건수는 그대로 둔다. -->
       <div class="list-bar">
-        <input type="text" id="apr-search" oninput="renderAprList()" placeholder="Title / 신청자 검색..." maxlength="60">
         <span id="apr-count" class="list-count"></span>
       </div>
       <div class="tbl-wrap"><table>
@@ -1662,18 +1667,13 @@ async function loadApr() {
   }
 }
 
-/* 결재함 그리기 — Title·신청자 검색을 적용한다(조회는 loadApr 가 한 번만 한다). */
+/* 결재함 그리기 (조회는 loadApr 가 한 번만 한다).
+   검색은 두지 않는다 — 내 차례인 건만 모이는 곳이라 걸러 낼 것이 없다(09-21). */
 function renderAprList() {
   const cat = _currentCat;
-  const all = (_cache[cat] && _cache[cat].apr) || [];
-  const q = ((document.getElementById('apr-search') || {}).value || '').trim().toLowerCase();
-  const rows = q ? all.filter(x => {
-    const f = x.req.fields;
-    return [f.Title, f.RequesterName, f.RequesterEmail, f.RequestTitle]
-      .some(v => String(v || '').toLowerCase().includes(q));
-  }) : all;
+  const rows = (_cache[cat] && _cache[cat].apr) || [];
   const cnt = document.getElementById('apr-count');
-  if (cnt) cnt.textContent = '총 ' + rows.length + '건' + (rows.length !== all.length ? ' / 전체 ' + all.length + '건' : '');
+  if (cnt) cnt.textContent = '총 ' + rows.length + '건';
   renderHead('apr', cat, 'apr');
   renderPaged('apr', rows, (x) => rowHtml(cat, 'apr', null, x), listCols(cat, 'apr').length);
 }
