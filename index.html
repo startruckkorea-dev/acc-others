@@ -324,9 +324,12 @@ tbody tr:hover{background:#f8f9fb}
       <!-- ── Deviation Report ── -->
       <div id="form-dev">
         <div class="sec">1. 기본 정보</div>
+        <!-- Report Prepared By (작성자) 칸은 뺐다(09-21).
+             로그인한 사람 이름이 자동으로 들어가는 읽기 전용 칸이었고, 값은 저장되지도
+             않아(상신 필드에 없음) 화면에서는 늘 신청자 이름으로 대체되고 있었다.
+             작성자는 곧 신청자이므로 상세보기의 「신청자」 줄에 이름·메일을 함께 적는다. -->
         <div class="row">
           <div class="fld"><label>Date (작성일)<span class="req">*</span></label><input type="date" id="dev-date" readonly title="오늘 날짜가 자동으로 들어갑니다"></div>
-          <div class="fld"><label>Report Prepared By (작성자)<span class="req">*</span></label><input type="text" id="dev-writer" readonly title="로그인한 사용자 이름이 자동으로 들어갑니다"></div>
         </div>
 
         <div class="sec">2. Deviation Summary (정책위반 내용)</div>
@@ -1175,7 +1178,6 @@ async function boot(account) {
 
     document.getElementById('dev-date').value = kstToday();
     document.getElementById('ccl-date').value = kstToday();
-    document.getElementById('dev-writer').value = user.name || '';
     document.getElementById('ccl-holder').value = user.name || '';
 
     loadBadge();
@@ -1406,8 +1408,7 @@ function resetForm(cat) {
        'ccl-a1-dept', 'ccl-a1-team', 'ccl-a1-sel', 'ccl-a1-name', 'ccl-a1-email'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById(cat + '-date').value = kstToday();
-  if (cat === 'dev') document.getElementById('dev-writer').value = user.name || '';
-  else document.getElementById('ccl-holder').value = user.name || '';
+  if (cat === 'ccl') document.getElementById('ccl-holder').value = user.name || '';
   _files[cat] = []; renderFiles(cat);
   // (결재자 선택 초기화는 아래 APPR_SLOTS 루프에서 처리한다 — 예전 onDeptChange 는 없는 함수였다)
   // 부서 선택이 풀렸으므로 팀·직원 드롭다운을 초기 상태로 되돌린다.
@@ -1426,7 +1427,6 @@ function validate(cat) {
   const miss = [];
   if (cat === 'dev') {
     if (!val('dev-date')) miss.push('Date (작성일)');
-    if (!val('dev-writer')) miss.push('Report Prepared By (작성자)');
     if (!val('dev-policy')) miss.push('Policy Title (규정명)');
     if (!val('dev-category')) miss.push('Deviation Category (위반사항)');
     if (!val('dev-incident')) miss.push('Date of Incident (발생일)');
@@ -1927,11 +1927,10 @@ async function openDetail(cat, reqId) {
     if (cat === 'dev') {
       body += sec('기본 정보') +
         row('제목', f.Title) +
-        row('신청자', f.RequesterEmail) +
+        row('신청자', f.RequesterName ? (f.RequesterName + ' · ' + (f.RequesterEmail || '')) : (f.RequesterEmail || '')) +
         rowH('상태', stPill(f.Status)) +
         row('신청일', f.RequestDate ? fmtDate(f.RequestDate) : '-') +
         row('Date (작성일)', fmtDay(f.ReportDate)) +
-        row('Report Prepared By (작성자)', f.ReportPreparedBy || f.RequesterName) +
         sec('Deviation Summary') +
         row('Request Title (요청 제목)', f.RequestTitle) +
         row('Policy Title (규정명)', f.PolicyTitle) +
@@ -2331,7 +2330,7 @@ async function exportExcel() {
     (apr.value || []).forEach(a => { const k = String(a.fields.RequestID); (byReq[k] = byReq[k] || []).push(a.fields); });
 
     const head = cat === 'dev'
-      ? ['번호', 'Title', '신청자', '작성자', '작성일', 'Policy Title', 'Deviation Category', '발생일',
+      ? ['번호', 'Title', '신청자 메일', '신청자 이름', '작성일', 'Policy Title', 'Deviation Category', '발생일',
          'Expense Type', 'Amount(KRW)', 'Description', 'Immediate Actions', 'Long-Term Measures',
          'Recommendations', '상태', '신청일', '결재 이력']
       : ['번호', 'Title', '신청자', 'Card Holder', '신청일자', 'Increase Type', 'Reason',
@@ -2346,7 +2345,7 @@ async function exportExcel() {
           (a.ApprovalDate ? ' ' + fmtDate(a.ApprovalDate) : ''))
         .join(' / ');
       rows.push(cat === 'dev'
-        ? [++_xlNo, f.Title || '', f.RequesterEmail || '', f.ReportPreparedBy || f.RequesterName || '', fmtDay(f.ReportDate),
+        ? [++_xlNo, f.Title || '', f.RequesterEmail || '', f.RequesterName || '', fmtDay(f.ReportDate),
            f.PolicyTitle || '', f.DeviationCategory || '', fmtDay(f.IncidentDate), f.ExpenseType || '',
            Number(f.Amount || 0), spText(f.Description), spText(f.ImmediateActions), spText(f.LongTermMeasures),
            spText(f.Recommendations), f.Status || '', fmtDate(f.RequestDate), hist]
