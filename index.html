@@ -118,10 +118,11 @@ input:disabled,select:disabled,textarea:disabled{background:#f3f2f1;color:#605e5
 /* 표 */
 table{width:100%;border-collapse:collapse;font-size:.8rem}
 /* 표 머리 — 진한 남색 단색은 BP·GW 와 달리 무거웠다. 옅은 회색 바탕 + 진한 글자에 아래 선만 둔다(09-19). */
-th{background:#faf9f8;color:#323130;padding:9px 10px;text-align:left;font-weight:600;font-size:.74rem;
+th{background:#faf9f8;color:#323130;padding:7px 10px;text-align:left;font-weight:600;font-size:.74rem;
   white-space:nowrap;border-bottom:1px solid #edebe9}
 tbody tr:hover td{background:#f9fbfd}
-td{padding:9px 8px;border-bottom:1px solid #edebe9;vertical-align:top}
+/* 행 간격 — 9px 은 한 화면에 들어가는 건수가 적어 스크롤이 잦았다(09-21 지적). */
+td{padding:5px 8px;border-bottom:1px solid #edebe9;vertical-align:middle;line-height:1.45}
 tbody tr:hover{background:#f8f9fb}
 .tbl-wrap{overflow-x:auto}
 /* 목록 위 도구 줄 — 상태·검색·건수 (BP Master 와 같은 배치) */
@@ -130,9 +131,11 @@ tbody tr:hover{background:#f8f9fb}
 .list-bar input[type=text]{flex:1;min-width:200px;max-width:420px}
 .list-count{margin-left:auto;font-size:.8rem;color:#605e5c;white-space:nowrap}
 /* 요청 제목·적용 기간은 길 수 있어 한 줄로 자르고, 전체 내용은 마우스를 올리면 보인다 */
-.c-rtit,.c-dur{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.c-rtit,.c-dur,.c-pol{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
 .c-rtit{max-width:320px}
-.c-dur{max-width:200px;color:#605e5c}
+.c-pol{max-width:180px;color:#605e5c}
+/* 적용 기간은 자르지 않는다 — 시작일·종료일이 잘리면 목록만 보고는 알 수 없다. */
+.c-dur{max-width:none;color:#605e5c}
 .empty{text-align:center;color:#a19f9d;padding:26px;font-size:.82rem}
 
 /* 상태 */
@@ -1358,6 +1361,16 @@ function onCclDuration() {
     }
   }
 }
+/* 목록에 쓰는 짧은 적용 기간.
+   저장값은 「6 months (6개월) · 2026-09-21 ~ 2027-03-20」 처럼 영문·한글을 함께 담는데,
+   목록에서는 한글만 남겨도 뜻이 통하고 열 폭이 절반으로 준다(09-21 지적).
+   괄호가 없는 값(옛 기록)은 그대로 쓴다. */
+function cclDurShort(v) {
+  const t = String(v || '').trim();
+  if (!t) return '-';
+  return t.replace(/^[^()·]*\(([^)]*)\)/, '$1').trim();
+}
+
 /* 저장·표시에 쓰는 적용 기간 문자열 */
 function cclDurationValue() {
   const temp = document.querySelector('input[name="ccl-type"]:checked').value === 'Temporary';
@@ -1768,18 +1781,28 @@ function listCols(cat, kind) {
   if (kind === 'adm' || kind === 'apr') cols.push(who);
   cols.push(title, rtit);
   if (cat === 'dev') {
+    // 규정명은 어떤 규정에서 벗어난 건인지 목록에서 바로 알 수 있는 값이라
+    // 요청 제목 옆에 둔다(09-21 요청). 세 화면 모두 같다.
+    cols.push({ label: '규정명', w: '190px', cell: (f) =>
+      '<span class="c-pol" title="' + esc(f.PolicyTitle || '') + '">' + esc(f.PolicyTitle || '-') + '</span>' });
     cols.push({ label: '발생일', w: '108px', cell: (f) => fmtDay(f.IncidentDate) || '-' });
     cols.push({ label: '금액', w: '120px', align: 'right', cell: (f) => money(f.Amount) });
   } else {
-    cols.push({ label: '증액 구분', w: '104px', cell: (f) => esc(f.IncreaseType || '-') });
-    cols.push({ label: '증액 금액', w: '120px', align: 'right', cell: (f) => money(f.IncreaseAmount) });
-    cols.push({ label: '적용 기간', w: '210px', cell: (f) => '<span class="c-dur" title="' + esc(f.Duration || '') + '">' + esc(f.Duration || '-') + '</span>' });
+    // 증액 구분은 Temporary · Permanent 두 값뿐이라 넓을 필요가 없다.
+    // 그만큼을 적용 기간에 넘겨 시작일·종료일이 잘리지 않게 한다(09-21 지적).
+    cols.push({ label: '증액 구분', w: '86px', cell: (f) => esc(f.IncreaseType || '-') });
+    cols.push({ label: '증액 금액', w: '116px', align: 'right', cell: (f) => money(f.IncreaseAmount) });
+    cols.push({ label: '적용 기간', w: '250px', cell: (f) =>
+      '<span class="c-dur" title="' + esc(f.Duration || '') + '">' + esc(cclDurShort(f.Duration)) + '</span>' });
   }
-  if (kind === 'apr') cols.push({ label: '내 결재순서', w: '140px', cell: (f, it, x) => esc((x && x.apr) ? (x.apr.fields.ApprovalOrder + '차 · ' + (x.apr.fields.ApproverRole || '')) : '') });
+  /* 「내 결재순서」 열은 뺐다 — 결재함에 뜬 건은 어차피 내 차례이고,
+     상세를 열면 결재 이력에 단계와 역할이 그대로 나온다(09-21 요청). */
   cols.push(stat, rdate);
   if (kind === 'my') cols.push({ label: '', w: '84px', cell: (f, it) =>
     (f.Status || '').trim() === '대기'
-      ? '<button class="btn btn-g" style="padding:3px 9px;font-size:.72rem" onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')">철회</button>' : '' });
+      // 철회 버튼은 BP·FA·GA·IT 와 같은 모양·같은 문구로 맞춘다(09-21 지적).
+      ? '<button onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')"'
+        + ' style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:2px 12px;font-size:.75rem;line-height:16px;cursor:pointer;font-family:inherit;white-space:nowrap">Withdraw</button>' : '' });
   return cols;
 }
 function renderHead(key, cat, kind) {
