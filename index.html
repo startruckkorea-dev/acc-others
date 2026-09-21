@@ -1946,7 +1946,7 @@ async function openDetail(cat, reqId) {
     if (cat === 'dev') {
       body += sec('기본 정보') +
         row('제목', f.Title) +
-        row('신청자', f.RequesterName ? (f.RequesterName + ' · ' + (f.RequesterEmail || '')) : (f.RequesterEmail || '')) +
+        row('신청자', f.RequesterEmail) +
         rowH('상태', stPill(f.Status)) +
         row('신청일', f.RequestDate ? fmtDate(f.RequestDate) : '-') +
         row('Date (작성일)', fmtDay(f.ReportDate)) +
