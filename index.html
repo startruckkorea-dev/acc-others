@@ -196,12 +196,6 @@ tbody tr:hover{background:#f8f9fb}
 .it-alert-btn{background:#0078d4;color:#fff;border:none;border-radius:8px;padding:9px 32px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
 .it-alert-btn:hover{background:#0062b1}
 #no-auth-modal.show{display:flex!important}
-/* 영구 증액처럼 꼭 채워야 하는 칸 앞에 두는 안내 — 눈에 띄되 경고창처럼 요란하지 않게 */
-.need-note{display:flex;align-items:flex-start;gap:8px;background:#fdf3f4;border:1px solid #f3c1c6;border-left:3px solid #a4262c;
-  border-radius:6px;padding:8px 12px;margin:0 0 8px;font-size:.78rem;line-height:1.55;color:#a4262c}
-.need-note b{font-weight:700}
-.need-note-ic{flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#a4262c;color:#fff;font-size:.66rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;margin-top:1px}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
 /* 증빙 첨부 안내 — 짙은 빨강 글자, 아이콘은 첫 줄에 맞춘다 */
 .att-notice{display:flex;align-items:flex-start;gap:7px;color:#9F1D1D;margin:2px 0 10px;line-height:1.5}
@@ -450,12 +444,16 @@ tbody tr:hover{background:#f8f9fb}
         <div class="fld full"><label>Request Title (요청 제목)<span class="req">*</span></label>
           <input type="text" id="ccl-title" maxlength="250" placeholder="한 줄로 요약해 주세요. 결재자 화면과 APS 목록에 이 제목이 보입니다."></div>
         <div class="fld full"><label>Reason for Request (신청 사유)<span class="req">*</span></label>
-          <textarea id="ccl-reason" maxlength="2000" placeholder="증액이 필요한 사유를 구체적으로 작성해 주세요."></textarea>
-          <!-- 영구 증액은 한 번 올리면 한도가 계속 유지되므로 사유를 더 자세히 받는다. 한시 증액일 때는 숨긴다. -->
-          <div class="need-note" id="ccl-reason-note" style="display:none">
-            <span class="need-note-ic">!</span>
-            <span><b>영구 증액</b>은 한도가 계속 유지됩니다. 필요한 <b>사유</b>와 함께 <b>대상 가맹점·월 예상 사용액</b>을 구체적으로 적어 주세요.</span>
-          </div></div>
+          <!-- 영구 증액 안내 — 제목 바로 아래, 상자 없이 짙은 빨강 두 줄(Deviation Report 증빙 첨부 안내와 같은 모양, 09-22 요청).
+               영구 증액은 한 번 올리면 한도가 계속 유지되므로 사유를 더 자세히 받는다. 한시 증액일 때는 숨긴다(onCclType). -->
+          <div class="att-notice" id="ccl-reason-note" role="note" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+              <div class="att-notice-main">영구 증액은 한도가 계속 유지됩니다.</div>
+              <div class="att-notice-sub">필요한 사유와 함께 대상 가맹점 · 월 예상 사용액을 구체적으로 적어 주세요.</div>
+            </div>
+          </div>
+          <textarea id="ccl-reason" maxlength="2000" placeholder="증액이 필요한 사유를 구체적으로 작성해 주세요."></textarea></div>
         <div class="row">
           <div class="fld"><label>Increase Amount (KRW) (증액 금액)<span class="req">*</span></label>
             <input type="text" id="ccl-amount" inputmode="numeric" maxlength="15" placeholder="0" oninput="fmtMoneyInput(this)"></div>
