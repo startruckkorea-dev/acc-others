@@ -203,6 +203,11 @@ tbody tr:hover{background:#f8f9fb}
 .need-note-ic{flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#a4262c;color:#fff;font-size:.66rem;font-weight:700;
   display:flex;align-items:center;justify-content:center;margin-top:1px}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
+/* 증빙 첨부 안내 — 짙은 빨강 글자, 아이콘은 첫 줄에 맞춘다 */
+.att-notice{display:flex;align-items:flex-start;gap:7px;color:#9F1D1D;margin:2px 0 10px;line-height:1.5}
+.att-notice svg{flex:none;margin-top:2px}
+.att-notice-main{font-size:.8rem;font-weight:700}
+.att-notice-sub{font-size:.72rem;font-weight:500;color:#B42318;opacity:.9}
 .drop:hover{border-color:#0078d4;background:#f0f6ff;color:#0078d4}
 .fitem{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f8f9fb;border:1px solid #edebe9;border-radius:4px;margin-top:6px;font-size:.78rem}
 .fitem button{background:none;border:none;color:#a4262c;cursor:pointer;font-size:.8rem;font-family:inherit}
@@ -367,6 +372,14 @@ tbody tr:hover{background:#f8f9fb}
           <textarea id="dev-recommend" maxlength="1000" placeholder="해당 없으면 비워두거나 NA로 입력하세요."></textarea></div>
 
         <div class="sec">5. 첨부파일</div>
+        <!-- 증빙 첨부 안내(09-22 요청) — 상자 없이 짙은 빨강 글자로. 첫 줄은 요구, 둘째 줄은 무엇을 올리는지. -->
+        <div class="att-notice" role="note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div class="att-notice-main">영수증 및 증빙 자료를 반드시 첨부해 주세요.</div>
+            <div class="att-notice-sub">결재자가 내용을 확인할 수 있도록 영수증 · 거래 내역 · 관련 메일 · 승인 문서 등 세부 증빙을 빠짐없이 올려 주세요.</div>
+          </div>
+        </div>
         <div class="drop" onclick="document.getElementById('dev-file').click()">📎 클릭하여 파일 첨부 (파일당 최대 20MB)</div>
         <input type="file" id="dev-file" multiple style="display:none" onchange="onPickFile('dev',this)">
         <div id="dev-filelist"></div>
