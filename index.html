@@ -65,13 +65,20 @@ body.wide-list .wrap{max-width:1360px}
 .cat{padding:14px 24px 11px;cursor:pointer;font-size:14px;font-weight:500;color:#605e5c;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:8px}
 .cat.on{color:#0078d4;border-bottom-color:#0078d4;font-weight:700}
 .cat:hover:not(.on){background:#f3f2f1;color:#323130}
-.cat-count{background:#edebe9;color:#605e5c;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:600}
+/* 숫자 배지 — 종류 탭(Deviation Report · Credit Card Limit)과 결재함 탭이 같은 원을 쓴다(09-21 지적).
+   예전에는 둘이 여백 · 글자 크기 · 굵기 · 모서리가 달라 원 크기가 제각각이었고, 줄 높이에 기대어
+   자리를 잡아 숫자가 원 안에서 위로 떠 보였다. 높이 18px 고정 원에 숫자를 가운데 놓는다(두 자리부터는 옆으로 늘어난다).
+   색 · 굵기는 GA 배지(#a4262c · 700)를 따른다. */
+.cat-count,.tab .badge{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;
+  min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;vertical-align:middle}
+.cat-count{background:#edebe9;color:#605e5c}
 .cat-count.has-item{background:#a4262c;color:#fff}
 .tabs{display:flex;gap:2px;padding:0;background:transparent;margin:0 0 14px;flex-wrap:wrap}
 .tab{padding:8px 18px;line-height:1.5;cursor:pointer;font-size:14px;font-weight:400;color:#605e5c;background:#fff;border:none;border-radius:4px 4px 0 0;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s}
 .tab:hover:not(.on){color:#323130;background:#faf9f8}
 .tab.on{background:#fff;color:#0078d4;border-bottom:3px solid #0078d4;font-weight:500}
-.tab .badge{background:#a4262c;color:#fff;border-radius:9px;padding:1px 6px;font-size:.68rem;margin-left:5px}
+.tab .badge{background:#a4262c;color:#fff;margin-left:6px;position:relative;top:-1px}
 .navcard{background:transparent;border-radius:0;margin:0;box-shadow:none}
 
 /* 폼 */
