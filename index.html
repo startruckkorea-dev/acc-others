@@ -1651,6 +1651,7 @@ async function submitForm(cat) {
     showAlert('상신되었습니다.', title + (attachWarn ? '\n' + attachWarn.trim() : ''));
     resetFormSilent(cat);
     switchTab('my');
+    loadBadge();   // 결재자가 본인이거나 결재함을 곧 볼 때 배지가 1분 주기까지 예전 숫자로 남던 것(09-25) — 상신 직후 바로 센다
   } catch (e) {
     showAlert('오류가 발생했습니다.', e.message, '⚠️');
   } finally {
@@ -1731,6 +1732,7 @@ async function loadApr() {
     const apr = await apiAll('/sites/' + siteId + '/lists/' + L.apr +
       '/items?' + fx(APR_LIST_FIELDS) + "&$filter=fields/Status eq '대기'&$top=500");
     const mine = (apr.value || []).filter(a => isMyAppr(a.fields.ApproverEmail));
+    _aprCount[cat] = mine.length; renderBadge();   // 결재함 목록과 배지가 같은 숫자를 보이게 — 목록을 읽은 김에 배지도 맞춘다(09-25)
     if (!mine.length) {
       _cache[cat].apr = [];
       renderHead('apr', cat, 'apr');                       // 비어 있어도 열은 보여 준다(09-19)
