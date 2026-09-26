@@ -1313,7 +1313,8 @@ async function boot(account) {
    APS 관리자(ADMIN_SP · ADMIN_SP_N)에 적힌 메일만. CFO 는 결재를 위해 자동 허용 — 신청서에서 고르는 1·2차 결재자는 ACCESS_N 에 등록해야 한다.
    설정이 없거나 명단이 비면 열지 않는다(닫힌 쪽이 기본). 메일과 UPN 어느 쪽으로 적혀 있어도 맞춘다. */
 function acoAccessEmails(cfg) {
-  const keys = ['ACC-OTHERS_IT', 'ACC-OTHERS_DEV_CFO', 'ACC-OTHERS_CCL_CFO', 'ACC-OTHERS_CONTACT', 'ADMIN_SP'];
+  // DEV_CFO · CCL_CFO 는 접두어 없는 옛 키 — boot 가 폴백으로 읽으므로 입장 명단도 같이 본다(09-26 리뷰).
+  const keys = ['ACC-OTHERS_IT', 'ACC-OTHERS_DEV_CFO', 'ACC-OTHERS_CCL_CFO', 'DEV_CFO', 'CCL_CFO', 'ACC-OTHERS_CONTACT', 'ADMIN_SP'];
   ['ACC-OTHERS_ACCESS_', 'ACC-OTHERS_ADMIN_', 'ACC-OTHERS_IT_', 'ADMIN_SP_'].forEach(p => {
     let n = 1; while (cfg && cfg[p + n]) { keys.push(p + n); n++; }
   });
@@ -2029,9 +2030,14 @@ function renderPaged(key, items, rowFn, cols) {
     '<span>' + cur + ' / ' + pages + '</span>' +
     '<button onclick="goPage(\'' + key + '\',' + (cur + 1) + ')"' + (cur >= pages ? ' disabled' : '') + '>›</button>';
 }
+/* 페이지 이동은 캐시를 다시 그리기만 한다. 예전(e3c9cb9 · 09-19)에는 loadMy/loadApr 를 다시 불렀는데 그 함수들이
+   _pg 를 1로 되돌려 내 신청 · 결재함이 2쪽 이후로 못 갔다(09-26 리뷰). 조회는 탭을 열 때 · 새로고침 때만. */
 function goPage(key, n) {
   _pg[key] = n;
-  if (key === 'my') loadMy(); else if (key === 'apr') loadApr(); else loadAdmin();
+  const cat = _currentCat;
+  if (key === 'my') renderMyList();
+  else if (key === 'apr') renderAprList();
+  else renderPaged('adm', _cache[cat].adm || [], (it) => rowHtml(cat, 'adm', it), listCols(cat, 'adm').length);
 }
 
 /* ── 상세보기 ─────────────────────────────────────────────── */
