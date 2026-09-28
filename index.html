@@ -241,11 +241,21 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-cta{border:1px dashed #c7d2de;border-radius:8px;padding:26px 20px;text-align:center;background:#fbfcfe;margin-bottom:12px}
 .bp-cta .t{font-size:.95rem;font-weight:700;color:#0f2744;margin-bottom:6px}
 .bp-cta .d{font-size:.76rem;color:#605e5c;line-height:1.65;margin-bottom:14px}
-/* SAP(Be1) 열 순서 — 번호 붙은 작은 칸. 진한 것만 기록 대상 */
-.be1-cols{display:flex;flex-wrap:wrap;gap:4px 5px;margin:6px 0 8px}
-.be1-cols .c{font-size:.66rem;border:1px solid #e1dfdd;border-radius:4px;padding:1px 6px;color:#a19f9d;background:#faf9f8;white-space:nowrap;text-decoration:line-through;text-decoration-color:#d2d0ce}
-.be1-cols .c.u{color:#323130;border-color:#c7d2de;background:#fff;text-decoration:none}
-.be1-cols .c i{font-style:normal;color:#0078d4;font-weight:700;margin-right:4px}
+/* SAP(Be1) 열 대응표(09-28) — 12개 열을 표로 보여 준다: 1행 열 이름, 2행 예시 값, 3행 우리 파일의 기록 위치.
+   칩 + 자유 입력칸으로는 열과 값이 눈으로 맞춰지지 않았다. 읽지 않는 열은 흐리게. */
+.be1-map{margin:6px 0 8px;overflow-x:auto}
+.be1-tbl{width:auto;min-width:100%;border:1px solid #e1dfdd;border-radius:6px;border-collapse:separate;border-spacing:0;font-size:.66rem;line-height:1.45}
+.be1-tbl th,.be1-tbl td{padding:3px 9px;white-space:nowrap;border-right:1px solid #f3f2f1;border-bottom:1px solid #f3f2f1;text-align:left;font-weight:400}
+.be1-tbl th:last-child,.be1-tbl td:last-child{border-right:none}
+.be1-tbl tr:last-child td{border-bottom:none}
+.be1-tbl th{background:#faf9f8;color:#323130;font-weight:600;font-size:.66rem}
+.be1-tbl th i{font-style:normal;color:#0078d4;font-weight:700;margin-right:5px}
+.be1-tbl .lbl{background:#faf9f8;color:#605e5c;font-weight:600;position:sticky;left:0}
+.be1-tbl th.x,.be1-tbl td.x{color:#bfbdbb;background:#fcfcfb}
+.be1-tbl td.ex{color:#323130}
+.be1-tbl td.to{color:#0078d4;font-weight:600}
+.be1-tbl td.to.x{color:#bfbdbb;font-weight:400}
+.be1-note{font-size:.66rem;color:#a19f9d;margin:-2px 0 8px}
 /* 이력 조회(관리자) */
 .bp-logs{border:1px solid #e1dfdd;border-radius:8px;margin:0 0 14px;background:#fff}
 .bp-logs-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px;background:#faf9f8;border-radius:8px 8px 0 0}
@@ -778,10 +788,11 @@ body.rd-rule .line-preview.rd-only{display:block}
       <div id="bp-admin-tools" style="opacity:.55;pointer-events:none">
         <div class="bp-paste">
           <div style="font-size:.78rem;font-weight:700;color:#323130">SAP(Be1) 내보내기 붙여넣기 <span style="font-weight:400;color:#605e5c">— 선택</span></div>
-          <div class="hint">Be1 「BP Excel Export」 행을 그대로 붙여 넣으세요(머리글 포함 가능 · 여러 행 가능). 탭으로 나뉜 12개 열을 아래 순서로 읽습니다 — <b>진한 열만 기록</b>하고 흐린 열은 무시합니다.
+          <div class="hint">Be1 「BP Excel Export」 행을 그대로 붙여 넣으세요(머리글 포함 가능 · 여러 행 가능). 열 순서와 기록 위치는 아래 표와 같습니다 — 흐린 열은 읽지 않습니다.
             한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다.</div>
-          <div class="be1-cols" id="be1-cols"></div>
-          <textarea id="bp-paste" placeholder="C0000371	Customer	Hong, Gil-dong	홍길동	M26091065		2026-09-23	 	No		-1	" oninput="bpParsePaste()"></textarea>
+          <div class="be1-map" id="be1-cols"></div>
+          <div class="be1-note">¹ VAT Reg. Number 가 비어 있으면 Contract Number 를 사업자등록번호 칸에 기록합니다. Default Bank 의 -1 은 빈 칸으로 봅니다.</div>
+          <textarea id="bp-paste" placeholder="Be1 에서 복사한 행을 여기에 붙여 넣으세요 (탭으로 나뉜 12개 열)" oninput="bpParsePaste()"></textarea>
           <div id="bp-prev-wrap" style="display:none">
             <div class="bp-prev"><table><thead><tr><th>#</th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th>상태</th><th>검사</th></tr></thead><tbody id="bp-prev-body"></tbody></table></div>
             <div style="display:flex;gap:8px;align-items:center"><span id="bp-prev-sum" style="font-size:.74rem;color:#605e5c"></span>
@@ -1946,11 +1957,17 @@ function bpRenderAdminInfo() {
   bpRenderBe1Cols();
   const m = document.getElementById('bp-log-month'); if (m && !m.value) { m.value = bpLogMonthDefault(); m.max = bpLogMonthDefault(); }
 }
-// Be1 내보내기 열 12개 — 번호 · 이름. 기록에 쓰는 열만 진하게(나머지는 읽지 않는다는 뜻으로 흐리게 · 취소선).
-const BE1_USED = { 0: 'Code', 1: '유형', 2: 'Name 1', 3: '한글이름', 4: '사업자등록번호(VAT 번호가 없을 때)', 7: '사업자등록번호', 8: '상태(Inactive)', 10: 'Bank', 11: 'Account no.' };
+// Be1 내보내기 열 12개 — 열 이름 · 예시 값 · 우리 파일의 기록 위치를 한 표로. 읽지 않는 열(E-Mail · Creation Date · Concur Employee ID)은 흐리게.
+const BE1_USED = { 0: 'Code', 1: '유형', 2: 'Name 1', 3: '한글이름', 4: '사업자등록번호 ¹', 7: '사업자등록번호', 8: '상태', 10: 'Bank', 11: 'Account no.' };
+const BE1_EXAMPLE = ['C0000371', 'Customer', 'Hong, Gil-dong', '홍길동', 'M26091065', '', '2026-09-23', '', 'No', '', '-1', ''];
 function bpRenderBe1Cols() {
   const el = document.getElementById('be1-cols'); if (!el || el.childElementCount) return;
-  el.innerHTML = BE1_COLS.map((c, i) => '<span class="c' + (i in BE1_USED ? ' u' : '') + '" title="' + esc(i in BE1_USED ? '→ ' + BE1_USED[i] : '읽지 않음') + '"><i>' + (i + 1) + '</i>' + esc(c) + '</span>').join('');
+  const x = i => (i in BE1_USED ? '' : ' x');
+  el.innerHTML = '<table class="be1-tbl">' +
+    '<tr><th class="lbl">Be1 열</th>' + BE1_COLS.map((c, i) => '<th class="' + x(i).trim() + '"><i>' + (i + 1) + '</i>' + esc(c) + '</th>').join('') + '</tr>' +
+    '<tr><td class="lbl">예시</td>' + BE1_EXAMPLE.map((v, i) => '<td class="ex' + x(i) + '">' + (v === '' ? '<span style="color:#c8c6c4">(빈 칸)</span>' : esc(v)) + '</td>').join('') + '</tr>' +
+    '<tr><td class="lbl">기록 위치</td>' + BE1_COLS.map((c, i) => '<td class="to' + x(i) + '">' + (i in BE1_USED ? esc(BE1_USED[i]) : '—') + '</td>').join('') + '</tr>' +
+    '</table>';
 }
 function bpNextRow() { return Math.max(BP_FIRST_NEW_ROW, (_bp.lastRow || 0) + 1); }
 function bpFormVals() {
