@@ -241,7 +241,22 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-bulk .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
 .bp-bulk .btn{height:26px;padding:0 11px;font-size:.7rem}
 .bp-bulk .btn:disabled{opacity:.45;cursor:not-allowed}
-.bp-paste{background:#fff;border:1px dashed #c7d2de;border-radius:6px;padding:10px 12px;margin-bottom:12px}
+.bp-paste{background:transparent;border:none;border-bottom:1px dashed #e1dfdd;border-radius:0;padding:0 0 12px;margin-bottom:12px}
+.bp-sub-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.bp-sub-hd .t{font-size:.78rem;font-weight:700;color:#323130;white-space:nowrap}
+.bp-sub-hd .o{font-size:.7rem;color:#605e5c}
+/* 관리 탭 구역(09-28) — ① 등록 · 수정 ② 목록 ③ 이력. 번호 + 제목 + 한 줄 설명의 머리띠로 구역을 나눈다. */
+.bp-section{background:#fff;border:1px solid #e1dfdd;border-radius:8px;margin:0 0 14px;overflow:hidden}
+.bp-section-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:#f0f6ff;border-bottom:1px solid #d6e4f5}
+.bp-section-hd .no{flex:none;width:20px;height:20px;border-radius:50%;background:#0078d4;color:#fff;font-size:.68rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.bp-section-hd .ttl{font-size:.84rem;font-weight:700;color:#0f2744;white-space:nowrap}
+.bp-section-hd .desc{font-size:.72rem;color:#3b5b7c}
+.bp-section-hd .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bp-section-bd{padding:12px 14px}
+.bp-section-bd > .bp-src{margin-top:0}
+.bp-meta .chip{font-size:.68rem;color:#3b5b7c;background:#fff;border:1px solid #cfe3f7;border-radius:10px;padding:1px 8px;white-space:nowrap}
+.bp-meta .chip b{color:#0f2744;font-weight:600}
+.bp-log-empty{font-size:.74rem;color:#a19f9d;text-align:center;padding:12px 0 4px}
 .bp-paste textarea{width:100%;min-height:58px;font-size:.74rem}
 .bp-paste .hint{font-size:.7rem;color:#605e5c;margin:4px 0 6px;line-height:1.5}
 .bp-prev{margin:6px 0 10px;border:1px solid #edebe9;border-radius:6px;overflow:auto;max-height:260px}
@@ -283,31 +298,27 @@ body:not(.cat-bp) .bp-tab{display:none}
 .be1-tbl td.to.x{color:#bfbdbb;font-weight:400}
 .be1-note{font-size:.66rem;color:#a19f9d;margin:-2px 0 8px}
 /* 이력 조회(관리자) */
-.bp-logs{border:1px solid #e1dfdd;border-radius:8px;margin:0 0 14px;background:#fff}
-.bp-logs-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px;background:#faf9f8;border-radius:8px 8px 0 0}
-.bp-logs-hd .ttl{font-size:.82rem;font-weight:700;color:#323130;white-space:nowrap}
-.bp-logs-hd .desc{font-size:.72rem;color:#605e5c}
-.bp-logs-hd .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.bp-logs-hd input[type=date],.bp-logs-hd select{width:auto;padding:3px 8px;font-size:.76rem;height:28px;box-sizing:border-box}
-.bp-logs-hd .tilde{color:#a19f9d;font-size:.74rem}
-.bp-logs-hd .nav{height:28px;padding:0 8px;font-size:.72rem;border:1px solid #d2d0ce;background:#fff;color:#605e5c;border-radius:4px;cursor:pointer;font-family:inherit}
-.bp-logs-hd .nav:hover{background:#f3f2f1}
-.bp-logs-hd .btn{height:28px;padding:0 12px;font-size:.74rem;white-space:nowrap}
-.bp-logs-bd{padding:10px 12px 12px;border-top:1px solid #e1dfdd}
+/* 이력 구역의 조작 줄(머리띠 오른쪽) */
+.bp-log-ctl input[type=date],.bp-log-ctl select{width:auto;padding:3px 8px;font-size:.76rem;height:28px;box-sizing:border-box}
+.bp-log-ctl .tilde{color:#a19f9d;font-size:.74rem}
+.bp-log-ctl .nav{height:28px;padding:0 8px;font-size:.72rem;border:1px solid #d2d0ce;background:#fff;color:#605e5c;border-radius:4px;cursor:pointer;font-family:inherit}
+.bp-log-ctl .nav:hover{background:#f3f2f1}
+.bp-log-ctl .btn{height:28px;padding:0 12px;font-size:.74rem;white-space:nowrap}
 .bp-logs-tools{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .bp-logs-tools input[type=text]{flex:1;min-width:200px;max-width:360px;padding:3px 9px;font-size:.76rem;height:28px;box-sizing:border-box}
 .bp-logs-tools .cnt{margin-left:auto;font-size:.74rem;color:#605e5c}
 .bp-logs-tools .btn{height:24px;padding:0 9px;font-size:.68rem;font-weight:500;line-height:1;white-space:nowrap}
-.bp-log-tbl{font-size:.72rem}
+.bp-log-tbl{font-size:.72rem;table-layout:fixed}
 .bp-log-tbl th{padding:5px 8px;font-size:.68rem}
-.bp-log-tbl td{padding:3px 8px;line-height:1.35;font-size:.72rem;vertical-align:top}
+/* 모든 칸 한 줄 · 넘치면 줄임표(전체 글은 title, 행을 누르면 원본) — 행 높이가 늘 같다(APS 이력 표와 같은 규칙 · 09-28) */
+.bp-log-tbl td{padding:3px 8px;line-height:1.35;font-size:.72rem;vertical-align:top;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bp-log-tbl tr.r{cursor:pointer}
 .bp-log-tbl tr.r:hover td{background:#f3f8fd}
 .bp-log-tbl td.t{white-space:nowrap;color:#605e5c}
 .bp-log-tbl .act{font-weight:600;color:#323130;white-space:nowrap}
-.bp-log-tbl .sum{color:#605e5c;word-break:break-all}
+.bp-log-tbl .sum{color:#605e5c}
 .bp-log-tbl .usr{color:#323130} .bp-log-tbl .usr small{color:#a19f9d;font-size:.66rem}
-.bp-log-tbl tr.detail td{background:#fafafa;padding:6px 10px 8px 28px}
+.bp-log-tbl tr.detail td{background:#fafafa;padding:6px 10px 8px 28px;white-space:normal}
 .bp-log-tbl pre{margin:0;font-size:.7rem;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:#323130;font-family:inherit}
 .bp-kind{display:inline-block;border-radius:9px;padding:0 7px;font-size:.62rem;font-weight:700;line-height:1.6;white-space:nowrap}
 .bp-kind.Accessor{background:#eef2f7;color:#3b5b7c}
@@ -832,12 +843,15 @@ body.rd-rule .line-preview.rd-only{display:block}
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
         <span class="sp"><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
 
-      <div id="bp-admin-tools" style="opacity:.55;pointer-events:none">
-        <div class="bp-paste">
-          <div style="font-size:.78rem;font-weight:700;color:#323130">SAP(Be1) 내보내기 붙여넣기 <span style="font-weight:400;color:#605e5c">— 선택</span></div>
-          <div class="hint">Be1 「BP Excel Export」 행을 그대로 붙여 넣으세요(머리글 포함 가능 · 여러 행 가능). 열 순서와 기록 위치는 아래 표와 같습니다 — 흐린 열은 읽지 않습니다.
-            한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다.</div>
-          <div class="be1-map" id="be1-cols"></div>
+      <!-- ① 등록 · 수정 — SAP 붙여넣기(선택) + 폼. 편집 모드가 아니면 흐리게(bp-admin-tools) -->
+      <section class="bp-section" id="bp-sec-edit">
+        <div class="bp-section-hd"><span class="no">1</span><span class="ttl">BP 등록 · 수정</span>
+          <span class="desc">SAP Be1 에서 만든 코드를 마스터 파일에 기록합니다. 기존 BP 수정은 ② 목록의 「수정」으로.</span>
+          <span class="sp bp-meta"><span class="chip">파일 <b id="bp-adm-file">-</b></span><span class="chip">시트 <b id="bp-adm-sheet">-</b></span><span class="chip">다음 행 <b id="bp-adm-next">-</b></span></span></div>
+        <div class="bp-section-bd" id="bp-admin-tools" style="opacity:.55;pointer-events:none">
+          <div class="bp-paste">
+            <div class="bp-sub-hd"><span class="t">SAP(Be1) 내보내기 붙여넣기</span><span class="o">선택 — 한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다. 흐린 열은 읽지 않습니다.</span></div>
+            <div class="be1-map" id="be1-cols"></div>
           <div class="be1-note">¹ VAT Reg. Number 가 비어 있으면 Contract Number 를 사업자등록번호 칸에 기록합니다. Default Bank 의 -1 은 빈 칸으로 봅니다.</div>
           <textarea id="bp-paste" placeholder="Be1 에서 복사한 행을 여기에 붙여 넣으세요 (탭으로 나뉜 12개 열)" oninput="bpParsePaste()"></textarea>
           <div id="bp-prev-wrap" style="display:none">
@@ -846,8 +860,7 @@ body.rd-rule .line-preview.rd-only{display:block}
               <span style="margin-left:auto"></span><button class="btn btn-g" style="padding:5px 12px;font-size:.76rem" onclick="bpClearPaste()">지우기</button>
               <button class="btn btn-p" id="bp-bulk-btn" style="padding:5px 14px;font-size:.76rem" onclick="bpBulkAdd()">일괄 등록</button></div>
           </div>
-        </div>
-
+          </div>
         <div class="bp-form" id="bp-form">
           <div class="bp-form-hd"><span class="ttl" id="bp-form-title">신규 BP 등록</span><span class="meta" id="bp-form-row"></span>
             <span class="sp"><button class="lnk" id="bp-form-back" onclick="bpResetForm()" style="display:none">← 신규 등록으로</button></span></div>
@@ -869,40 +882,45 @@ body.rd-rule .line-preview.rd-only{display:block}
               <button class="btn btn-p" id="bp-save-btn" onclick="bpSave()">등록</button></div>
           </div>
         </div>
-      </div>
-      <div style="font-size:.72rem;color:#a19f9d;margin:0 0 10px;line-height:1.6">· 기록 대상: <b id="bp-adm-file">-</b> · 시트 <b id="bp-adm-sheet">-</b> · 신규 행은 <b id="bp-adm-next">-</b>행부터 이어서 기록됩니다(14,600행부터 사용). 유형이 Customer · Vendor · Employee 인 행만 다루며 다른 행 · 다른 열은 건드리지 않습니다.
-        · 조회 · 수정은 아래 목록(조회 탭과 같은 목록)에서 「수정」을 누르세요.
-        · <b>접근 · 조회 · 검색 · 편집 내용은 모두 기록됩니다</b> — SharePoint STK-DB <b>Logging_data/ACC-Others/BP-Master/Accessor · Admin</b> 에 날짜별 JSON 으로 남으며, 아래에서 7일 단위로 확인할 수 있습니다.</div>
+        </div>
+      </section>
 
-      <!-- 이력 조회 — 7일 단위(기본 오늘까지 7일). 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
-      <div class="bp-logs" id="bp-logs">
-        <div class="bp-logs-hd">
-          <span class="ttl">접근 · 편집 이력</span>
-          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 기록을 7일 단위로 읽습니다 (기본: 오늘까지 7일).</span>
-          <span class="sp">
+      <!-- ② 목록 — 조회 탭과 같은 목록 요소(bp-src · bp-tools · bp-bulk · bp-tbl · bp-pg)가 여기로 옮겨 온다(bpPlaceList) -->
+      <section class="bp-section" id="bp-sec-list">
+        <div class="bp-section-hd"><span class="no">2</span><span class="ttl">BP 목록</span>
+          <span class="desc">조회 · 검색 · 「수정」 · 체크한 행 일괄 활성/비활성 — Customer · Vendor · Employee 행만 다루며 다른 행 · 열은 건드리지 않습니다.</span></div>
+        <div class="bp-section-bd" id="bp-admin-list"></div>
+      </section>
+
+      <!-- ③ 이력 — 7일 단위(기본 오늘까지 7일). 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
+      <section class="bp-section" id="bp-logs">
+        <div class="bp-section-hd"><span class="no">3</span><span class="ttl">접근 · 편집 이력</span>
+          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 기록 · 7일 단위</span>
+          <span class="sp bp-log-ctl">
             <button class="nav" onclick="bpLogShift(-7)" title="7일 앞으로">‹ 7일</button>
             <input type="date" id="bp-log-from" onchange="bpLogRangeFix('from')"><span class="tilde">~</span><input type="date" id="bp-log-to" onchange="bpLogRangeFix('to')">
             <button class="nav" onclick="bpLogShift(7)" title="7일 뒤로">7일 ›</button>
             <button class="nav" onclick="bpLogRangeDefault(true)" title="오늘까지 7일">최근 7일</button>
             <select id="bp-log-kind"><option value="">Accessor + Admin</option><option value="Accessor">Accessor (조회 · 검색)</option><option value="Admin">Admin (편집)</option></select>
             <button class="btn btn-p" id="bp-log-btn" onclick="bpLoadLogs()">불러오기</button>
-          </span>
-        </div>
-        <div class="bp-logs-bd" id="bp-logs-body" style="display:none">
+          </span></div>
+        <div class="bp-section-bd">
+          <div class="bp-log-empty" id="bp-logs-empty">기간과 구분을 고르고 「불러오기」를 누르세요.</div>
+          <div id="bp-logs-body" style="display:none">
           <div class="bp-logs-tools">
             <input type="text" id="bp-log-q" oninput="bpRenderLogs(true)" placeholder="사용자 / 행위 / 내용으로 거르기" maxlength="60">
             <span class="cnt" id="bp-log-count"></span>
             <button class="btn btn-g" onclick="bpExportLogs()">Excel 내보내기</button>
-            <button class="btn btn-g" onclick="document.getElementById('bp-logs-body').style.display='none'">접기</button>
+            <button class="btn btn-g" onclick="document.getElementById('bp-logs-body').style.display='none';document.getElementById('bp-logs-empty').style.display=''">접기</button>
           </div>
           <div class="tbl-wrap"><table class="bp-log-tbl">
             <thead><tr><th style="width:118px">일시</th><th style="width:76px">구분</th><th style="width:200px">사용자</th><th style="width:130px">행위</th><th>내용 <span style="font-weight:400;color:#a19f9d">(행을 누르면 상세)</span></th></tr></thead>
             <tbody id="bp-log-rows"></tbody>
           </table></div>
-          <div class="pg" id="bp-log-pg"></div>
+            <div class="pg" id="bp-log-pg"></div>
+          </div>
         </div>
-      </div>
-      <div id="bp-admin-list"></div>
+      </section>
     </div>
 
     <div id="pane-admin" style="display:none">
@@ -2068,7 +2086,7 @@ window.addEventListener('beforeunload', () => {
 /* ── 관리 화면 ── */
 function bpRenderAdminInfo() {
   const f = document.getElementById('bp-adm-file'); if (!f) return;
-  f.textContent = (_bp.meta && _bp.meta.name) || BP_MASTER_FILE;
+  f.textContent = bpFileLabel((_bp.meta && _bp.meta.name) || BP_MASTER_FILE);
   document.getElementById('bp-adm-sheet').textContent = _bp.sheet;
   document.getElementById('bp-adm-next').textContent = bpNextRow().toLocaleString();
   bpRenderBe1Cols();
@@ -2308,6 +2326,7 @@ async function bpLoadLogs() {
     out.sort((a, b) => (b.ts > a.ts ? 1 : b.ts < a.ts ? -1 : 0));
     _bpLog.range = range; _bpLog.from = from; _bpLog.to = to; _bpLog.kind = kind; _bpLog.items = out;
     document.getElementById('bp-logs-body').style.display = '';
+    document.getElementById('bp-logs-empty').style.display = 'none';
     document.getElementById('bp-log-q').value = '';
     bpRenderLogs(true);
     bpLogAdmin('이력 조회', { from, to, kind: kind || '전체', count: out.length });
@@ -2357,7 +2376,7 @@ function bpRenderLogs(resetPage) {
   document.getElementById('bp-log-rows').innerHTML = slice.length ? slice.map((e, i) => {
     const idx = (_bpLog.page - 1) * BP_LOG_PAGE + i;
     return '<tr class="r" onclick="bpToggleLog(this,' + idx + ')"><td class="t">' + esc(String(e.ts || '').slice(5)) + '</td><td><span class="bp-kind ' + esc(e.kind) + '">' + esc(e.kind) + '</span></td>' +
-      '<td>' + bpLogUser(e.user) + '</td><td class="act">' + esc(e.action || '') + '</td><td class="sum">' + esc(bpLogSummary(e)) + '</td></tr>';
+      '<td title="' + esc(String(e.user || '').toLowerCase()) + '">' + bpLogUser(e.user) + '</td><td class="act" title="' + esc(e.action || '') + '">' + esc(e.action || '') + '</td><td class="sum" title="' + esc(bpLogSummary(e)) + '">' + esc(bpLogSummary(e)) + '</td></tr>';
   }).join('') : '<tr><td colspan="5" class="empty">' + (_bpLog.items.length ? '거른 조건에 맞는 이력이 없습니다.' : '이 기간에는 이력이 없습니다.') + '</td></tr>';
   const pg = document.getElementById('bp-log-pg');
   pg.innerHTML = items.length > BP_LOG_PAGE ?
