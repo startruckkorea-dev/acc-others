@@ -250,11 +250,6 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-section-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:#f0f6ff;border-bottom:1px solid #d6e4f5}
 .bp-section-hd .no{flex:none;width:20px;height:20px;border-radius:50%;background:#0078d4;color:#fff;font-size:.68rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 .bp-section-hd .ttl{font-size:.84rem;font-weight:700;color:#0f2744;white-space:nowrap}
-.bp-section-hd .desc{display:none;flex-basis:100%;font-size:.72rem;color:#3b5b7c;padding:2px 0 2px 30px;line-height:1.5}
-.bp-section.open .bp-section-hd .desc{display:block}
-.bp-section-hd .tg{flex:none;width:20px;height:20px;border:1px solid #cfe3f7;border-radius:50%;background:#fff;color:#3b5b7c;font-size:.62rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;padding:0;transition:transform .15s}
-.bp-section-hd .tg:hover{background:#e8f1fb}
-.bp-section.open .bp-section-hd .tg{transform:rotate(180deg)}
 .bp-section-hd .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .bp-section-bd{padding:12px 14px}
 .bp-section-bd > .bp-src{margin-top:0}
@@ -845,13 +840,12 @@ body.rd-rule .line-preview.rd-only{display:block}
     <div id="pane-bpadmin" style="display:none">
       <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>접근 · 조회 · 검색 · 편집 내용은 모두 기록</b>되며, 아래 「접근 · 편집 이력」에서 7일 단위로 확인할 수 있습니다.</span></div>
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
-        <span class="sp"><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
+        <span class="sp"><button class="btn btn-g" id="bp-lock-btn2" style="padding:3px 10px;font-size:.72rem;display:none" onclick="bpCheckLock()">↻ 상태 확인</button><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
 
       <!-- ① 등록 · 수정 — SAP 붙여넣기(선택) + 폼. 편집 모드가 아니면 흐리게(bp-admin-tools) -->
       <section class="bp-section" id="bp-sec-edit">
-        <div class="bp-section-hd"><span class="no">1</span><span class="ttl">BP 등록 · 수정</span><button class="tg" onclick="bpSecToggle(this)" title="설명 보기">∨</button>
-          <span class="sp bp-meta"><span class="chip">파일 <b id="bp-adm-file">-</b></span><span class="chip">시트 <b id="bp-adm-sheet">-</b></span><span class="chip">다음 행 <b id="bp-adm-next">-</b></span></span>
-          <span class="desc">SAP Be1 에서 만든 코드를 마스터 파일에 기록합니다. 기존 BP 수정은 ② 목록의 「수정」으로.</span></div>
+        <div class="bp-section-hd"><span class="no">1</span><span class="ttl">BP 등록 · 수정</span>
+          <span class="sp bp-meta"><span class="chip">파일 <b id="bp-adm-file">-</b></span><span class="chip">시트 <b id="bp-adm-sheet">-</b></span><span class="chip">다음 행 <b id="bp-adm-next">-</b></span></span></div>
         <div class="bp-section-bd" id="bp-admin-tools" style="opacity:.55;pointer-events:none">
           <div class="bp-paste">
             <div class="bp-sub-hd"><span class="t">SAP(Be1) 내보내기 붙여넣기</span><span class="o">선택 — 한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다. 흐린 열은 읽지 않습니다.</span></div>
@@ -891,14 +885,13 @@ body.rd-rule .line-preview.rd-only{display:block}
 
       <!-- ② 목록 — 조회 탭과 같은 목록 요소(bp-src · bp-tools · bp-bulk · bp-tbl · bp-pg)가 여기로 옮겨 온다(bpPlaceList) -->
       <section class="bp-section" id="bp-sec-list">
-        <div class="bp-section-hd"><span class="no">2</span><span class="ttl">BP 목록</span><button class="tg" onclick="bpSecToggle(this)" title="설명 보기">∨</button>
-          <span class="desc">조회 · 검색 · 「수정」 · 체크한 행 일괄 활성/비활성 — Customer · Vendor · Employee 행만 다루며 다른 행 · 열은 건드리지 않습니다.</span></div>
+        <div class="bp-section-hd"><span class="no">2</span><span class="ttl">BP 목록</span></div>
         <div class="bp-section-bd" id="bp-admin-list"></div>
       </section>
 
       <!-- ③ 이력 — 7일 단위(기본 오늘까지 7일). 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
       <section class="bp-section" id="bp-logs">
-        <div class="bp-section-hd"><span class="no">3</span><span class="ttl">접근 · 편집 이력</span><button class="tg" onclick="bpSecToggle(this)" title="설명 보기">∨</button>
+        <div class="bp-section-hd"><span class="no">3</span><span class="ttl">접근 · 편집 이력</span>
           <span class="sp bp-log-ctl">
             <button class="nav" onclick="bpLogShift(-7)" title="7일 앞으로">‹ 7일</button>
             <input type="date" id="bp-log-from" onchange="bpLogRangeFix('from')"><span class="tilde">~</span><input type="date" id="bp-log-to" onchange="bpLogRangeFix('to')">
@@ -906,8 +899,7 @@ body.rd-rule .line-preview.rd-only{display:block}
             <button class="nav" onclick="bpLogRangeDefault(true)" title="오늘까지 7일">최근 7일</button>
             <select id="bp-log-kind"><option value="">Accessor + Admin</option><option value="Accessor">Accessor (조회 · 검색)</option><option value="Admin">Admin (편집)</option></select>
             <button class="btn btn-p" id="bp-log-btn" onclick="bpLoadLogs()">불러오기</button>
-          </span>
-          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 기록을 7일 단위로 읽습니다(기본 오늘까지 7일). 불러오기 · 내보내기도 기록에 남습니다.</span></div>
+          </span></div>
         <div class="bp-section-bd">
           <div class="bp-log-empty" id="bp-logs-empty">기간과 구분을 고르고 「불러오기」를 누르세요.</div>
           <div id="bp-logs-body" style="display:none">
@@ -1729,8 +1721,12 @@ window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_
    · 쓰기: Graph Excel API 로 「그 행의 A~L」 만 PATCH 한다(값 없는 칸은 null = 그대로). 파일 전체를 다시 쓰지 않으므로
      서식 · 다른 열 · 다른 행이 보존된다. 앞자리 0 이 있는 계좌 · 사업자번호가 숫자로 바뀌지 않게 텍스트 서식(@)으로 기록.
    · 신규 행: 14,600행부터(BP_FIRST_NEW_ROW). 그 뒤로는 마지막 코드 행 다음에 이어 쓴다. 쓰기 직전 대상 행이 비었는지 서버에서 확인.
-   · 잠금: acc_others_bp_lock.json(문서 루트)을 ETag 조건부 PUT 으로 선점한다 — 한 사람만 편집 모드. 5분 무응답이면 만료,
-     편집 중에는 60초마다 연장, 편집 종료 · 창 닫기 때 해제. 조회는 잠금과 무관하게 누구나.
+   · 잠금: acc_others_bp_lock.json(문서 루트)을 ETag 조건부 PUT 으로 선점한다 — 한 사람 · 한 창만 편집 모드.
+     편집 중에는 60초마다 만료 시각을 5분 뒤로 미룬다(사용자 활동과 무관 — 창이 살아 있으면 계속 연장). 편집 종료 · 창 닫기 때
+     해제하고, 창이 멈추면(절전 · 강제 종료) 마지막 연장 뒤 5분에 만료. 조회는 잠금과 무관하게 누구나.
+   · 잠금 기록의 tag 는 창(탭)마다 다르다(sessionStorage 에 보관 — 새로고침에도 같은 창이면 유지). 같은 사람이 다른 창에서 관리 탭을
+     열면 그 창은 「다른 창에서 편집 모드」로 조회만 되고, 「이 창으로 가져오기」를 누르면 잠금이 그 창으로 옮겨진다.
+     (09-28: 두 창이 같은 잠금을 번갈아 연장하며 1분마다 「다른 사용자에게 넘어갔습니다」 팝업이 뜨던 것을 고침)
    · 확장: 쓰기는 bpMasterUpsert(rec) / bpMasterAppendRows(recs) 하나로 모아 두었다 — BP Master 시스템에서 코드가 생기면
      같은 함수(잠금 포함)를 그대로 부르면 된다.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -1738,7 +1734,8 @@ const BP_MASTER_FILE = 'Master data List 2014_Final(STK).xlsx';
 const BP_MASTER_SHEET = 'DTK';
 const BP_LOCK_FILE = 'acc_others_bp_lock.json';
 const BP_FIRST_NEW_ROW = 14600;
-const BP_LOCK_TTL_MS = 5 * 60 * 1000;
+const BP_LOCK_TTL_MS = 5 * 60 * 1000;   // 마지막 연장(60초마다) 뒤 이만큼 지나면 만료 — 창이 멈췄을 때만 의미가 있다
+const BP_LOCK_TAG_KEY = 'acc_others_bp_lock_tag';
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
@@ -1750,7 +1747,8 @@ function bpLogAccess(action, detail) { logAction('BP-Master/Accessor', action, d
 function bpLogAdmin(action, detail) { logAction('BP-Master/Admin', action, detail); }
 function bpFilterState() { return { type: _bp.type || '전체', status: { '': '전체', on: '활성', off: '비활성' }[document.getElementById('bp-st').value] || '전체', query: _bp.q || '' }; }
 function bpFileLabel(name) { return String(name || BP_MASTER_FILE).replace(/\.xlsx$/i, ''); }
-const _bpLock = { mine: false, eTag: '', holder: null, timer: null, itemId: null };
+const _bpLock = { mine: false, eTag: '', holder: null, timer: null, itemId: null, tag: '' };
+try { _bpLock.tag = sessionStorage.getItem(BP_LOCK_TAG_KEY) || ''; } catch (e) {}   // 같은 창의 새로고침이면 내 잠금을 이어받는다
 function isBpAdmin() {
   const me = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
   return BP_ADMIN_EMAILS.some(e => me.includes(e));
@@ -1982,13 +1980,28 @@ async function bpLockWrite(rec, create) {
   return true;
 }
 function bpMe() { return (user && user.email || user && user.username || '').toLowerCase(); }
+/* 이 창의 잠금인가 — 같은 사람이라도 tag 가 다르면 다른 창(탭)의 잠금이다. tag 가 없는 옛 기록은 같은 사람이면 내 것으로 본다. */
+function bpLockIsMine(h) { return !!h && String(h.email || '').toLowerCase() === bpMe() && (!h.tag || h.tag === _bpLock.tag); }
+function bpLockIsMyOtherWindow(h) { return !!h && String(h.email || '').toLowerCase() === bpMe() && !bpLockIsMine(h); }
+function bpLockRemember(tag) { _bpLock.tag = tag || ''; try { if (tag) sessionStorage.setItem(BP_LOCK_TAG_KEY, tag); else sessionStorage.removeItem(BP_LOCK_TAG_KEY); } catch (e) {} }
 async function bpLockRefresh() {
   if (!_bp.driveId) { try { _bp.driveId = await getDocDriveId(); } catch (e) { return; } }
   const h = await bpLockRead();
   _bpLock.checkedAt = Date.now();
-  if (h && h.email.toLowerCase() === bpMe()) { _bpLock.mine = true; _bpLock.holder = h; bpStartHeartbeat(); }
+  if (bpLockIsMine(h)) { _bpLock.mine = true; _bpLock.holder = h; bpStartHeartbeat(); }
   else { _bpLock.mine = false; _bpLock.holder = h; bpStopHeartbeat(); }
   bpRenderLock(); renderBpList(false);
+}
+/* 잠금을 잃었을 때(연장 실패 · 쓰기 직전 재확인) — 이 창을 조회 상태로 돌리고, 왜 잃었는지 한 번만 알린다. */
+function bpLockLost(h, viaAlert) {
+  _bpLock.mine = false; bpStopHeartbeat(); _bpLock.holder = h; _bpLock.checkedAt = Date.now();
+  bpRenderLock(); renderBpList(false);
+  const msg = bpLockIsMyOtherWindow(h)
+    ? ['편집 모드가 다른 창으로 옮겨졌습니다.', '이 창은 조회만 됩니다. 이 창에서 편집하려면 「이 창으로 가져오기」를 누르세요.']
+    : h ? ['편집 잠금이 다른 사용자에게 넘어갔습니다.', (h.name || h.email) + ' 님이 편집 중입니다. 변경 내용이 있으면 잠금이 풀린 뒤 다시 편집 모드를 켜고 저장하세요.']
+        : ['편집 모드가 풀렸습니다.', '잠금이 해제되어 있습니다(다른 창에서 「편집 종료」했거나 창이 멈춰 만료). 계속 편집하려면 「편집 시작」을 다시 누르세요.'];
+  if (viaAlert) showAlert(msg[0], msg[1], '🔒');
+  return msg[0] + ' ' + msg[1];
 }
 async function bpToggleEdit() { if (_bpLock.mine) await bpStopEdit(); else await bpStartEdit(); }
 /* 「상태 확인」 — 눌러도 아무 반응이 없어 보였다(09-28). 팝업을 띄우고, 배너에 확인 시각을 적는다. */
@@ -2003,16 +2016,18 @@ async function bpStartEdit() {
     if (!_bp.all.length) await loadBpMaster(false);
     const cur = await bpLockRead();
     if (cur && cur.email.toLowerCase() !== bpMe()) { _bpLock.holder = cur; _bpLock.mine = false; bpRenderLock(); bpLogAdmin('편집 시작 실패', { reason: '다른 관리자 편집 중', holder: cur.email }); return; }
-    const rec = { email: bpMe(), name: (user && user.name) || bpMe(), since: Date.now(), until: Date.now() + BP_LOCK_TTL_MS, tag: Math.random().toString(36).slice(2, 10) };
+    const takeover = bpLockIsMyOtherWindow(cur);                    // 내 다른 창의 잠금 → 이 창으로 가져온다(그 창은 다음 연장 때 조회 상태로 바뀐다)
+    const rec = { email: bpMe(), name: (user && user.name) || bpMe(), since: takeover && cur.since ? cur.since : Date.now(), until: Date.now() + BP_LOCK_TTL_MS, tag: Math.random().toString(36).slice(2, 10) };
     const ok = await bpLockWrite(rec, !_bpLock.itemId);
-    if (!ok) { await bpLockRefresh(); if (!_bpLock.mine) showAlert('다른 관리자가 먼저 편집을 시작했습니다.', '잠시 후 다시 시도해 주세요.', '🔒'); return; }
+    if (!ok) { await bpLockRefresh(); if (!_bpLock.mine) showAlert(_bpLock.holder && !bpLockIsMyOtherWindow(_bpLock.holder) ? '다른 관리자가 먼저 편집을 시작했습니다.' : '잠금 상태가 그 사이 바뀌었습니다.', '잠시 후 다시 시도해 주세요.', '🔒'); return; }
     /* 되읽어 확인 — 파일을 처음 만들 때는 조건부 쓰기가 없어 두 사람이 동시에 만들면 나중 것이 남는다.
        내 tag 가 아니면 진 것으로 본다(선점 실패). */
     const now = await bpLockRead();
     if (!now || now.tag !== rec.tag) { _bpLock.mine = false; _bpLock.holder = now; bpRenderLock(); showAlert('다른 관리자가 먼저 편집을 시작했습니다.', '잠시 후 다시 시도해 주세요.', '🔒'); return; }
     _bpLock.token = await token();
+    bpLockRemember(rec.tag);
     _bpLock.mine = true; _bpLock.holder = rec; bpStartHeartbeat(); bpRenderLock(); renderBpList(false);
-    bpLogAdmin('편집 시작', { until: new Date(rec.until).toISOString() });
+    bpLogAdmin('편집 시작', { until: new Date(rec.until).toISOString(), ...(takeover ? { from: '다른 창의 편집 모드를 이 창으로 가져옴' } : {}) });
   } catch (e) { showAlert('편집 모드를 켜지 못했습니다.', e.message, '⚠️'); }
   finally { btn.disabled = false; }
 }
@@ -2020,7 +2035,7 @@ async function bpStopEdit(silent) {
   bpStopHeartbeat();
   if (_bpLock.mine) bpLogAdmin('편집 종료', { since: _bpLock.holder && _bpLock.holder.since ? new Date(_bpLock.holder.since).toISOString() : '' });
   try { if (_bpLock.mine) await bpLockWrite({ email: '', name: '', since: 0, until: 0, releasedBy: bpMe(), at: Date.now() }, false); } catch (e) { console.warn('[BP] 잠금 해제 실패:', e.message); }
-  _bpLock.mine = false; _bpLock.holder = null;
+  _bpLock.mine = false; _bpLock.holder = null; bpLockRemember('');
   if (!silent) { bpRenderLock(); bpResetForm(); renderBpList(false); }
 }
 function bpStartHeartbeat() {
@@ -2031,39 +2046,46 @@ function bpStartHeartbeat() {
       const rec = { ..._bpLock.holder, until: Date.now() + BP_LOCK_TTL_MS };
       _bpLock.token = await token();                                 // 창을 닫을 때 쓸 토큰을 늘 최신으로
       const ok = await bpLockWrite(rec, false);
-      if (!ok) { _bpLock.mine = false; await bpLockRefresh(); showAlert('편집 잠금이 다른 사용자에게 넘어갔습니다.', '변경 내용이 있으면 다시 편집 모드를 켠 뒤 저장하세요.', '🔒'); }
-      else { _bpLock.holder = rec; bpRenderLock(); }
+      if (ok) { _bpLock.holder = rec; return; }
+      /* 412 — 잠금 파일이 그 사이 바뀌었다. 누가 들고 있는지 다시 읽고 나서 판단한다. 같은 사람 · 같은 tag(같은 창의 다른 요청)면
+         최신 eTag 로 조용히 이어 가고, 다른 창 · 다른 사람 · 해제된 경우에만 조회 상태로 돌리며 한 번 알린다. */
+      const h = await bpLockRead();
+      if (bpLockIsMine(h)) { _bpLock.holder = h; return; }
+      bpLockLost(h, true);
     } catch (e) { console.warn('[BP] 잠금 연장 실패:', e.message); }
   }, 60000);
 }
 function bpStopHeartbeat() { if (_bpLock.timer) { clearInterval(_bpLock.timer); _bpLock.timer = null; } }
 function bpRenderLock() {
-  const box = document.getElementById('bp-lock'), txt = document.getElementById('bp-lock-txt'), btn = document.getElementById('bp-lock-btn'), tools = document.getElementById('bp-admin-tools');
+  const box = document.getElementById('bp-lock'), txt = document.getElementById('bp-lock-txt'), btn = document.getElementById('bp-lock-btn'), btn2 = document.getElementById('bp-lock-btn2'), tools = document.getElementById('bp-admin-tools');
   if (!box) return;
   box.classList.remove('other', 'mine', 'free'); box.classList.add('show');
   const h = _bpLock.holder;
   const hm = (ms) => { const d = new Date(Number(ms) + 9 * 3600 * 1000); return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0'); };
   const hms = (ms) => { const d = new Date(Number(ms) + 9 * 3600 * 1000); return hm(ms) + ':' + String(d.getUTCSeconds()).padStart(2, '0'); };
   const BTN = 'padding:3px 10px;font-size:.72rem';
+  const chk = _bpLock.checkedAt ? ' <span class="chk">· ' + hms(_bpLock.checkedAt) + ' 확인</span>' : '';
+  const setBtn = (label, cls, fn) => { btn.textContent = label; btn.className = 'btn ' + cls; btn.style.cssText = BTN; btn.onclick = fn; };
+  const dim = (on) => { tools.style.opacity = on ? '1' : '.55'; tools.style.pointerEvents = on ? '' : 'none'; };
+  btn2.style.display = 'none';
   if (_bpLock.mine) {
+    /* 만료 시각은 60초마다 5분 뒤로 밀리므로 적지 않는다 — 「HH:MM 자동 해제」가 1분마다 바뀌어 헷갈렸다(09-28). */
     box.classList.add('mine'); box.querySelector('.ico').textContent = '✏️';
-    txt.innerHTML = '<span class="who">편집 모드</span> — ' + esc(h.name || h.email) + ' (나) · ' + hm(h.since) + ' 부터 · 다른 관리자는 조회만 할 수 있습니다. 활동이 없으면 ' + hm(h.until) + ' 에 자동 해제됩니다.';
-    btn.textContent = '편집 종료'; btn.className = 'btn btn-g'; btn.style.cssText = BTN;
-    tools.style.opacity = '1'; tools.style.pointerEvents = '';
+    txt.innerHTML = '<span class="who">편집 모드</span> — ' + esc(h.name || h.email) + ' (나) · ' + hm(h.since) + ' 부터 · 다른 관리자는 조회만 할 수 있습니다. 「편집 종료」를 누르거나 이 창을 닫으면 풀립니다(창이 멈추면 5분 뒤 자동 해제).';
+    setBtn('편집 종료', 'btn-g', () => bpToggleEdit()); dim(true);
+  } else if (bpLockIsMyOtherWindow(h)) {
+    box.classList.add('other'); box.querySelector('.ico').textContent = '🔒';
+    txt.innerHTML = '<span class="who">다른 창에서 편집 모드</span> — ' + hm(h.since) + ' 부터 내 다른 창(탭)이 편집 중이라 이 창은 조회만 됩니다. 여기서 편집하려면 「이 창으로 가져오기」(그 창은 조회만 되게 바뀝니다).' + chk;
+    setBtn('이 창으로 가져오기', 'btn-p', () => bpStartEdit()); btn2.style.display = ''; dim(false);
   } else if (h) {
     box.classList.add('other'); box.querySelector('.ico').textContent = '🔒';
-    txt.innerHTML = '<span class="who">' + esc(h.name || h.email) + '</span> 님이 수정 중입니다 · ' + hm(h.since) + ' 부터 · 조회는 가능하며, 편집은 잠금이 풀린 뒤(' + hm(h.until) + ' 자동 해제) 할 수 있습니다.' +
-      (_bpLock.checkedAt ? ' <span class="chk">· ' + hms(_bpLock.checkedAt) + ' 확인</span>' : '');
-    btn.textContent = '↻ 상태 확인'; btn.className = 'btn btn-g'; btn.style.cssText = BTN; btn.onclick = () => bpCheckLock();
-    tools.style.opacity = '.55'; tools.style.pointerEvents = 'none';
-    return;
+    txt.innerHTML = '<span class="who">' + esc(h.name || h.email) + '</span> 님이 수정 중입니다 · ' + hm(h.since) + ' 부터 · 조회는 가능하며, 편집은 잠금이 풀린 뒤 할 수 있습니다(그 창이 닫히면 늦어도 5분 안에 풀립니다).' + chk;
+    setBtn('↻ 상태 확인', 'btn-g', () => bpCheckLock()); dim(false);
   } else {
     box.classList.add('free'); box.querySelector('.ico').textContent = '🔓';
     txt.textContent = '편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.';
-    btn.textContent = '✏️ 편집 시작'; btn.className = 'btn btn-p'; btn.style.cssText = BTN;
-    tools.style.opacity = '.55'; tools.style.pointerEvents = 'none';
+    setBtn('✏️ 편집 시작', 'btn-p', () => bpToggleEdit()); dim(false);
   }
-  btn.onclick = () => bpToggleEdit();
 }
 // 창을 닫거나 다른 페이지로 가면 잠금을 풀어 둔다(keepalive 로 페이지가 사라져도 요청은 간다). 실패해도 5분 뒤 만료.
 window.addEventListener('beforeunload', () => {
@@ -2088,7 +2110,6 @@ window.addEventListener('beforeunload', () => {
 });
 
 /* ── 관리 화면 ── */
-function bpSecToggle(btn) { const sec = btn.closest('.bp-section'); if (sec) sec.classList.toggle('open'); }
 function bpRenderAdminInfo() {
   const f = document.getElementById('bp-adm-file'); if (!f) return;
   f.textContent = bpFileLabel((_bp.meta && _bp.meta.name) || BP_MASTER_FILE);
@@ -2206,6 +2227,11 @@ async function bpEnsureReady() {
   if (!_bp.all.length) await loadBpMaster(false);
   if (!_bp.driveId || !_bp.itemId) throw new Error('BP 마스터 파일 정보를 아직 못 읽었습니다. 새로고침 후 다시 시도해 주세요.');
   if (!_bpLock.mine) throw new Error('편집 모드가 아닙니다. 「편집 시작」을 눌러 잠금을 얻은 뒤 저장하세요.');
+  /* 쓰기 직전 잠금 재확인(09-28) — 창이 멈춰 만료됐거나 다른 창 · 다른 사람에게 넘어간 뒤에도 이 창은 아직 「편집 모드」로 알고
+     있을 수 있다. 서버의 잠금 기록이 이 창의 것일 때만 기록한다. */
+  const h = await bpLockRead();
+  if (!bpLockIsMine(h)) throw new Error(bpLockLost(h, false));
+  _bpLock.holder = h;
 }
 function bpApplyLocal(rec, row) {
   const item = { row, code: rec.code, type: rec.type, name: rec.name, nameKo: rec.nameKo || '', bizNo: rec.bizNo || '', inactive: !!rec.inactive, bank: (rec.bank && rec.bank !== '-1') ? rec.bank : '', acct: rec.acct || '' };
@@ -2349,7 +2375,7 @@ function bpLogSummary(e) {
     case '검색': case '검색 초기화': case '유형 선택': case '상태 필터': return (filt || '전체') + (d.results != null ? ' → ' + n(d.results) + '건' : '');
     case '새로고침': return (filt ? filt + ' · ' : '') + (d.rows != null ? n(d.rows) + '건 다시 읽음' : '');
     case '조회 열기': case '관리 탭 열기': case '조회 시작': return d.cached ? '읽어 둔 목록 사용' : '';
-    case '편집 시작': return d.until ? '자동 해제 ' + fmtDate(d.until).slice(11) : '';
+    case '편집 시작': return d.from || '';
     case '편집 시작 실패': return (d.reason || '') + (d.holder ? ' · ' + d.holder : '');
     case '편집 종료': return d.since ? fmtDate(d.since).slice(11) + ' 부터 편집' : '';
     case '잠금 상태 확인': return d.holder ? (d.mine ? '내가 편집 중' : d.holder + ' 편집 중') : '잠금 없음';
