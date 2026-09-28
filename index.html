@@ -209,12 +209,38 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-lock .chk{color:inherit;opacity:.7;font-weight:400}
 .bp-lock .sp{margin-left:auto;display:flex;gap:6px;align-items:center;white-space:nowrap}
 .bp-lock .who{font-weight:700}
-.bp-form{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:14px 16px 6px;margin-bottom:14px}
-.bp-form .row{display:flex;gap:12px;flex-wrap:wrap}
-.bp-form .fld{min-width:160px}
-.bp-form .fld label{display:block;font-size:.72rem;color:#605e5c;margin-bottom:4px;font-weight:600}
+/* 등록 · 수정 폼(09-28 다듬음) — 흰 카드에 머리띠(제목 · 대상 행 · 돌아가기), 두 줄 격자, 32px 입력칸. 수정 중이면 파란 머리띠. */
+.bp-form{background:#fff;border:1px solid #e1dfdd;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.bp-form.edit{border-color:#b3d1ee}
+.bp-form-hd{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#faf9f8;border-bottom:1px solid #edebe9}
+.bp-form.edit .bp-form-hd{background:#f0f6ff;border-bottom-color:#cfe3f7}
+.bp-form-hd .ttl{font-size:.82rem;font-weight:700;color:#323130;white-space:nowrap}
+.bp-form-hd .meta{font-size:.72rem;color:#605e5c}
+.bp-form-hd .meta b{color:#0078d4}
+.bp-form-hd .sp{margin-left:auto}
+.bp-form-hd .lnk{background:none;border:none;color:#0078d4;font-size:.72rem;cursor:pointer;font-family:inherit;padding:0;white-space:nowrap}
+.bp-form-hd .lnk:hover{text-decoration:underline}
+.bp-form-bd{padding:12px 14px 10px}
+.bp-form .g4{display:grid;grid-template-columns:150px 140px minmax(200px,1fr) minmax(160px,1fr);gap:8px 12px;margin-bottom:8px}
+.bp-form .g4b{display:grid;grid-template-columns:190px minmax(160px,1fr) minmax(160px,1fr) 120px;gap:8px 12px}
+@media (max-width:900px){.bp-form .g4,.bp-form .g4b{grid-template-columns:1fr 1fr}}
+.bp-form .fld{min-width:0;margin-bottom:0;flex:none}   /* 공통 .fld(min-width:200px · margin) 이 격자 칸을 밀어내지 않게 */
+.bp-form .fld label{display:block;font-size:.7rem;color:#605e5c;margin-bottom:3px;font-weight:600}
 .bp-form .fld label .req{color:#a4262c;margin-left:2px}
-.bp-form input[type=text],.bp-form select{width:100%}
+.bp-form input[type=text],.bp-form select{width:100%;height:32px;padding:4px 9px;font-size:.8rem;box-sizing:border-box}
+.bp-form input[readonly]{background:#f3f2f1;color:#323130;font-weight:600}
+.bp-form-ft{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #edebe9}
+.bp-form-ft .ft-note{font-size:.7rem;color:#a19f9d;margin-right:auto;line-height:1.5}
+.bp-form-ft .btn{height:30px;padding:0 16px;font-size:.76rem}
+/* 일괄 상태 변경 줄(관리 탭) — 체크박스로 고른 행을 한 번에 활성 · 비활성 */
+.bp-bulk{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:#f3f7fc;border:1px solid #d6e4f5;border-radius:6px;padding:4px 10px;margin:0 0 8px;font-size:.74rem;color:#3b5b7c}
+.bp-bulk.show{display:flex}
+.bp-bulk b{color:#0f2744}
+.bp-bulk .lnk{background:none;border:none;color:#0078d4;cursor:pointer;font-size:.7rem;font-family:inherit;padding:0;text-decoration:underline}
+.bp-bulk .lnk:disabled{color:#a19f9d;text-decoration:none;cursor:default}
+.bp-bulk .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+.bp-bulk .btn{height:26px;padding:0 11px;font-size:.7rem}
+.bp-bulk .btn:disabled{opacity:.45;cursor:not-allowed}
 .bp-paste{background:#fff;border:1px dashed #c7d2de;border-radius:6px;padding:10px 12px;margin-bottom:12px}
 .bp-paste textarea{width:100%;min-height:58px;font-size:.74rem}
 .bp-paste .hint{font-size:.7rem;color:#605e5c;margin:4px 0 6px;line-height:1.5}
@@ -288,7 +314,15 @@ body:not(.cat-bp) .bp-tab{display:none}
 /* 표 글자(09-28) — 이름 · 은행처럼 길어 두 줄이 되는 칸이 많다. 한 단계 작게 해 행 높이를 줄인다(BP 표에만). */
 #bp-tbl table{font-size:.72rem}
 #bp-tbl th{padding:5px 8px;font-size:.68rem}
-#bp-tbl td{padding:3px 8px;line-height:1.3;font-size:.72rem}
+#bp-tbl td{padding:4px 8px;line-height:1.35;font-size:.72rem;white-space:nowrap}
+/* 두 줄로 내려가던 칸(이름 · 한글이름 · 은행)은 한 줄로 고정하고 넘치면 줄임표(전체 글은 title). 긴 글은 한 단계 더 작게(.sm). */
+#bp-tbl td.clip{max-width:300px;overflow:hidden;text-overflow:ellipsis}
+#bp-tbl td.clip.ko{max-width:210px}
+#bp-tbl td.clip.bank{max-width:170px}
+#bp-tbl td.clip.sm{font-size:.64rem;letter-spacing:-.01em}
+#bp-tbl th.sel,#bp-tbl td.sel{width:28px;padding:0 4px;text-align:center}
+#bp-tbl input[type=checkbox]{width:14px;height:14px;margin:0;vertical-align:middle;cursor:pointer;accent-color:#0078d4}
+#bp-tbl tr.on td{background:#f0f6ff}
 #bp-tbl .bp-code{font-size:.72rem}
 #bp-tbl .bp-num{font-size:.7rem}
 #bp-tbl .bp-type,#bp-tbl .bp-st{font-size:.62rem;padding:0 7px;line-height:1.6}
@@ -770,8 +804,18 @@ body.rd-rule .line-preview.rd-only{display:block}
         <button class="btn btn-p" id="bp-q-btn" style="padding:5px 14px;font-size:.74rem;white-space:nowrap" onclick="bpSearch()">검색</button>
         <span class="cnt" id="bp-count"></span>
       </div>
+      <!-- 일괄 상태 변경(관리 탭 · 편집 모드) — 체크한 행을 한 번에 활성 · 비활성. 관리 탭에서만 보인다. -->
+      <div class="bp-bulk" id="bp-bulk">
+        <span>선택 <b id="bp-sel-n">0</b>건</span>
+        <button class="lnk" id="bp-sel-all" onclick="bpSelAllView()">이 조건의 결과 모두 선택</button>
+        <button class="lnk" id="bp-sel-clr" onclick="bpSelClear()">선택 해제</button>
+        <span class="sp">
+          <button class="btn btn-g" id="bp-bulk-on" onclick="bpBulkStatus(false)">선택 → 활성</button>
+          <button class="btn btn-g" id="bp-bulk-off" onclick="bpBulkStatus(true)">선택 → 비활성</button>
+        </span>
+      </div>
       <div class="tbl-wrap" id="bp-tbl" style="display:none"><table>
-        <thead><tr><th style="width:96px">Code</th><th style="width:84px">유형</th><th>Name 1</th><th>한글이름</th><th style="width:130px">사업자등록번호</th><th style="width:150px">Bank</th><th style="width:150px">Account no.</th><th style="width:64px">상태</th><th style="width:60px;text-align:right">행</th><th class="bp-adm-col" style="width:66px"></th></tr></thead>
+        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th style="width:96px">Code</th><th style="width:84px">유형</th><th>Name 1</th><th>한글이름</th><th style="width:130px">사업자등록번호</th><th style="width:150px">Bank</th><th style="width:150px">Account no.</th><th style="width:64px">상태</th><th style="width:60px;text-align:right">행</th><th class="bp-adm-col" style="width:66px"></th></tr></thead>
         <tbody id="bp-body"></tbody>
       </table></div>
       <div class="pg" id="bp-pg" style="display:none"></div>
@@ -801,24 +845,25 @@ body.rd-rule .line-preview.rd-only{display:block}
           </div>
         </div>
 
-        <div class="bp-form">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:.82rem;font-weight:700;color:#323130" id="bp-form-title">신규 BP 등록</span>
-            <span id="bp-form-row" style="font-size:.72rem;color:#605e5c"></span></div>
-          <div class="row">
-            <div class="fld" style="flex:0 0 150px"><label>BP Code<span class="req">*</span></label><input type="text" id="bp-f-code" maxlength="20" placeholder="C0000374" oninput="this.value=this.value.toUpperCase()"></div>
-            <div class="fld" style="flex:0 0 140px"><label>유형<span class="req">*</span></label><select id="bp-f-type"><option value="Customer">Customer</option><option value="Vendor">Vendor</option><option value="Employee">Employee</option></select></div>
-            <div class="fld" style="flex:1 1 220px"><label>Name 1 (영문)<span class="req">*</span></label><input type="text" id="bp-f-name" maxlength="100"></div>
-            <div class="fld" style="flex:1 1 180px"><label>한글이름</label><input type="text" id="bp-f-nameko" maxlength="100"></div>
-          </div>
-          <div class="row">
-            <div class="fld" style="flex:0 0 190px"><label>사업자등록번호 / 계약번호</label><input type="text" id="bp-f-bizno" maxlength="40"></div>
-            <div class="fld" style="flex:1 1 200px"><label>Bank</label><input type="text" id="bp-f-bank" maxlength="60"></div>
-            <div class="fld" style="flex:1 1 200px"><label>Account no.</label><input type="text" id="bp-f-acct" maxlength="40"></div>
-            <div class="fld" style="flex:0 0 120px"><label>상태</label><select id="bp-f-inactive"><option value="No">활성</option><option value="Yes">비활성</option></select></div>
-          </div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;margin:2px 0 8px">
-            <button class="btn btn-g" onclick="bpResetForm()">취소</button>
-            <button class="btn btn-p" id="bp-save-btn" onclick="bpSave()">등록</button>
+        <div class="bp-form" id="bp-form">
+          <div class="bp-form-hd"><span class="ttl" id="bp-form-title">신규 BP 등록</span><span class="meta" id="bp-form-row"></span>
+            <span class="sp"><button class="lnk" id="bp-form-back" onclick="bpResetForm()" style="display:none">← 신규 등록으로</button></span></div>
+          <div class="bp-form-bd">
+            <div class="g4">
+              <div class="fld"><label>BP Code<span class="req">*</span></label><input type="text" id="bp-f-code" maxlength="20" placeholder="C0000374" oninput="this.value=this.value.toUpperCase()"></div>
+              <div class="fld"><label>유형<span class="req">*</span></label><select id="bp-f-type"><option value="Customer">Customer</option><option value="Vendor">Vendor</option><option value="Employee">Employee</option></select></div>
+              <div class="fld"><label>Name 1 (영문)<span class="req">*</span></label><input type="text" id="bp-f-name" maxlength="100"></div>
+              <div class="fld"><label>한글이름</label><input type="text" id="bp-f-nameko" maxlength="100"></div>
+            </div>
+            <div class="g4b">
+              <div class="fld"><label>사업자등록번호 / 계약번호</label><input type="text" id="bp-f-bizno" maxlength="40"></div>
+              <div class="fld"><label>Bank</label><input type="text" id="bp-f-bank" maxlength="60"></div>
+              <div class="fld"><label>Account no.</label><input type="text" id="bp-f-acct" maxlength="40"></div>
+              <div class="fld"><label>상태</label><select id="bp-f-inactive"><option value="No">활성</option><option value="Yes">비활성</option></select></div>
+            </div>
+            <div class="bp-form-ft"><span class="ft-note" id="bp-form-note">SAP Be1 에서 만든 코드를 그대로 적습니다. 「등록」을 누르면 Excel 새 행에 바로 기록됩니다.</span>
+              <button class="btn btn-g" onclick="bpResetForm()">취소</button>
+              <button class="btn btn-p" id="bp-save-btn" onclick="bpSave()">등록</button></div>
           </div>
         </div>
       </div>
@@ -1669,7 +1714,7 @@ const BP_LOCK_TTL_MS = 5 * 60 * 1000;
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
-const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [], viewOpened: false };
+const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [], viewOpened: false, sel: new Set() };
 /* 이력(09-28) — SharePoint Logging_data/ACC-Others/BP-Master/{Accessor|Admin}/YYYY-MM-DD/… 에 한 행위마다 JSON 한 개.
    Accessor: 조회 열기 · 새로고침 · 유형(Customer/Vendor/Employee/전체) · 상태 필터 · 검색(검색어 포함).
    Admin: 편집 시작 · 종료 · 등록 · 수정(전 · 후) · SAP(Be1) 붙여넣기 · 일괄 등록. 폴더는 logAction 이 없으면 만든다. */
@@ -1706,7 +1751,8 @@ function bpPlaceList() {
   const admWrap = document.getElementById('bp-admin-list'), viewPane = document.getElementById('pane-bpview');
   const inAdmin = _bpTab === 'bpadmin' && _currentCat === 'bp';
   const target = inAdmin ? admWrap : viewPane, show = inAdmin || _bp.viewOpened;
-  ['bp-src', 'bp-tools', 'bp-tbl', 'bp-pg'].forEach(id => { const el = document.getElementById(id); if (el.parentNode !== target) target.appendChild(el); el.style.display = show ? '' : 'none'; });
+  ['bp-src', 'bp-tools', 'bp-bulk', 'bp-tbl', 'bp-pg'].forEach(id => { const el = document.getElementById(id); if (el.parentNode !== target) target.appendChild(el); el.style.display = show ? '' : 'none'; });
+  const bulk = document.getElementById('bp-bulk'); if (bulk) bulk.style.display = (show && inAdmin && isBpAdmin()) ? 'flex' : 'none';
   const cta = document.getElementById('bp-view-cta'); if (cta) cta.style.display = (!inAdmin && !_bp.viewOpened) ? '' : 'none';
 }
 function bpRefresh() {
@@ -1751,7 +1797,7 @@ async function loadBpMaster(force) {
         all.push({ row: rowNo, code, type, name: bpCell(r[2]), nameKo: bpCell(r[3]), bizNo: bpCell(r[4]),
                    inactive: bpIsInactive(r[8]), bank: bpCell(r[10]), acct: bpCell(r[11]) });
       });
-      _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now();
+      _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now(); _bp.sel.clear();   // 다시 읽으면 행이 바뀔 수 있어 선택은 비운다
       const by = (meta.lastModifiedBy && meta.lastModifiedBy.user && meta.lastModifiedBy.user.displayName) || '';
       document.getElementById('bp-src-name').textContent = bpFileLabel(meta.name);   // 확장자(.xlsx)는 빼고 보여 준다
       document.getElementById('bp-src-meta').textContent = '시트 ' + _bp.sheet + ' · ' + all.length.toLocaleString() + '건 · 마지막 수정 ' + fmtDate(meta.lastModifiedDateTime) + (by ? ' (' + by + ')' : '');
@@ -1803,16 +1849,22 @@ function renderBpList(resetPage) {
   document.querySelectorAll('.bp-adm-col').forEach(el => el.style.display = admin ? '' : 'none');
   const body = document.getElementById('bp-body');
   const slice = items.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE);
+  // 긴 글은 한 줄로 두고 줄임표 — 글자 수가 많으면 한 단계 작게(.sm). 전체 글은 title 로.
+  const clip = (v, cls, lim) => '<td class="clip ' + cls + (v.length > lim ? ' sm' : '') + '" title="' + esc(v) + '">' + esc(v) + '</td>';
   body.innerHTML = slice.length ? slice.map(x =>
-    '<tr' + (x.row >= BP_FIRST_NEW_ROW ? ' class="bp-row-new"' : '') + '>' +
+    '<tr class="' + (x.row >= BP_FIRST_NEW_ROW ? 'bp-row-new' : '') + (_bp.sel.has(x.row) ? ' on' : '') + '" data-row="' + x.row + '">' +
+    (admin ? '<td class="sel"><input type="checkbox"' + (_bp.sel.has(x.row) ? ' checked' : '') + ' onchange="bpToggleSel(' + x.row + ', this.checked, this)"></td>' : '') +
     '<td class="bp-code">' + esc(x.code) + '</td>' +
     '<td><span class="bp-type ' + x.type + '">' + x.type + '</span></td>' +
-    '<td>' + esc(x.name) + '</td><td>' + esc(x.nameKo) + '</td>' +
-    '<td class="bp-num">' + esc(x.bizNo) + '</td><td>' + esc(x.bank) + '</td><td class="bp-num">' + esc(x.acct) + '</td>' +
+    clip(x.name, 'nm', 30) + clip(x.nameKo, 'ko', 14) +
+    '<td class="bp-num">' + esc(x.bizNo) + '</td>' + clip(x.bank, 'bank', 16) + '<td class="bp-num">' + esc(x.acct) + '</td>' +
     '<td><span class="bp-st ' + (x.inactive ? 'off">비활성' : 'on">활성') + '</span></td>' +
     '<td class="bp-num" style="text-align:right;color:#a19f9d">' + x.row.toLocaleString() + '</td>' +
     (admin ? '<td><button class="bp-edit-btn" ' + (_bpLock.mine ? '' : 'disabled title="편집 모드에서만 수정할 수 있습니다"') + ' onclick="bpEditRow(' + x.row + ')">수정</button></td>' : '') +
-    '</tr>').join('') : '<tr><td colspan="10" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
+    '</tr>').join('') : '<tr><td colspan="' + (admin ? 11 : 9) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
+  const pageCb = document.getElementById('bp-sel-page');
+  if (pageCb) { const allOn = slice.length > 0 && slice.every(x => _bp.sel.has(x.row)); pageCb.checked = allOn; pageCb.indeterminate = !allOn && slice.some(x => _bp.sel.has(x.row)); }
+  bpRenderBulk();
   const pg = document.getElementById('bp-pg');
   pg.innerHTML = items.length > BP_PAGE ?
     '<button onclick="bpGoPage(' + (_bp.page - 1) + ')"' + (_bp.page <= 1 ? ' disabled' : '') + '>‹</button><span>' + _bp.page + ' / ' + pages + '</span>' +
@@ -1820,6 +1872,65 @@ function renderBpList(resetPage) {
   bpPlaceList();                                                     // 열려 있는 탭 아래로
 }
 function bpGoPage(n) { _bp.page = n; renderBpList(false); }
+
+/* ── 일괄 상태 변경(관리 탭) ──────────────────────────────────
+   체크한 행의 I열(Inactivated)만 Yes/No 로 바꾼다. 연속한 행은 한 번의 PATCH 로 묶고, 쓰기 전에 그 구간 A열을 한 번에 읽어
+   코드가 화면과 같은지 확인한다(행이 밀렸으면 중단). 편집 잠금을 쥔 사람만. */
+function bpToggleSel(row, on, cb) {
+  if (on) _bp.sel.add(row); else _bp.sel.delete(row);
+  const tr = cb && cb.closest('tr'); if (tr) tr.classList.toggle('on', on);
+  const slice = _bp.view.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE);
+  const pageCb = document.getElementById('bp-sel-page');
+  if (pageCb) { const allOn = slice.length > 0 && slice.every(x => _bp.sel.has(x.row)); pageCb.checked = allOn; pageCb.indeterminate = !allOn && slice.some(x => _bp.sel.has(x.row)); }
+  bpRenderBulk();
+}
+function bpSelPage(on) { _bp.view.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE).forEach(x => on ? _bp.sel.add(x.row) : _bp.sel.delete(x.row)); renderBpList(false); }
+function bpSelAllView() { _bp.view.forEach(x => _bp.sel.add(x.row)); renderBpList(false); }
+function bpSelClear() { _bp.sel.clear(); renderBpList(false); }
+function bpRenderBulk() {
+  const bar = document.getElementById('bp-bulk'); if (!bar) return;
+  const n = _bp.sel.size;
+  document.getElementById('bp-sel-n').textContent = n.toLocaleString();
+  const all = document.getElementById('bp-sel-all'); all.textContent = '이 조건의 결과 모두 선택 (' + _bp.view.length.toLocaleString() + '건)'; all.disabled = !_bp.view.length || _bp.view.length > 2000;
+  all.title = _bp.view.length > 2000 ? '2,000건까지만 한 번에 선택할 수 있습니다 — 조건을 좁혀 주세요' : '';
+  document.getElementById('bp-sel-clr').disabled = !n;
+  ['bp-bulk-on', 'bp-bulk-off'].forEach(id => { const b = document.getElementById(id); b.disabled = !n || !_bpLock.mine; b.title = !_bpLock.mine ? '편집 모드에서만 바꿀 수 있습니다' : ''; });
+}
+async function bpBulkStatus(inactive) {
+  const rows = [..._bp.sel].sort((a, b) => a - b);
+  const picked = rows.map(r => _bp.all.find(x => x.row === r)).filter(Boolean);
+  const targets = picked.filter(x => x.inactive !== inactive);
+  const label = inactive ? '비활성' : '활성';
+  if (!picked.length) return;
+  if (!targets.length) { showAlert('바꿀 행이 없습니다.', '선택한 ' + picked.length + '건이 이미 모두 ' + label + ' 상태입니다.', 'ℹ️'); return; }
+  const skip = picked.length - targets.length;
+  if (!confirm('선택한 ' + picked.length + '건 중 ' + targets.length + '건을 「' + label + '」 으로 바꿉니다.' + (skip ? '\n(이미 ' + label + '인 ' + skip + '건은 건너뜁니다)' : '') + '\n\n진행할까요?')) return;
+  loading(true, targets.length + '건의 상태를 바꾸는 중...');
+  try {
+    await bpEnsureReady();
+    // 코드 확인 — 선택 구간의 A열을 한 번에 읽어 화면과 같은지 본다(행이 밀렸으면 엉뚱한 행을 바꾸게 된다)
+    const min = targets[0].row, max = targets[targets.length - 1].row;
+    const colA = await api(bpWb() + "/range(address='A" + min + ":A" + max + "')?$select=values");
+    const vals = colA.values || [];
+    const bad = targets.filter(x => bpCell(vals[x.row - min] && vals[x.row - min][0]).toUpperCase() !== x.code.toUpperCase());
+    if (bad.length) throw new Error(bad.length + '행의 코드가 화면과 다릅니다(' + bad.slice(0, 3).map(x => x.row.toLocaleString() + '행 ' + x.code).join(', ') + (bad.length > 3 ? ' …' : '') + '). 새로고침 후 다시 시도해 주세요.');
+    // 연속한 행은 한 번에
+    const runs = []; targets.forEach(x => { const last = runs[runs.length - 1]; if (last && x.row === last.end + 1) last.end = x.row; else runs.push({ start: x.row, end: x.row }); });
+    const val = inactive ? 'Yes' : 'No'; let done = 0;
+    for (const run of runs) {
+      const n = run.end - run.start + 1;
+      await bpPatchRange(bpWb() + "/range(address='I" + run.start + ":I" + run.end + "')", Array.from({ length: n }, () => [val]), 1);
+      done += n; loading(true, '상태를 바꾸는 중... ' + done + ' / ' + targets.length);
+    }
+    targets.forEach(x => { x.inactive = inactive; });
+    bpLogAdmin('일괄 상태 변경', { to: label, count: targets.length, skipped: skip, codes: targets.map(x => x.code).join(','), rows: runs.map(r => r.start === r.end ? String(r.start) : r.start + '~' + r.end).join(',') });
+    _bp.sel.clear(); renderBpList(false);
+    showAlert(targets.length + '건을 ' + label + '으로 바꿨습니다.', targets.map(x => x.code).slice(0, 8).join(', ') + (targets.length > 8 ? ' 외 ' + (targets.length - 8) + '건' : ''), '✅');
+  } catch (e) {
+    bpLogAdmin('일괄 상태 변경 실패', { to: label, count: targets.length, codes: targets.map(x => x.code).join(','), error: e.message });
+    alert('상태를 바꾸지 못했습니다.\n\n' + e.message + '\n\n목록을 새로고침해 어디까지 반영됐는지 확인해 주세요.');
+  } finally { loading(false); }
+}
 
 /* ── 잠금 ── */
 async function bpLockRead() {
@@ -1985,8 +2096,11 @@ function bpFillForm(x) {
 function bpResetForm() {
   _bp.editRow = null; bpFillForm({});
   document.getElementById('bp-f-code').readOnly = false;
+  document.getElementById('bp-form').classList.remove('edit');
   document.getElementById('bp-form-title').textContent = '신규 BP 등록';
   document.getElementById('bp-form-row').textContent = '';
+  document.getElementById('bp-form-back').style.display = 'none';
+  document.getElementById('bp-form-note').textContent = 'SAP Be1 에서 만든 코드를 그대로 적습니다. 「등록」을 누르면 Excel 새 행에 바로 기록됩니다.';
   document.getElementById('bp-save-btn').textContent = '등록';
 }
 function bpEditRow(row) {
@@ -1995,10 +2109,13 @@ function bpEditRow(row) {
   if (_bpTab !== 'bpadmin') switchTab('bpadmin');
   _bp.editRow = row; bpFillForm(x);
   document.getElementById('bp-f-code').readOnly = true;            // 코드는 SAP 에서 정해진 값 — 바꾸려면 새로 등록
+  document.getElementById('bp-form').classList.add('edit');
   document.getElementById('bp-form-title').textContent = 'BP 수정';
-  document.getElementById('bp-form-row').textContent = '(' + row.toLocaleString() + '행 · ' + x.code + ')';
+  document.getElementById('bp-form-row').innerHTML = '<b>' + esc(x.code) + '</b> · ' + esc(x.name) + ' · ' + row.toLocaleString() + '행';
+  document.getElementById('bp-form-back').style.display = '';
+  document.getElementById('bp-form-note').textContent = '코드는 바꿀 수 없습니다(SAP 기준). 「수정 저장」을 누르면 Excel 의 이 행이 바로 바뀝니다.';
   document.getElementById('bp-save-btn').textContent = '수정 저장';
-  document.querySelector('.bp-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('bp-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function bpValidate(rec, isNew) {
   const m = [];
@@ -2040,19 +2157,20 @@ function bpRowSegs(rec) {
   };
 }
 const BP_SEGS = [['A', 'E', 'AE', 5], ['I', 'I', 'I', 1], ['K', 'L', 'KL', 2]];
+async function bpPatchRange(addr, values, width) {
+  const numberFormat = values.map(() => Array(width).fill('@'));   // 텍스트 서식 — 앞자리 0 · 긴 숫자 보존
+  try { await api(addr, 'PATCH', { values, numberFormat }); }
+  catch (e) {
+    // 서식 지정을 거부하는 경우(400)에만 값만 다시 보낸다. 잠금(423) · 권한 · 네트워크 오류는 그대로 올린다.
+    if (!/400|invalid|numberformat/i.test(String(e.message))) throw e;
+    console.warn('[BP] numberFormat 거부 — 값만 기록:', e.message);
+    await api(addr, 'PATCH', { values });
+  }
+}
 async function bpWriteRows(start, recs) {
   const end = start + recs.length - 1;
   for (const [c1, c2, key, n] of BP_SEGS) {
-    const values = recs.map(r => bpRowSegs(r)[key]);
-    const numberFormat = recs.map(() => Array(n).fill('@'));      // 텍스트 서식 — 앞자리 0 · 긴 숫자 보존
-    const addr = bpWb() + "/range(address='" + c1 + start + ':' + c2 + end + "')";
-    try { await api(addr, 'PATCH', { values, numberFormat }); }
-    catch (e) {
-      // 서식 지정을 거부하는 경우(400)에만 값만 다시 보낸다. 잠금(423) · 권한 · 네트워크 오류는 그대로 올린다.
-      if (!/400|invalid|numberformat/i.test(String(e.message))) throw e;
-      console.warn('[BP] numberFormat 거부 — 값만 기록:', e.message);
-      await api(addr, 'PATCH', { values });
-    }
+    await bpPatchRange(bpWb() + "/range(address='" + c1 + start + ':' + c2 + end + "')", recs.map(r => bpRowSegs(r)[key]), n);
   }
 }
 async function bpEnsureReady() {
@@ -2183,6 +2301,7 @@ function bpLogSummary(e) {
     case '잠금 상태 확인': return d.holder ? (d.mine ? '내가 편집 중' : d.holder + ' 편집 중') : '잠금 없음';
     case '등록': case '일괄 등록': return (d.codes || '') + (d.rows ? ' · ' + d.rows + '행' : '');
     case '일괄 등록 건너뜀': return n(d.count) + '건 · ' + (d.codes || '');
+    case '일괄 상태 변경': return '→ ' + (d.to || '') + ' · ' + n(d.count) + '건' + (d.skipped ? ' (건너뜀 ' + n(d.skipped) + ')' : '') + (d.codes ? ' · ' + d.codes : '');
     case '수정': {
       const b = d.before || {}, f = d.after || {};
       const ch = Object.keys(f).filter(k => String(b[k] == null ? '' : b[k]) !== String(f[k] == null ? '' : f[k])).map(k => k + ': ' + blank(b[k]) + ' → ' + blank(f[k]));
