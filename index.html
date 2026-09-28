@@ -228,6 +228,15 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 .bp-tools input[type=text]{flex:1;min-width:220px;max-width:420px}
 .bp-tools .cnt{margin-left:auto;font-size:.78rem;color:#605e5c;white-space:nowrap}
+.bp-tools .cnt .q{color:#0078d4;font-weight:600}
+/* 표 글자(09-28) — 이름 · 은행처럼 길어 두 줄이 되는 칸이 많다. 한 단계 작게 해 행 높이를 줄인다(BP 표에만). */
+#bp-tbl table{font-size:.72rem}
+#bp-tbl th{padding:5px 8px;font-size:.68rem}
+#bp-tbl td{padding:3px 8px;line-height:1.3;font-size:.72rem}
+#bp-tbl .bp-code{font-size:.72rem}
+#bp-tbl .bp-num{font-size:.7rem}
+#bp-tbl .bp-type,#bp-tbl .bp-st{font-size:.62rem;padding:0 7px;line-height:1.6}
+#bp-tbl .bp-edit-btn{padding:2px 8px;font-size:.66rem}
 
 /* 첨부 */
 .opt-danger{color:#a4262c;font-weight:700}
@@ -244,10 +253,9 @@ body:not(.cat-bp) .bp-tab{display:none}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
 /* 증빙 첨부 안내 — 짙은 빨강 글자, 아이콘은 첫 줄에 맞춘다 */
 .att-notice{display:flex;align-items:flex-start;gap:7px;color:#9F1D1D;margin:2px 0 10px;line-height:1.5}
-/* 상무(RD) 고정 결재 라인 안내(09-28) — 첨부 안내와 같은 붉은 계열, 한 줄. 규칙이 켜질 때만 보인다(body.rd-rule). */
-.rd-notice{display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #b42318;border-radius:6px;
-  padding:8px 12px;margin:0 0 10px;color:#9f1d1d;font-size:.78rem;font-weight:700;line-height:1.5;word-break:keep-all}
-.rd-notice svg{flex:none}
+/* 상무(RD) 고정 결재 라인 안내(09-28) — 첨부 안내(att-notice one-line)와 같은 모양 · 같은 글자 크기. 배경 · 테두리 없이 글자만.
+   규칙이 켜질 때만 보인다(body.rd-rule). */
+.rd-notice{display:none;margin:0 0 10px}
 body.rd-rule .rd-notice{display:flex}
 body.rd-rule .rd-hide{display:none!important}
 .rd-only{display:none}
@@ -481,8 +489,15 @@ body.rd-rule .line-preview.rd-only{display:block}
         <div id="dev-filelist"></div>
 
         <div class="sec">6. 결재자 지정 (Approvers)</div>
-        <!-- RD 직보 · MC 본인 요청자(employee_search G열 Boss = RD)는 BU 1·2차 없이 RD → CFO 로 간다(09-28). applyRdRule() 이 body.rd-rule 로 켠다. -->
-        <div class="rd-notice" id="dev-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>MC 본인 요청 또는 RD 직보 건은 1·2차 BU 결재를 RD 결재 하나로 진행하며, 결재 라인이 고정으로 구성됩니다.</span></div>
+        <!-- RD 직속 · MC 본인 요청자(employee_search G열 Boss = RD)는 BU 1·2차 없이 RD → CFO 로 간다(09-28). applyRdRule() 이 body.rd-rule 로 켠다.
+             모양은 첨부 안내와 같다(작은 붉은 글자 두 줄 · 알약 없음). -->
+        <div class="att-notice one-line rd-notice" id="dev-rd-notice" role="note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div class="att-notice-main">MC 본인 요청 또는 RD 직속 조직의 요청 건은 1·2차 BU 결재를 RD 결재 하나로 진행합니다.</div>
+            <div class="att-notice-sub">결재 라인은 RD → CFO 로 자동 고정되며, 결재자를 따로 지정하지 않습니다.</div>
+          </div>
+        </div>
         <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Team Leader</span><span class="line-arrow">→</span></span>
@@ -593,7 +608,13 @@ body.rd-rule .line-preview.rd-only{display:block}
         <div id="ccl-filelist"></div>
 
         <div class="sec">4. 결재자 지정 (Approvers)</div>
-        <div class="rd-notice" id="ccl-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>MC 본인 요청 또는 RD 직보 건은 1차 결재를 RD 결재로 고정하여 진행하며, 결재 라인이 자동으로 구성됩니다.</span></div>
+        <div class="att-notice one-line rd-notice" id="ccl-rd-notice" role="note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div class="att-notice-main">MC 본인 요청 또는 RD 직속 조직의 요청 건은 1차 결재를 RD 결재로 진행합니다.</div>
+            <div class="att-notice-sub">결재 라인은 RD → CFO 로 자동 고정되며, 결재자를 따로 지정하지 않습니다.</div>
+          </div>
+        </div>
         <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Department Head</span><span class="line-arrow">→</span></span>
@@ -673,21 +694,23 @@ body.rd-rule .line-preview.rd-only{display:block}
     <!-- ══════════════ BP Master · 조회 (전 사용자) ══════════════ -->
     <div id="pane-bpview" style="display:none">
       <div class="bp-src" id="bp-src">
-        <span>📄 <b id="bp-src-name">-</b></span><span id="bp-src-meta">불러오는 중...</span>
-        <span class="sp"><button class="btn btn-g" style="padding:4px 10px;font-size:.74rem" onclick="loadBpMaster(true)">↻ 새로고침</button></span>
+        <span><b id="bp-src-name">-</b></span><span id="bp-src-meta"></span>
+        <span class="sp"><button class="btn btn-g" style="padding:4px 10px;font-size:.74rem" onclick="bpRefresh()">↻ 새로고침</button></span>
       </div>
       <div class="bp-tools" id="bp-tools">
         <span class="bp-chip on" data-t="" onclick="bpSetType('')">전체</span>
         <span class="bp-chip" data-t="Customer" onclick="bpSetType('Customer')">Customer</span>
         <span class="bp-chip" data-t="Vendor" onclick="bpSetType('Vendor')">Vendor</span>
         <span class="bp-chip" data-t="Employee" onclick="bpSetType('Employee')">Employee</span>
-        <select id="bp-st" onchange="renderBpList(true)" style="width:auto"><option value="">전체 상태</option><option value="on">활성</option><option value="off">비활성</option></select>
-        <input type="text" id="bp-q" oninput="renderBpList(true)" placeholder="코드 / 이름 / 한글이름 / 사업자등록번호 / 계좌 검색..." maxlength="60">
+        <select id="bp-st" onchange="bpSetStatus()" style="width:auto"><option value="">전체 상태</option><option value="on">활성</option><option value="off">비활성</option></select>
+        <!-- 검색은 입력 즉시가 아니라 「검색」(또는 Enter)을 눌러야 적용된다(09-28) — 검색어를 이력으로 남기기 위해. -->
+        <input type="text" id="bp-q" onkeydown="if(event.key==='Enter'){event.preventDefault();bpSearch();}" placeholder="코드 / 이름 / 한글이름 / 사업자등록번호 / 계좌 입력 후 검색" maxlength="60">
+        <button class="btn btn-p" id="bp-q-btn" style="padding:5px 14px;font-size:.74rem;white-space:nowrap" onclick="bpSearch()">검색</button>
         <span class="cnt" id="bp-count"></span>
       </div>
       <div class="tbl-wrap" id="bp-tbl"><table>
         <thead><tr><th style="width:96px">Code</th><th style="width:84px">유형</th><th>Name 1</th><th>한글이름</th><th style="width:130px">사업자등록번호</th><th style="width:150px">Bank</th><th style="width:150px">Account no.</th><th style="width:64px">상태</th><th style="width:60px;text-align:right">행</th><th class="bp-adm-col" style="width:66px"></th></tr></thead>
-        <tbody id="bp-body"><tr><td colspan="10" class="empty">불러오는 중...</td></tr></tbody>
+        <tbody id="bp-body"></tbody>
       </table></div>
       <div class="pg" id="bp-pg"></div>
     </div>
@@ -1230,6 +1253,12 @@ function cfgEmails(cfg, keys) {
   });
   return [...new Set(expanded)].map(k => (cfg && cfg[k] ? cfg[k].email : '')).filter(Boolean);
 }
+// 접두어 뒤에 1, 2, 3… 이 이어지는 키의 메일을 모은다(cfgEmails 는 _ADMIN_ · _IT_ 로 끝나는 접두어만 자동 확장한다).
+function cfgSeqEmails(cfg, prefix) {
+  const out = [];
+  for (let n = 1; cfg && cfg[prefix + n]; n++) if (cfg[prefix + n].email) out.push(cfg[prefix + n].email);
+  return out;
+}
 async function loadSystemConfig() {
   if (_sysConfig) return _sysConfig;
   try {
@@ -1330,8 +1359,8 @@ async function loadEmployees() {
 }
 const APPR_SLOTS = { dev: [1, 2], ccl: [1] };   // 직접 지정하는 결재 차수
 
-/* ── RD 직보 · MC 본인 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
-   employee_search 의 G열(Boss = 직속 상사)이 RD 인 요청자(MC 본인, RD 직보자)는 BU 1·2차 결재 없이 RD 한 단계로 간다.
+/* ── RD 직속 · MC 본인 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
+   employee_search 의 G열(Boss = 직속 상사)이 RD 인 요청자(MC 본인, RD 직속 조직)는 BU 1·2차 결재 없이 RD 한 단계로 간다.
      DEV: Team Leader → MC → CFO  ⇒  RD → CFO
      CCL: Department Head → CFO   ⇒  RD → CFO
    RD 는 system_config 의 ACC-OTHERS_RD(이름 · 메일). 없으면 이름 'Keuntae Dong' 을 직원 명부에서 찾아 메일을 채운다.
@@ -1350,7 +1379,7 @@ function applyRdRule() {
     if (p) RD_FIXED.email = p.email;
   }
   _rdRule = rdRuleApplies() && !!RD_FIXED.email;
-  if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 직보이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
+  if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 직속이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
   document.body.classList.toggle('rd-rule', _rdRule);
   ['dev', 'ccl'].forEach(cat => {
     const n = document.getElementById(cat + '-rd-name'), m = document.getElementById(cat + '-rd-view');
@@ -1444,8 +1473,10 @@ async function boot(account) {
     _configLoaded = true;
     ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP']);
     IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
-    // BP Master 관리자(09-28) — 전용 키 ACC-OTHERS_BP_ADMIN_N 이 있으면 그 명단 + ACC Others 관리자 · IT.
-    BP_ADMIN_EMAILS = [...new Set([...cfgEmails(cfg, ['ACC-OTHERS_BP_ADMIN_1']), ...ADMIN_EMAILS, ...IT_EMAILS].map(e => String(e || '').toLowerCase()).filter(Boolean))];
+    // BP Master 관리자(09-28) — ACC-OTHERS_ADMIN_N(ACC Others 관리자)과 BP 전담 키 ACC-OTHERS_ADMIN-BP_N 에 적힌 사람만.
+    //   IT(ACC-OTHERS_IT_N) · ADMIN_SP 는 자동으로 들어가지 않는다 — 필요하면 위 키에 적는다. (옛 표기 ACC-OTHERS_BP_ADMIN_N 도 읽는다)
+    BP_ADMIN_EMAILS = [...new Set([...cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1']), ...cfgSeqEmails(cfg, 'ACC-OTHERS_ADMIN-BP_'), ...cfgSeqEmails(cfg, 'ACC-OTHERS_BP_ADMIN_')]
+      .map(e => String(e || '').toLowerCase()).filter(Boolean))];
     // 헤더 BU Admin 연락처 — GW·IT 와 같은 규칙으로 설정 파일에서 읽는다.
     // 키: ACC-OTHERS_CONTACT (없으면 공통 CONTACT_EMAIL)
     const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '' }));
@@ -1546,7 +1577,14 @@ const BP_LOCK_TTL_MS = 5 * 60 * 1000;
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
-const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', editRow: null, bulk: [] };
+const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [] };
+/* 이력(09-28) — SharePoint Logging_data/ACC-Others/BP-Master/{Accessor|Admin}/YYYY-MM-DD/… 에 한 행위마다 JSON 한 개.
+   Accessor: 조회 열기 · 새로고침 · 유형(Customer/Vendor/Employee/전체) · 상태 필터 · 검색(검색어 포함).
+   Admin: 편집 시작 · 종료 · 등록 · 수정(전 · 후) · SAP(Be1) 붙여넣기 · 일괄 등록. 폴더는 logAction 이 없으면 만든다. */
+function bpLogAccess(action, detail) { logAction('BP-Master/Accessor', action, detail); }
+function bpLogAdmin(action, detail) { logAction('BP-Master/Admin', action, detail); }
+function bpFilterState() { return { type: _bp.type || '전체', status: { '': '전체', on: '활성', off: '비활성' }[document.getElementById('bp-st').value] || '전체', query: _bp.q || '' }; }
+function bpFileLabel(name) { return String(name || BP_MASTER_FILE).replace(/\.xlsx$/i, ''); }
 const _bpLock = { mine: false, eTag: '', holder: null, timer: null, itemId: null };
 function isBpAdmin() {
   const me = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
@@ -1558,9 +1596,15 @@ function bpCell(v) { return v == null ? '' : String(v).trim(); }
 
 async function bpOpenTab(tab) {
   document.getElementById('tab-bpadmin').style.display = isBpAdmin() ? '' : 'none';
+  bpLogAccess(tab === 'bpadmin' ? '관리 탭 열기' : '조회 열기', { cached: !!_bp.all.length });
   if (!_bp.all.length) await loadBpMaster(false);
   else renderBpList(false);
   if (tab === 'bpadmin') { await bpLockRefresh(); bpRenderAdminInfo(); }
+}
+function bpRefresh() {
+  if (_bp.loading) return _bp.loading;
+  bpLogAccess('새로고침', { ...bpFilterState(), rows: _bp.all.length });
+  return loadBpMaster(true);
 }
 
 /* ── 읽기 ── */
@@ -1568,8 +1612,9 @@ async function loadBpMaster(force) {
   if (_bp.loading) return _bp.loading;
   if (!force && _bp.all.length && Date.now() - _bp.loadedAt < 90000) { renderBpList(false); return; }
   const body = document.getElementById('bp-body');
-  if (body && !_bp.all.length) body.innerHTML = '<tr><td colspan="10" class="empty">BP 마스터를 불러오는 중... (약 14,000행)</td></tr>';
-  document.getElementById('bp-src-meta').textContent = '불러오는 중...';
+  // 다른 화면과 같은 차단 팝업(#loading) — 읽는 동안 다른 조작을 막는다. 표 안의 「불러오는 중」 글은 쓰지 않는다(09-28).
+  document.getElementById('bp-src-name').textContent = bpFileLabel(BP_MASTER_FILE);
+  loading(true, 'BP 마스터를 불러오는 중...');
   _bp.loading = (async () => {
     try {
       const t = await token();
@@ -1578,7 +1623,9 @@ async function loadBpMaster(force) {
       _bp.itemId = meta.id; _bp.meta = meta;
       const res = await fetch(GRAPH + '/drives/' + _bp.driveId + '/items/' + meta.id + '/content', { headers: { Authorization: 'Bearer ' + t } });
       if (!res.ok) throw new Error('파일 내려받기 실패 (' + res.status + ')');
-      const wb = XLSX.read(await res.arrayBuffer(), { type: 'array', cellDates: false });
+      const buf = await res.arrayBuffer();
+      await new Promise(r => setTimeout(r, 30));                   // 파싱(약 1초, 화면이 멈춘다) 전에 팝업이 먼저 그려지도록 한 번 양보
+      const wb = XLSX.read(buf, { type: 'array', cellDates: false });
       _bp.sheet = wb.SheetNames.includes(BP_MASTER_SHEET) ? BP_MASTER_SHEET : wb.SheetNames[0];
       const ws = wb.Sheets[_bp.sheet];
       const ref = XLSX.utils.decode_range(ws['!ref'] || 'A1');
@@ -1598,7 +1645,7 @@ async function loadBpMaster(force) {
       });
       _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now();
       const by = (meta.lastModifiedBy && meta.lastModifiedBy.user && meta.lastModifiedBy.user.displayName) || '';
-      document.getElementById('bp-src-name').textContent = meta.name || BP_MASTER_FILE;
+      document.getElementById('bp-src-name').textContent = bpFileLabel(meta.name);   // 확장자(.xlsx)는 빼고 보여 준다
       document.getElementById('bp-src-meta').textContent = '시트 ' + _bp.sheet + ' · ' + all.length.toLocaleString() + '건 · 마지막 수정 ' + fmtDate(meta.lastModifiedDateTime) + (by ? ' (' + by + ')' : '');
       renderBpList(true);
       bpRenderAdminInfo();
@@ -1607,7 +1654,7 @@ async function loadBpMaster(force) {
       console.warn('[BP] 로드 실패:', e.message);
       document.getElementById('bp-src-meta').textContent = '불러오지 못했습니다: ' + e.message;
       if (body) body.innerHTML = '<tr><td colspan="10" class="empty">BP 마스터를 불러오지 못했습니다. ' + esc(e.message) + '</td></tr>';
-    } finally { _bp.loading = null; }
+    } finally { _bp.loading = null; loading(false); }
   })();
   return _bp.loading;
 }
@@ -1615,10 +1662,22 @@ function bpSetType(t) {
   _bp.type = t;
   document.querySelectorAll('.bp-chip').forEach(c => c.classList.toggle('on', c.dataset.t === t));
   renderBpList(true);
+  bpLogAccess('유형 선택', { ...bpFilterState(), results: _bp.view.length });
+}
+function bpSetStatus() {
+  renderBpList(true);
+  bpLogAccess('상태 필터', { ...bpFilterState(), results: _bp.view.length });
+}
+/* 검색 — 입력 즉시 걸지 않고 「검색」 버튼(또는 Enter)으로 적용한다. 검색어와 결과 수를 이력에 남긴다(09-28). */
+function bpSearch() {
+  const q = (document.getElementById('bp-q').value || '').trim();
+  _bp.q = q;
+  renderBpList(true);
+  bpLogAccess(q ? '검색' : '검색 초기화', { ...bpFilterState(), results: _bp.view.length });
 }
 function renderBpList(resetPage) {
-  if (_bp.loading && !_bp.all.length) return;                      // 아직 읽는 중 — 「불러오는 중」 표시를 지우지 않는다
-  const q = (document.getElementById('bp-q').value || '').trim().toLowerCase();
+  if (_bp.loading && !_bp.all.length) return;                      // 아직 읽는 중 — 팝업이 닫힌 뒤 그린다
+  const q = (_bp.q || '').toLowerCase();
   const st = document.getElementById('bp-st').value;
   let items = _bp.all;
   if (_bp.type) items = items.filter(x => x.type === _bp.type);
@@ -1631,7 +1690,7 @@ function renderBpList(resetPage) {
   const pages = Math.max(1, Math.ceil(items.length / BP_PAGE));
   _bp.page = Math.min(_bp.page, pages);
   const cnt = document.getElementById('bp-count');
-  cnt.textContent = '총 ' + items.length.toLocaleString() + '건' + (items.length !== _bp.all.length ? ' / 전체 ' + _bp.all.length.toLocaleString() + '건' : '');
+  cnt.innerHTML = (q ? '검색 <span class="q">「' + esc(_bp.q) + '」</span> · ' : '') + '총 ' + items.length.toLocaleString() + '건' + (items.length !== _bp.all.length ? ' / 전체 ' + _bp.all.length.toLocaleString() + '건' : '');
   const admin = isBpAdmin();
   document.querySelectorAll('.bp-adm-col').forEach(el => el.style.display = admin ? '' : 'none');
   const body = document.getElementById('bp-body');
@@ -1693,7 +1752,7 @@ async function bpStartEdit() {
   try {
     if (!_bp.all.length) await loadBpMaster(false);
     const cur = await bpLockRead();
-    if (cur && cur.email.toLowerCase() !== bpMe()) { _bpLock.holder = cur; _bpLock.mine = false; bpRenderLock(); return; }
+    if (cur && cur.email.toLowerCase() !== bpMe()) { _bpLock.holder = cur; _bpLock.mine = false; bpRenderLock(); bpLogAdmin('편집 시작 실패', { reason: '다른 관리자 편집 중', holder: cur.email }); return; }
     const rec = { email: bpMe(), name: (user && user.name) || bpMe(), since: Date.now(), until: Date.now() + BP_LOCK_TTL_MS, tag: Math.random().toString(36).slice(2, 10) };
     const ok = await bpLockWrite(rec, !_bpLock.itemId);
     if (!ok) { await bpLockRefresh(); if (!_bpLock.mine) showAlert('다른 관리자가 먼저 편집을 시작했습니다.', '잠시 후 다시 시도해 주세요.', '🔒'); return; }
@@ -1703,11 +1762,13 @@ async function bpStartEdit() {
     if (!now || now.tag !== rec.tag) { _bpLock.mine = false; _bpLock.holder = now; bpRenderLock(); showAlert('다른 관리자가 먼저 편집을 시작했습니다.', '잠시 후 다시 시도해 주세요.', '🔒'); return; }
     _bpLock.token = await token();
     _bpLock.mine = true; _bpLock.holder = rec; bpStartHeartbeat(); bpRenderLock(); renderBpList(false);
+    bpLogAdmin('편집 시작', { until: new Date(rec.until).toISOString() });
   } catch (e) { showAlert('편집 모드를 켜지 못했습니다.', e.message, '⚠️'); }
   finally { btn.disabled = false; }
 }
 async function bpStopEdit(silent) {
   bpStopHeartbeat();
+  if (_bpLock.mine) bpLogAdmin('편집 종료', { since: _bpLock.holder && _bpLock.holder.since ? new Date(_bpLock.holder.since).toISOString() : '' });
   try { if (_bpLock.mine) await bpLockWrite({ email: '', name: '', since: 0, until: 0, releasedBy: bpMe(), at: Date.now() }, false); } catch (e) { console.warn('[BP] 잠금 해제 실패:', e.message); }
   _bpLock.mine = false; _bpLock.holder = null;
   if (!silent) { bpRenderLock(); bpResetForm(); renderBpList(false); }
@@ -1758,6 +1819,18 @@ window.addEventListener('beforeunload', () => {
     const rec = JSON.stringify({ email: '', name: '', since: 0, until: 0, releasedBy: bpMe(), at: Date.now() });
     fetch(GRAPH + '/drives/' + _bp.driveId + '/root:/' + BP_LOCK_FILE + ':/content', { method: 'PUT', keepalive: true,
       headers: { Authorization: 'Bearer ' + _bpLock.token, 'Content-Type': 'application/json', ...(_bpLock.eTag ? { 'If-Match': _bpLock.eTag } : {}) }, body: rec });
+    // 「편집 종료(창 닫힘)」 이력 — 폴더 만들기까지는 못 하므로 오늘 폴더가 이미 확인된 경우에만 남긴다(logAction 과 같은 파일 이름 규칙).
+    const now = kstNow(), p = n => String(n).padStart(2, '0');
+    const dateStr = now.getUTCFullYear() + '-' + p(now.getUTCMonth() + 1) + '-' + p(now.getUTCDate());
+    const folderPath = 'Logging_data/ACC-Others/BP-Master/Admin/' + dateStr;
+    if (_ensuredLogFolders.has(folderPath) && _logDriveId) {
+      const timeStr = p(now.getUTCHours()) + p(now.getUTCMinutes()) + p(now.getUTCSeconds());
+      const userTag = bpMe().split('@')[0].replace(/[^a-zA-Z0-9._-]/g, '_');
+      fetch(GRAPH + '/drives/' + _logDriveId + '/root:/' + folderPath + '/' + timeStr + '_' + userTag + '_' + Math.random().toString(36).slice(2, 6) + '.json:/content', {
+        method: 'PUT', keepalive: true, headers: { Authorization: 'Bearer ' + _bpLock.token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestampKST: dateStr + ' ' + p(now.getUTCHours()) + ':' + p(now.getUTCMinutes()) + ':' + p(now.getUTCSeconds()), user: bpMe(),
+          system: 'ACC-Others/BP-Master/Admin', action: '편집 종료(창 닫힘)', detail: {} }) });
+    }
   } catch (e) {}
 });
 
@@ -1813,12 +1886,13 @@ async function bpSave() {
   const miss = bpValidate(rec, isNew);
   if (miss.length) { alert('다음 항목을 확인해 주세요.\n\n· ' + miss.join('\n· ')); return; }
   const btn = document.getElementById('bp-save-btn'); btn.disabled = true;
+  bpFlushPasteLog();
   loading(true, isNew ? 'Excel 에 새 행을 기록하는 중... (처음 한 번은 10초쯤 걸릴 수 있습니다)' : 'Excel 행을 수정하는 중...');
   try {
     if (isNew) { const r = await bpMasterAppendRows([rec]); showAlert('등록되었습니다.', rec.code + ' · ' + r[0].toLocaleString() + '행', '✅'); }
     else { const r = await bpMasterUpsert({ ...rec, row: _bp.editRow }); showAlert('수정되었습니다.', rec.code + ' · ' + r.toLocaleString() + '행', '✅'); }
     bpResetForm(); renderBpList(false); bpRenderAdminInfo();
-  } catch (e) { alert('저장하지 못했습니다.\n\n' + e.message); }
+  } catch (e) { bpLogAdmin(isNew ? '등록 실패' : '수정 실패', { code: rec.code, row: _bp.editRow || null, error: e.message }); alert('저장하지 못했습니다.\n\n' + e.message); }
   finally { loading(false); btn.disabled = false; }
 }
 
@@ -1871,9 +1945,10 @@ async function bpMasterUpsert(rec) {
     const cur = await api(bpWb() + "/range(address='A" + row + ":A" + row + "')?$select=values");
     const curCode = bpCell(cur.values && cur.values[0] && cur.values[0][0]);
     if (curCode.toUpperCase() !== String(rec.code).toUpperCase()) throw new Error(row + '행의 코드가 화면과 다릅니다(' + (curCode || '빈 칸') + '). 새로고침 후 다시 시도해 주세요.');
+    const before = _bp.all.find(x => x.row === row) || null;
     await bpWriteRows(row, [rec]);
     bpApplyLocal(rec, row);
-    logAction('BP', '수정', { row, code: rec.code, type: rec.type, name: rec.name });
+    bpLogAdmin('수정', { row, code: rec.code, before: before ? bpLogRec(before) : null, after: bpLogRec(_bp.all.find(x => x.row === row)) });
     return row;
   }
   const rows = await bpMasterAppendRows([rec]);
@@ -1896,9 +1971,11 @@ async function bpMasterAppendRows(recs) {
   const got = (chk.values || []).map(r => bpCell(r && r[0]).toUpperCase());
   recs.forEach((r, i) => { if (got[i] !== r.code.toUpperCase()) throw new Error((start + i) + '행 기록 확인 실패 — Excel 값(' + (got[i] || '빈 칸') + ')이 다릅니다. 파일을 열어 확인해 주세요.'); });
   recs.forEach((r, i) => bpApplyLocal(r, start + i));
-  logAction('BP', recs.length > 1 ? '일괄 등록' : '등록', { rows: start + '~' + end, codes: recs.map(r => r.code).join(',') });
+  bpLogAdmin(recs.length > 1 ? '일괄 등록' : '등록', { rows: start + '~' + end, count: recs.length, codes: recs.map(r => r.code).join(','),
+    records: recs.map((r, i) => ({ row: start + i, ...bpLogRec(_bp.all.find(x => x.row === start + i)) })) });
   return recs.map((r, i) => start + i);
 }
+function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: x.bizNo, inactive: !!x.inactive, bank: x.bank, acct: x.acct } : null; }
 // 외부(BP Master 시스템 등)에서 같은 규칙으로 쓸 수 있게 이름을 고정해 둔다.
 window.bpMasterUpsert = bpMasterUpsert; window.bpMasterAppendRows = bpMasterAppendRows;
 
@@ -1919,12 +1996,26 @@ function bpParsePasteText(text) {
   });
   return out;
 }
+let _bpPasteTimer = null, _bpPasteLogged = '', _bpPastePending = null;
+function bpLogPasteLater(txt, recs, bulk) {
+  clearTimeout(_bpPasteTimer); _bpPastePending = null;
+  if (!txt.trim() || txt === _bpPasteLogged) return;
+  _bpPastePending = () => {
+    _bpPastePending = null; _bpPasteLogged = txt;
+    const bad = bulk ? bulk.filter(r => r.miss.length) : [];
+    bpLogAdmin('SAP(Be1) 붙여넣기', { lines: txt.split(/\r?\n/).filter(l => l.trim()).length, parsed: recs.length,
+      codes: recs.map(r => r.code).join(','), invalid: bad.length, invalidCodes: bad.map(r => r.code).join(','),
+      nextRow: bpNextRow(), preview: txt.length > 4000 ? txt.slice(0, 4000) + '…' : txt });
+  };
+  _bpPasteTimer = setTimeout(_bpPastePending, 1200);
+}
+function bpFlushPasteLog() { if (_bpPastePending) { clearTimeout(_bpPasteTimer); _bpPastePending(); } }
 function bpParsePaste() {
   const txt = document.getElementById('bp-paste').value;
   const recs = bpParsePasteText(txt);
   const wrap = document.getElementById('bp-prev-wrap');
-  if (!recs.length) { wrap.style.display = 'none'; _bp.bulk = []; return; }
-  if (recs.length === 1) { wrap.style.display = 'none'; _bp.bulk = []; bpResetForm(); bpFillForm(recs[0]); return; }
+  if (!recs.length) { wrap.style.display = 'none'; _bp.bulk = []; clearTimeout(_bpPasteTimer); _bpPastePending = null; return; }
+  if (recs.length === 1) { wrap.style.display = 'none'; _bp.bulk = []; bpResetForm(); bpFillForm(recs[0]); bpLogPasteLater(txt, recs, null); return; }
   _bp.bulk = recs.map(r => { const miss = bpValidate(r, true); const dup = miss.find(m => m.startsWith('이미 있는')); return { ...r, miss, dup: !!dup }; });
   // 붙여넣은 목록 안의 중복 코드도 표시
   const seen = {}; _bp.bulk.forEach(r => { if (seen[r.code]) { r.miss.push('붙여넣은 목록 안에서 중복'); r.dup = true; } seen[r.code] = true; });
@@ -1933,19 +2024,23 @@ function bpParsePaste() {
   document.getElementById('bp-prev-sum').textContent = recs.length + '건 중 등록 가능 ' + ok + '건' + (ok < recs.length ? ' · 문제 있는 행은 건너뜁니다' : '') + ' → ' + bpNextRow().toLocaleString() + '행부터';
   document.getElementById('bp-bulk-btn').disabled = !ok;
   wrap.style.display = '';
+  bpLogPasteLater(txt, recs, _bp.bulk);
 }
 function bpClearPaste() { document.getElementById('bp-paste').value = ''; bpParsePaste(); }
 async function bpBulkAdd() {
   const recs = _bp.bulk.filter(r => !r.miss.length).map(({ miss, dup, ...r }) => r);
   if (!recs.length) return;
   if (!confirm(recs.length + '건을 ' + bpNextRow().toLocaleString() + '행부터 Excel 에 기록합니다. 진행할까요?')) return;
+  const skipped = _bp.bulk.filter(r => r.miss.length);
+  bpFlushPasteLog();                                               // 붙여넣기 이력이 아직 안 남았으면 등록 전에 남긴다
   const btn = document.getElementById('bp-bulk-btn'); btn.disabled = true;
   loading(true, recs.length + '건을 Excel 에 기록하는 중...');
   try {
     const rows = await bpMasterAppendRows(recs);
+    if (skipped.length) bpLogAdmin('일괄 등록 건너뜀', { count: skipped.length, codes: skipped.map(r => r.code).join(','), reasons: skipped.map(r => r.code + ': ' + r.miss.join(' · ')) });
     showAlert(recs.length + '건 등록되었습니다.', rows[0].toLocaleString() + '~' + rows[rows.length - 1].toLocaleString() + '행', '✅');
     bpClearPaste(); renderBpList(true); bpRenderAdminInfo();
-  } catch (e) { alert('일괄 등록 중 오류가 났습니다.\n\n' + e.message + '\n\n목록을 새로고침해 어디까지 기록됐는지 확인해 주세요.'); }
+  } catch (e) { bpLogAdmin('일괄 등록 실패', { count: recs.length, codes: recs.map(r => r.code).join(','), error: e.message }); alert('일괄 등록 중 오류가 났습니다.\n\n' + e.message + '\n\n목록을 새로고침해 어디까지 기록됐는지 확인해 주세요.'); }
   finally { loading(false); btn.disabled = false; }
 }
 
@@ -2247,7 +2342,7 @@ function validate(cat) {
 }
 
 function buildApprovers(cat) {
-  // RD 직보 · MC 본인 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
+  // RD 직속 · MC 본인 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
   applyRdRule();
   if (_rdRule) {
     const cfo = cat === 'dev' ? DEV_CFO : CCL_CFO;
