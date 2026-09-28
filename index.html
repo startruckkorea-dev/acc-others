@@ -432,8 +432,8 @@ body.rd-rule .line-preview.rd-only{display:block}
         <div id="dev-filelist"></div>
 
         <div class="sec">6. 결재자 지정 (Approvers)</div>
-        <!-- 상무(RD) 소속 요청자(employee_search H열 Boss of Boss = RD)는 BU 1·2차 없이 RD → CFO 로 간다(09-28). applyRdRule() 이 body.rd-rule 로 켠다. -->
-        <div class="rd-notice" id="dev-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>상무 요청 건은 1·2차 BU 결재를 RD 결재 하나로 진행하며, 결재 라인이 고정으로 구성됩니다.</span></div>
+        <!-- RD 직보 · MC 본인 요청자(employee_search G열 Boss = RD)는 BU 1·2차 없이 RD → CFO 로 간다(09-28). applyRdRule() 이 body.rd-rule 로 켠다. -->
+        <div class="rd-notice" id="dev-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>MC 본인 요청 또는 RD 직보 건은 1·2차 BU 결재를 RD 결재 하나로 진행하며, 결재 라인이 고정으로 구성됩니다.</span></div>
         <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Team Leader</span><span class="line-arrow">→</span></span>
@@ -544,7 +544,7 @@ body.rd-rule .line-preview.rd-only{display:block}
         <div id="ccl-filelist"></div>
 
         <div class="sec">4. 결재자 지정 (Approvers)</div>
-        <div class="rd-notice" id="ccl-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>상무 요청 건은 1차 결재를 RD 결재로 고정하여 진행하며, 결재 라인이 자동으로 구성됩니다.</span></div>
+        <div class="rd-notice" id="ccl-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>MC 본인 요청 또는 RD 직보 건은 1차 결재를 RD 결재로 고정하여 진행하며, 결재 라인이 자동으로 구성됩니다.</span></div>
         <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Department Head</span><span class="line-arrow">→</span></span>
@@ -1202,8 +1202,8 @@ async function loadEmployees() {
       team: (r['Team'] || '').toString().trim(),
       name: (r['EngName'] || '').toString().trim(),
       email: (r['EMail'] || r['email'] || '').toString().trim(),
-      // G열 Boss = 직속 상사, H열 Boss of Boss = 부서장(AAC 와 같은 해석). RD 고정 결재 라인 판정에 쓴다(09-28).
-      boss2: (r['Boss of Boss'] || '').toString().trim()
+      // G열 Boss = 직속 상사(AAC 와 같은 해석). RD 고정 결재 라인 판정에 쓴다(09-28 — 처음엔 H열로 잘못 잡았다가 G열로 정정).
+      boss: (r['Boss'] || '').toString().trim()
     })).filter(r => r.email && r.name);
     ['dev', 'ccl'].forEach(initDept);
     applyRdRule();
@@ -1212,8 +1212,8 @@ async function loadEmployees() {
 }
 const APPR_SLOTS = { dev: [1, 2], ccl: [1] };   // 직접 지정하는 결재 차수
 
-/* ── 상무(RD) 소속 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
-   employee_search 의 H열(Boss of Boss = 부서장)이 RD 인 요청자는 BU 1·2차 결재 없이 RD 한 단계로 간다.
+/* ── RD 직보 · MC 본인 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
+   employee_search 의 G열(Boss = 직속 상사)이 RD 인 요청자(MC 본인, RD 직보자)는 BU 1·2차 결재 없이 RD 한 단계로 간다.
      DEV: Team Leader → MC → CFO  ⇒  RD → CFO
      CCL: Department Head → CFO   ⇒  RD → CFO
    RD 는 system_config 의 ACC-OTHERS_RD(이름 · 메일). 없으면 이름 'Keuntae Dong' 을 직원 명부에서 찾아 메일을 채운다.
@@ -1224,7 +1224,7 @@ function rdRuleApplies() {
   const mine = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
   const rec = employeeData.find(e => mine.includes((e.email || '').trim().toLowerCase()));
   if (!rec) return false;
-  return !!RD_FIXED.name && (rec.boss2 || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase();
+  return !!RD_FIXED.name && (rec.boss || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase();
 }
 function applyRdRule() {
   if (!RD_FIXED.email) {
@@ -1232,7 +1232,7 @@ function applyRdRule() {
     if (p) RD_FIXED.email = p.email;
   }
   _rdRule = rdRuleApplies() && !!RD_FIXED.email;
-  if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 소속이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
+  if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 직보이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
   document.body.classList.toggle('rd-rule', _rdRule);
   ['dev', 'ccl'].forEach(cat => {
     const n = document.getElementById(cat + '-rd-name'), m = document.getElementById(cat + '-rd-view');
@@ -1694,7 +1694,7 @@ function validate(cat) {
 }
 
 function buildApprovers(cat) {
-  // 상무(RD) 소속 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
+  // RD 직보 · MC 본인 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
   applyRdRule();
   if (_rdRule) {
     const cfo = cat === 'dev' ? DEV_CFO : CCL_CFO;
