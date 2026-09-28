@@ -1595,8 +1595,9 @@ function validate(cat) {
     if (!val('dev-a1-email')) miss.push('1차 결재자 (Team Leader)');
     if (!val('dev-a2-email')) miss.push('2차 결재자 (MC)');
     if (numVal('dev-amount') < 0) miss.push('금액은 0 이상이어야 합니다');
+    // 작성일은 오늘로 고정(readonly)이라 이 검사는 곧 「발생일이 미래」 다. 어느 날짜가 걸렸는지 보이게 두 값을 함께 적는다(09-28).
     if (val('dev-incident') && val('dev-date') && val('dev-incident') > val('dev-date'))
-      miss.push('발생일이 작성일보다 뒤일 수 없습니다');
+      miss.push('발생일(' + val('dev-incident') + ')이 작성일(' + val('dev-date') + ')보다 뒤일 수 없습니다 — 발생일은 오늘 또는 그 이전 날짜여야 합니다');
   } else {
     if (!val('ccl-date')) miss.push('Application Date (신청일)');
     if (!val('ccl-holder')) miss.push('Card Holder (카드 사용자)');
