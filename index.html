@@ -15,7 +15,10 @@
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;color:#252423;font-size:14px}
+/* 글꼴은 GW 와 같다 — 'Segoe UI' 하나만 쓰고(코드 · 숫자 칸도 같은 글꼴), 바탕 규칙도 GW 의 body 와 같게 둔다(09-28).
+   body 에 14px 을 두던 것을 GW 처럼 뺐다. 그 값을 물려받던 팝업 상자만 아래에서 14px 로 고정해 모양을 유지한다. */
+body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
+.mod-hd,.mod-bd,.modal-box{font-size:14px}
 .wrap{max-width:960px;margin:0 auto;padding:24px 16px 48px}
 /* 목록(내 신청·결재함·관리자)은 열이 많아 960px 로는 좁다. 목록 탭에서만 넓힌다(작성 화면은 그대로). */
 body.wide-list .wrap{max-width:1360px}
@@ -108,10 +111,10 @@ body.wide-list .wrap{max-width:1360px}
 .line-step-badge.fixed{background:#605e5c}
 .line-arrow{color:#8a8886;margin:0 2px}
 .fld.full{flex:0 0 100%}
-label{display:block;font-size:.76rem;font-weight:600;color:#323130;margin-bottom:5px}
+label{display:block;font-size:.75rem;font-weight:600;color:#323130;margin-bottom:5px}
 label .req{color:#a4262c;margin-left:2px}
 input[type=text],input[type=email],input[type=date],input[type=number],select,textarea{
-  width:100%;padding:8px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:.82rem;font-family:inherit;background:#fff}
+  width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:.82rem;font-family:inherit;background:#fff}
 /* 결재자 블록의 이름·이메일 칸은 읽기 전용 표시용이라 낮게 둔다(IT Ticket 과 같은 6px 10px · 13px).
    공통 입력 규칙(.fld …)이 뒤에 와서 이기던 탓에 40px 가까이 높아져 있었다(09-19). */
 .appr-info input{padding:5px 10px;font-size:13px;line-height:1.4;background:#f3f2f1;color:#605e5c;border:1px solid #d2d0ce;border-radius:4px;width:100%;box-sizing:border-box}
@@ -123,9 +126,9 @@ input:disabled,select:disabled,textarea:disabled{background:#f3f2f1;color:#605e5
 .chk input{width:14px;height:14px;cursor:pointer}
 
 /* 표 */
-table{width:100%;border-collapse:collapse;font-size:.8rem}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
 /* 표 머리 — 진한 남색 단색은 BP·GW 와 달리 무거웠다. 옅은 회색 바탕 + 진한 글자에 아래 선만 둔다(09-19). */
-th{background:#faf9f8;color:#323130;padding:7px 10px;text-align:left;font-weight:600;font-size:.74rem;
+th{background:#faf9f8;color:#323130;padding:7px 10px;text-align:left;font-weight:600;font-size:.75rem;
   white-space:nowrap;border-bottom:1px solid #edebe9}
 tbody tr:hover td{background:#f9fbfd}
 /* 행 간격 — 9px 은 한 화면에 들어가는 건수가 적어 스크롤이 잦았다(09-21 지적). */
@@ -196,7 +199,7 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-st{display:inline-block;border-radius:9px;padding:1px 8px;font-size:.68rem;font-weight:700;line-height:1.5;white-space:nowrap}
 .bp-st.on{background:#dff6dd;color:#107c10}
 .bp-st.off{background:#f3f2f1;color:#a19f9d}
-.bp-code{font-family:Consolas,'Segoe UI',monospace;font-weight:700;color:#0078d4;font-size:.78rem;white-space:nowrap}
+.bp-code{font-weight:700;color:#0078d4;font-size:.78rem;white-space:nowrap}
 .bp-lock{display:none;align-items:center;gap:8px;border-radius:6px;padding:5px 12px;margin-bottom:10px;font-size:.74rem;line-height:1.4}
 .bp-lock.show{display:flex}
 .bp-lock.other{background:#fff4ce;border:1px solid #f0d9a0;color:#7d5700}
@@ -213,7 +216,7 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-form .fld label .req{color:#a4262c;margin-left:2px}
 .bp-form input[type=text],.bp-form select{width:100%}
 .bp-paste{background:#fff;border:1px dashed #c7d2de;border-radius:6px;padding:10px 12px;margin-bottom:12px}
-.bp-paste textarea{width:100%;min-height:58px;font-size:.74rem;font-family:Consolas,'Segoe UI',monospace}
+.bp-paste textarea{width:100%;min-height:58px;font-size:.74rem}
 .bp-paste .hint{font-size:.7rem;color:#605e5c;margin:4px 0 6px;line-height:1.5}
 .bp-prev{margin:6px 0 10px;border:1px solid #edebe9;border-radius:6px;overflow:auto;max-height:260px}
 .bp-prev table{font-size:.74rem}
@@ -223,24 +226,24 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-edit-btn{padding:3px 9px;font-size:.7rem;border-radius:4px;border:1px solid #c7e0f4;background:#f0f6ff;color:#0078d4;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap}
 .bp-edit-btn:disabled{opacity:.45;cursor:not-allowed}
 .bp-row-new td{background:#f3fbf3}
-.bp-num{font-family:Consolas,'Segoe UI',monospace;font-size:.76rem;white-space:nowrap}
+.bp-num{font-size:.76rem;white-space:nowrap}
 .bp-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #d2d0ce;border-radius:14px;padding:3px 11px;font-size:.74rem;cursor:pointer;background:#fff;color:#605e5c;user-select:none}
 .bp-chip.on{background:#0078d4;border-color:#0078d4;color:#fff;font-weight:600}
 .bp-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 .bp-tools input[type=text]{flex:1;min-width:220px;max-width:420px}
 .bp-tools select,.bp-tools input[type=text]{padding:4px 9px;font-size:.76rem;height:30px;box-sizing:border-box;line-height:1.3}
 .bp-tools #bp-q-btn{height:30px;padding:0 14px;font-size:.74rem;white-space:nowrap}
-/* 이력 기록 안내 — 조회 · 관리 두 화면 맨 위, 한 줄 */
-.bp-audit{display:flex;align-items:center;gap:7px;font-size:.72rem;color:#3b5b7c;background:#f3f7fc;border:1px solid #d6e4f5;border-radius:6px;padding:5px 10px;margin:0 0 10px;line-height:1.5}
-.bp-audit svg{flex:none}
-.bp-audit b{color:#0f2744}
+/* 기록 안내 — 조회 · 관리 두 화면 맨 위, 한 줄. 주의를 뜻하는 노랑 계열(IT Ticket .notice.warn 과 같은 값 · 09-28). */
+.bp-audit{display:flex;align-items:center;gap:7px;font-size:.74rem;color:#7d5700;background:#fff4ce;border:1px solid #f0d9a0;border-radius:6px;padding:5px 10px;margin:0 0 10px;line-height:1.5}
+.bp-audit svg{flex:none;color:#b8860b}
+.bp-audit b{color:#5c4200}
 /* 조회 시작 전 — 「조회 시작」을 누를 때까지 목록을 읽지도 보여 주지도 않는다 */
 .bp-cta{border:1px dashed #c7d2de;border-radius:8px;padding:26px 20px;text-align:center;background:#fbfcfe;margin-bottom:12px}
 .bp-cta .t{font-size:.95rem;font-weight:700;color:#0f2744;margin-bottom:6px}
 .bp-cta .d{font-size:.76rem;color:#605e5c;line-height:1.65;margin-bottom:14px}
 /* SAP(Be1) 열 순서 — 번호 붙은 작은 칸. 진한 것만 기록 대상 */
 .be1-cols{display:flex;flex-wrap:wrap;gap:4px 5px;margin:6px 0 8px}
-.be1-cols .c{font-size:.66rem;border:1px solid #e1dfdd;border-radius:4px;padding:1px 6px;color:#a19f9d;background:#faf9f8;font-family:Consolas,'Segoe UI',monospace;white-space:nowrap;text-decoration:line-through;text-decoration-color:#d2d0ce}
+.be1-cols .c{font-size:.66rem;border:1px solid #e1dfdd;border-radius:4px;padding:1px 6px;color:#a19f9d;background:#faf9f8;white-space:nowrap;text-decoration:line-through;text-decoration-color:#d2d0ce}
 .be1-cols .c.u{color:#323130;border-color:#c7d2de;background:#fff;text-decoration:none}
 .be1-cols .c i{font-style:normal;color:#0078d4;font-weight:700;margin-right:4px}
 /* 이력 조회(관리자) */
@@ -249,24 +252,24 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-logs-hd .ttl{font-size:.82rem;font-weight:700;color:#323130;white-space:nowrap}
 .bp-logs-hd .desc{font-size:.72rem;color:#605e5c}
 .bp-logs-hd .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.bp-logs-hd input[type=month],.bp-logs-hd select{width:auto;padding:3px 8px;font-size:.76rem;height:30px;box-sizing:border-box}
-.bp-logs-hd .btn{height:30px;padding:0 12px;font-size:.74rem;white-space:nowrap}
+.bp-logs-hd input[type=month],.bp-logs-hd select{width:auto;padding:3px 8px;font-size:.76rem;height:28px;box-sizing:border-box}
+.bp-logs-hd .btn{height:28px;padding:0 12px;font-size:.74rem;white-space:nowrap}
 .bp-logs-bd{padding:10px 12px 12px;border-top:1px solid #e1dfdd}
 .bp-logs-tools{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
-.bp-logs-tools input[type=text]{flex:1;min-width:200px;max-width:360px;padding:4px 9px;font-size:.76rem;height:30px;box-sizing:border-box}
+.bp-logs-tools input[type=text]{flex:1;min-width:200px;max-width:360px;padding:3px 9px;font-size:.76rem;height:28px;box-sizing:border-box}
 .bp-logs-tools .cnt{margin-left:auto;font-size:.74rem;color:#605e5c}
-.bp-logs-tools .btn{height:30px;padding:0 12px;font-size:.72rem;white-space:nowrap}
+.bp-logs-tools .btn{height:24px;padding:0 9px;font-size:.68rem;font-weight:500;line-height:1;white-space:nowrap}
 .bp-log-tbl{font-size:.72rem}
 .bp-log-tbl th{padding:5px 8px;font-size:.68rem}
 .bp-log-tbl td{padding:3px 8px;line-height:1.35;font-size:.72rem;vertical-align:top}
 .bp-log-tbl tr.r{cursor:pointer}
 .bp-log-tbl tr.r:hover td{background:#f3f8fd}
-.bp-log-tbl td.t{font-family:Consolas,'Segoe UI',monospace;white-space:nowrap;color:#605e5c}
+.bp-log-tbl td.t{white-space:nowrap;color:#605e5c}
 .bp-log-tbl .act{font-weight:600;color:#323130;white-space:nowrap}
 .bp-log-tbl .sum{color:#605e5c;word-break:break-all}
 .bp-log-tbl .usr{color:#323130} .bp-log-tbl .usr small{color:#a19f9d;font-size:.66rem}
 .bp-log-tbl tr.detail td{background:#fafafa;padding:6px 10px 8px 28px}
-.bp-log-tbl pre{margin:0;font-size:.68rem;line-height:1.45;white-space:pre-wrap;word-break:break-all;color:#323130;font-family:Consolas,'Segoe UI',monospace}
+.bp-log-tbl pre{margin:0;font-size:.7rem;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:#323130;font-family:inherit}
 .bp-kind{display:inline-block;border-radius:9px;padding:0 7px;font-size:.62rem;font-weight:700;line-height:1.6;white-space:nowrap}
 .bp-kind.Accessor{background:#eef2f7;color:#3b5b7c}
 .bp-kind.Admin{background:#fdf1e3;color:#b45309}
@@ -736,10 +739,10 @@ body.rd-rule .line-preview.rd-only{display:block}
     <!-- ══════════════ 관리자 ══════════════ -->
     <!-- ══════════════ BP Master · 조회 (전 사용자) ══════════════ -->
     <div id="pane-bpview" style="display:none">
-      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>BP Master 의 <b>모든 접근 · 조회 · 검색 행위는 이력으로 저장</b>됩니다.</span></div>
+      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>이 화면에서의 <b>접근 · 조회 · 검색 내용은 모두 기록</b>됩니다.</span></div>
       <div class="bp-cta" id="bp-view-cta">
         <div class="t">BP 코드 조회</div>
-        <div class="d">「조회 시작」을 누르면 BP 마스터(약 14,000건)를 읽어 목록을 표시합니다.<br>조회 시작 · 검색 · 유형 선택 등 모든 행위가 이력으로 기록됩니다.</div>
+        <div class="d">「조회 시작」을 누르면 BP 마스터를 읽어 목록을 표시합니다.</div>
         <button class="btn btn-p" onclick="bpStartView()">🔍 조회 시작</button>
       </div>
       <div class="bp-src" id="bp-src" style="display:none">
@@ -768,7 +771,7 @@ body.rd-rule .line-preview.rd-only{display:block}
     <!-- Excel 을 열어 손으로 고치던 일을 웹에서 한다. 파일 전체를 다시 쓰지 않고 Graph Excel API 로 「해당 행만」 기록해
          다른 열 · 다른 행 · 서식은 건드리지 않는다. 동시 편집은 잠금 파일(acc_others_bp_lock.json)로 한 사람만 허용한다. -->
     <div id="pane-bpadmin" style="display:none">
-      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>BP Master 의 <b>모든 접근 · 조회 · 검색 · 편집 행위는 이력으로 저장</b>됩니다 — 아래 「접근 · 편집 이력」에서 달별로 볼 수 있습니다.</span></div>
+      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>접근 · 조회 · 검색 · 편집 내용은 모두 기록</b>되며, 아래 「접근 · 편집 이력」에서 달별로 확인할 수 있습니다.</span></div>
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
         <span class="sp"><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
 
@@ -810,13 +813,13 @@ body.rd-rule .line-preview.rd-only{display:block}
       </div>
       <div style="font-size:.72rem;color:#a19f9d;margin:0 0 10px;line-height:1.6">· 기록 대상: <b id="bp-adm-file">-</b> · 시트 <b id="bp-adm-sheet">-</b> · 신규 행은 <b id="bp-adm-next">-</b>행부터 이어서 기록됩니다(14,600행부터 사용). 유형이 Customer · Vendor · Employee 인 행만 다루며 다른 행 · 다른 열은 건드리지 않습니다.
         · 조회 · 수정은 아래 목록(조회 탭과 같은 목록)에서 「수정」을 누르세요.
-        · <b>모든 접근 · 조회 · 검색 · 편집 행위는 이력으로 남습니다</b> — SharePoint STK-DB <b>Logging_data/ACC-Others/BP-Master/Accessor · Admin</b> 에 날짜별 JSON 으로 기록되며, 아래에서 달 단위로 확인할 수 있습니다.</div>
+        · <b>접근 · 조회 · 검색 · 편집 내용은 모두 기록됩니다</b> — SharePoint STK-DB <b>Logging_data/ACC-Others/BP-Master/Accessor · Admin</b> 에 날짜별 JSON 으로 남으며, 아래에서 달 단위로 확인할 수 있습니다.</div>
 
       <!-- 이력 조회 — 달 단위. 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
       <div class="bp-logs" id="bp-logs">
         <div class="bp-logs-hd">
-          <span class="ttl">📜 접근 · 편집 이력</span>
-          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 이력을 한 달 단위로 읽습니다.</span>
+          <span class="ttl">접근 · 편집 이력</span>
+          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 기록을 한 달 단위로 읽습니다.</span>
           <span class="sp">
             <input type="month" id="bp-log-month">
             <select id="bp-log-kind"><option value="">Accessor + Admin</option><option value="Accessor">Accessor (조회 · 검색)</option><option value="Admin">Admin (편집)</option></select>
@@ -827,11 +830,11 @@ body.rd-rule .line-preview.rd-only{display:block}
           <div class="bp-logs-tools">
             <input type="text" id="bp-log-q" oninput="bpRenderLogs(true)" placeholder="사용자 / 행위 / 내용으로 거르기" maxlength="60">
             <span class="cnt" id="bp-log-count"></span>
-            <button class="btn btn-g" onclick="bpExportLogs()">📊 Excel</button>
+            <button class="btn btn-g" onclick="bpExportLogs()">Excel 내보내기</button>
             <button class="btn btn-g" onclick="document.getElementById('bp-logs-body').style.display='none'">접기</button>
           </div>
           <div class="tbl-wrap"><table class="bp-log-tbl">
-            <thead><tr><th style="width:118px">일시</th><th style="width:76px">구분</th><th style="width:210px">사용자</th><th style="width:130px">행위</th><th>내용 <span style="font-weight:400;color:#a19f9d">(행을 누르면 상세)</span></th></tr></thead>
+            <thead><tr><th style="width:118px">일시</th><th style="width:76px">구분</th><th style="width:200px">사용자</th><th style="width:130px">행위</th><th>내용 <span style="font-weight:400;color:#a19f9d">(행을 누르면 상세)</span></th></tr></thead>
             <tbody id="bp-log-rows"></tbody>
           </table></div>
           <div class="pg" id="bp-log-pg"></div>
@@ -2146,11 +2149,7 @@ async function bpLoadLogs() {
   } catch (e) { alert('이력을 읽지 못했습니다.\n\n' + e.message); }
   finally { loading(false); btn.disabled = false; }
 }
-function bpLogUser(email) {
-  const m = String(email || '').toLowerCase();
-  const r = employeeData.find(x => (x.email || '').toLowerCase() === m);
-  return r && r.name ? '<span class="usr">' + esc(r.name) + ' <small>' + esc(m) + '</small></span>' : '<span class="usr">' + esc(m) + '</span>';
-}
+function bpLogUser(email) { return '<span class="usr">' + esc(String(email || '').toLowerCase()) + '</span>'; }   // 메일만(이름은 Excel 내보내기에만 · 09-28)
 /* 한 줄 요약 — 행위별로 사람이 읽기 좋은 꼴. 상세(JSON)는 행을 누르면 편다. */
 function bpLogSummary(e) {
   const d = e.detail || {}, a = e.action || '';
