@@ -186,7 +186,7 @@ tbody tr:hover{background:#f8f9fb}
 /* ── BP Master(09-28) — 카테고리 전용 탭 · 잠금 배너 · 유형 알약 ── */
 body.cat-bp .tab:not(.bp-tab){display:none}
 body:not(.cat-bp) .bp-tab{display:none}
-.bp-src{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:#f8faff;border:1px solid #dbe7f5;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:.74rem;color:#3b5b7c}
+.bp-src{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;background:#f8faff;border:1px solid #dbe7f5;border-radius:6px;padding:6px 12px;margin-bottom:10px;font-size:.74rem;color:#3b5b7c}
 .bp-src b{color:#0f2744}
 .bp-src .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
 .bp-type{display:inline-block;border-radius:9px;padding:1px 8px;font-size:.68rem;font-weight:700;line-height:1.5;white-space:nowrap}
@@ -197,12 +197,13 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-st.on{background:#dff6dd;color:#107c10}
 .bp-st.off{background:#f3f2f1;color:#a19f9d}
 .bp-code{font-family:Consolas,'Segoe UI',monospace;font-weight:700;color:#0078d4;font-size:.78rem;white-space:nowrap}
-.bp-lock{display:none;align-items:center;gap:10px;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;line-height:1.5}
+.bp-lock{display:none;align-items:center;gap:8px;border-radius:6px;padding:5px 12px;margin-bottom:10px;font-size:.74rem;line-height:1.4}
 .bp-lock.show{display:flex}
 .bp-lock.other{background:#fff4ce;border:1px solid #f0d9a0;color:#7d5700}
 .bp-lock.mine{background:#dff6dd;border:1px solid #bfe6bd;color:#0b5a0b}
 .bp-lock.free{background:#f3f2f1;border:1px solid #e1dfdd;color:#605e5c}
-.bp-lock .ico{font-size:1.05rem;line-height:1}
+.bp-lock .ico{font-size:.9rem;line-height:1}
+.bp-lock .chk{color:inherit;opacity:.7;font-weight:400}
 .bp-lock .sp{margin-left:auto;display:flex;gap:6px;align-items:center;white-space:nowrap}
 .bp-lock .who{font-weight:700}
 .bp-form{background:#f9f9f9;border:1px solid #edebe9;border-radius:6px;padding:14px 16px 6px;margin-bottom:14px}
@@ -227,6 +228,48 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-chip.on{background:#0078d4;border-color:#0078d4;color:#fff;font-weight:600}
 .bp-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 .bp-tools input[type=text]{flex:1;min-width:220px;max-width:420px}
+.bp-tools select,.bp-tools input[type=text]{padding:4px 9px;font-size:.76rem;height:30px;box-sizing:border-box;line-height:1.3}
+.bp-tools #bp-q-btn{height:30px;padding:0 14px;font-size:.74rem;white-space:nowrap}
+/* 이력 기록 안내 — 조회 · 관리 두 화면 맨 위, 한 줄 */
+.bp-audit{display:flex;align-items:center;gap:7px;font-size:.72rem;color:#3b5b7c;background:#f3f7fc;border:1px solid #d6e4f5;border-radius:6px;padding:5px 10px;margin:0 0 10px;line-height:1.5}
+.bp-audit svg{flex:none}
+.bp-audit b{color:#0f2744}
+/* 조회 시작 전 — 「조회 시작」을 누를 때까지 목록을 읽지도 보여 주지도 않는다 */
+.bp-cta{border:1px dashed #c7d2de;border-radius:8px;padding:26px 20px;text-align:center;background:#fbfcfe;margin-bottom:12px}
+.bp-cta .t{font-size:.95rem;font-weight:700;color:#0f2744;margin-bottom:6px}
+.bp-cta .d{font-size:.76rem;color:#605e5c;line-height:1.65;margin-bottom:14px}
+/* SAP(Be1) 열 순서 — 번호 붙은 작은 칸. 진한 것만 기록 대상 */
+.be1-cols{display:flex;flex-wrap:wrap;gap:4px 5px;margin:6px 0 8px}
+.be1-cols .c{font-size:.66rem;border:1px solid #e1dfdd;border-radius:4px;padding:1px 6px;color:#a19f9d;background:#faf9f8;font-family:Consolas,'Segoe UI',monospace;white-space:nowrap;text-decoration:line-through;text-decoration-color:#d2d0ce}
+.be1-cols .c.u{color:#323130;border-color:#c7d2de;background:#fff;text-decoration:none}
+.be1-cols .c i{font-style:normal;color:#0078d4;font-weight:700;margin-right:4px}
+/* 이력 조회(관리자) */
+.bp-logs{border:1px solid #e1dfdd;border-radius:8px;margin:0 0 14px;background:#fff}
+.bp-logs-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px;background:#faf9f8;border-radius:8px 8px 0 0}
+.bp-logs-hd .ttl{font-size:.82rem;font-weight:700;color:#323130;white-space:nowrap}
+.bp-logs-hd .desc{font-size:.72rem;color:#605e5c}
+.bp-logs-hd .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bp-logs-hd input[type=month],.bp-logs-hd select{width:auto;padding:3px 8px;font-size:.76rem;height:30px;box-sizing:border-box}
+.bp-logs-hd .btn{height:30px;padding:0 12px;font-size:.74rem;white-space:nowrap}
+.bp-logs-bd{padding:10px 12px 12px;border-top:1px solid #e1dfdd}
+.bp-logs-tools{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.bp-logs-tools input[type=text]{flex:1;min-width:200px;max-width:360px;padding:4px 9px;font-size:.76rem;height:30px;box-sizing:border-box}
+.bp-logs-tools .cnt{margin-left:auto;font-size:.74rem;color:#605e5c}
+.bp-logs-tools .btn{height:30px;padding:0 12px;font-size:.72rem;white-space:nowrap}
+.bp-log-tbl{font-size:.72rem}
+.bp-log-tbl th{padding:5px 8px;font-size:.68rem}
+.bp-log-tbl td{padding:3px 8px;line-height:1.35;font-size:.72rem;vertical-align:top}
+.bp-log-tbl tr.r{cursor:pointer}
+.bp-log-tbl tr.r:hover td{background:#f3f8fd}
+.bp-log-tbl td.t{font-family:Consolas,'Segoe UI',monospace;white-space:nowrap;color:#605e5c}
+.bp-log-tbl .act{font-weight:600;color:#323130;white-space:nowrap}
+.bp-log-tbl .sum{color:#605e5c;word-break:break-all}
+.bp-log-tbl .usr{color:#323130} .bp-log-tbl .usr small{color:#a19f9d;font-size:.66rem}
+.bp-log-tbl tr.detail td{background:#fafafa;padding:6px 10px 8px 28px}
+.bp-log-tbl pre{margin:0;font-size:.68rem;line-height:1.45;white-space:pre-wrap;word-break:break-all;color:#323130;font-family:Consolas,'Segoe UI',monospace}
+.bp-kind{display:inline-block;border-radius:9px;padding:0 7px;font-size:.62rem;font-weight:700;line-height:1.6;white-space:nowrap}
+.bp-kind.Accessor{background:#eef2f7;color:#3b5b7c}
+.bp-kind.Admin{background:#fdf1e3;color:#b45309}
 .bp-tools .cnt{margin-left:auto;font-size:.78rem;color:#605e5c;white-space:nowrap}
 .bp-tools .cnt .q{color:#0078d4;font-weight:600}
 /* 표 글자(09-28) — 이름 · 은행처럼 길어 두 줄이 되는 칸이 많다. 한 단계 작게 해 행 높이를 줄인다(BP 표에만). */
@@ -693,11 +736,17 @@ body.rd-rule .line-preview.rd-only{display:block}
     <!-- ══════════════ 관리자 ══════════════ -->
     <!-- ══════════════ BP Master · 조회 (전 사용자) ══════════════ -->
     <div id="pane-bpview" style="display:none">
-      <div class="bp-src" id="bp-src">
+      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>BP Master 의 <b>모든 접근 · 조회 · 검색 행위는 이력으로 저장</b>됩니다.</span></div>
+      <div class="bp-cta" id="bp-view-cta">
+        <div class="t">BP 코드 조회</div>
+        <div class="d">「조회 시작」을 누르면 BP 마스터(약 14,000건)를 읽어 목록을 표시합니다.<br>조회 시작 · 검색 · 유형 선택 등 모든 행위가 이력으로 기록됩니다.</div>
+        <button class="btn btn-p" onclick="bpStartView()">🔍 조회 시작</button>
+      </div>
+      <div class="bp-src" id="bp-src" style="display:none">
         <span><b id="bp-src-name">-</b></span><span id="bp-src-meta"></span>
         <span class="sp"><button class="btn btn-g" style="padding:4px 10px;font-size:.74rem" onclick="bpRefresh()">↻ 새로고침</button></span>
       </div>
-      <div class="bp-tools" id="bp-tools">
+      <div class="bp-tools" id="bp-tools" style="display:none">
         <span class="bp-chip on" data-t="" onclick="bpSetType('')">전체</span>
         <span class="bp-chip" data-t="Customer" onclick="bpSetType('Customer')">Customer</span>
         <span class="bp-chip" data-t="Vendor" onclick="bpSetType('Vendor')">Vendor</span>
@@ -708,26 +757,28 @@ body.rd-rule .line-preview.rd-only{display:block}
         <button class="btn btn-p" id="bp-q-btn" style="padding:5px 14px;font-size:.74rem;white-space:nowrap" onclick="bpSearch()">검색</button>
         <span class="cnt" id="bp-count"></span>
       </div>
-      <div class="tbl-wrap" id="bp-tbl"><table>
+      <div class="tbl-wrap" id="bp-tbl" style="display:none"><table>
         <thead><tr><th style="width:96px">Code</th><th style="width:84px">유형</th><th>Name 1</th><th>한글이름</th><th style="width:130px">사업자등록번호</th><th style="width:150px">Bank</th><th style="width:150px">Account no.</th><th style="width:64px">상태</th><th style="width:60px;text-align:right">행</th><th class="bp-adm-col" style="width:66px"></th></tr></thead>
         <tbody id="bp-body"></tbody>
       </table></div>
-      <div class="pg" id="bp-pg"></div>
+      <div class="pg" id="bp-pg" style="display:none"></div>
     </div>
 
     <!-- ══════════════ BP Master · 관리 (관리자) ══════════════ -->
     <!-- Excel 을 열어 손으로 고치던 일을 웹에서 한다. 파일 전체를 다시 쓰지 않고 Graph Excel API 로 「해당 행만」 기록해
          다른 열 · 다른 행 · 서식은 건드리지 않는다. 동시 편집은 잠금 파일(acc_others_bp_lock.json)로 한 사람만 허용한다. -->
     <div id="pane-bpadmin" style="display:none">
+      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>BP Master 의 <b>모든 접근 · 조회 · 검색 · 편집 행위는 이력으로 저장</b>됩니다 — 아래 「접근 · 편집 이력」에서 달별로 볼 수 있습니다.</span></div>
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
-        <span class="sp"><button class="btn btn-p" id="bp-lock-btn" style="padding:5px 12px;font-size:.76rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
+        <span class="sp"><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
 
       <div id="bp-admin-tools" style="opacity:.55;pointer-events:none">
         <div class="bp-paste">
           <div style="font-size:.78rem;font-weight:700;color:#323130">SAP(Be1) 내보내기 붙여넣기 <span style="font-weight:400;color:#605e5c">— 선택</span></div>
-          <div class="hint">Be1 「BP Excel Export」 행을 그대로 붙여 넣으세요(머리글 포함 가능 · 여러 행 가능). 열 순서: BP Code · BP Type · BP Name · Foreign Name · Contract Number · E-Mail · Creation Date · VAT Reg. Number · Inactive · Concur Employee ID · Default Bank · Default Account.
+          <div class="hint">Be1 「BP Excel Export」 행을 그대로 붙여 넣으세요(머리글 포함 가능 · 여러 행 가능). 탭으로 나뉜 12개 열을 아래 순서로 읽습니다 — <b>진한 열만 기록</b>하고 흐린 열은 무시합니다.
             한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다.</div>
-          <textarea id="bp-paste" placeholder="C0000371	Customer	Byeon, Ha-beom	변하범	M26091065		2026-09-23	 	No		-1	" oninput="bpParsePaste()"></textarea>
+          <div class="be1-cols" id="be1-cols"></div>
+          <textarea id="bp-paste" placeholder="C0000371	Customer	Hong, Gil-dong	홍길동	M26091065		2026-09-23	 	No		-1	" oninput="bpParsePaste()"></textarea>
           <div id="bp-prev-wrap" style="display:none">
             <div class="bp-prev"><table><thead><tr><th>#</th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th>상태</th><th>검사</th></tr></thead><tbody id="bp-prev-body"></tbody></table></div>
             <div style="display:flex;gap:8px;align-items:center"><span id="bp-prev-sum" style="font-size:.74rem;color:#605e5c"></span>
@@ -758,7 +809,34 @@ body.rd-rule .line-preview.rd-only{display:block}
         </div>
       </div>
       <div style="font-size:.72rem;color:#a19f9d;margin:0 0 10px;line-height:1.6">· 기록 대상: <b id="bp-adm-file">-</b> · 시트 <b id="bp-adm-sheet">-</b> · 신규 행은 <b id="bp-adm-next">-</b>행부터 이어서 기록됩니다(14,600행부터 사용). 유형이 Customer · Vendor · Employee 인 행만 다루며 다른 행 · 다른 열은 건드리지 않습니다.
-        · 조회 · 수정은 아래 목록(조회 탭과 같은 목록)에서 「수정」을 누르세요.</div>
+        · 조회 · 수정은 아래 목록(조회 탭과 같은 목록)에서 「수정」을 누르세요.
+        · <b>모든 접근 · 조회 · 검색 · 편집 행위는 이력으로 남습니다</b> — SharePoint STK-DB <b>Logging_data/ACC-Others/BP-Master/Accessor · Admin</b> 에 날짜별 JSON 으로 기록되며, 아래에서 달 단위로 확인할 수 있습니다.</div>
+
+      <!-- 이력 조회 — 달 단위. 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
+      <div class="bp-logs" id="bp-logs">
+        <div class="bp-logs-hd">
+          <span class="ttl">📜 접근 · 편집 이력</span>
+          <span class="desc">조회 · 검색(Accessor) · 편집(Admin) 이력을 한 달 단위로 읽습니다.</span>
+          <span class="sp">
+            <input type="month" id="bp-log-month">
+            <select id="bp-log-kind"><option value="">Accessor + Admin</option><option value="Accessor">Accessor (조회 · 검색)</option><option value="Admin">Admin (편집)</option></select>
+            <button class="btn btn-p" id="bp-log-btn" onclick="bpLoadLogs()">불러오기</button>
+          </span>
+        </div>
+        <div class="bp-logs-bd" id="bp-logs-body" style="display:none">
+          <div class="bp-logs-tools">
+            <input type="text" id="bp-log-q" oninput="bpRenderLogs(true)" placeholder="사용자 / 행위 / 내용으로 거르기" maxlength="60">
+            <span class="cnt" id="bp-log-count"></span>
+            <button class="btn btn-g" onclick="bpExportLogs()">📊 Excel</button>
+            <button class="btn btn-g" onclick="document.getElementById('bp-logs-body').style.display='none'">접기</button>
+          </div>
+          <div class="tbl-wrap"><table class="bp-log-tbl">
+            <thead><tr><th style="width:118px">일시</th><th style="width:76px">구분</th><th style="width:210px">사용자</th><th style="width:130px">행위</th><th>내용 <span style="font-weight:400;color:#a19f9d">(행을 누르면 상세)</span></th></tr></thead>
+            <tbody id="bp-log-rows"></tbody>
+          </table></div>
+          <div class="pg" id="bp-log-pg"></div>
+        </div>
+      </div>
       <div id="bp-admin-list"></div>
     </div>
 
@@ -1577,7 +1655,7 @@ const BP_LOCK_TTL_MS = 5 * 60 * 1000;
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
-const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [] };
+const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [], viewOpened: false };
 /* 이력(09-28) — SharePoint Logging_data/ACC-Others/BP-Master/{Accessor|Admin}/YYYY-MM-DD/… 에 한 행위마다 JSON 한 개.
    Accessor: 조회 열기 · 새로고침 · 유형(Customer/Vendor/Employee/전체) · 상태 필터 · 검색(검색어 포함).
    Admin: 편집 시작 · 종료 · 등록 · 수정(전 · 후) · SAP(Be1) 붙여넣기 · 일괄 등록. 폴더는 logAction 이 없으면 만든다. */
@@ -1596,10 +1674,26 @@ function bpCell(v) { return v == null ? '' : String(v).trim(); }
 
 async function bpOpenTab(tab) {
   document.getElementById('tab-bpadmin').style.display = isBpAdmin() ? '' : 'none';
-  bpLogAccess(tab === 'bpadmin' ? '관리 탭 열기' : '조회 열기', { cached: !!_bp.all.length });
+  if (tab === 'bpadmin') bpLogAdmin('관리 탭 열기', { cached: !!_bp.all.length });
+  else bpLogAccess('조회 열기', { cached: !!_bp.all.length, started: _bp.viewOpened });
+  // 조회 탭은 「조회 시작」을 누를 때까지 목록을 읽지도 보여 주지도 않는다(09-28). 관리 탭은 중복 검사 때문에 바로 읽는다.
+  if (tab === 'bpview' && !_bp.viewOpened) { bpPlaceList(); return; }
   if (!_bp.all.length) await loadBpMaster(false);
   else renderBpList(false);
-  if (tab === 'bpadmin') { await bpLockRefresh(); bpRenderAdminInfo(); }
+  if (tab === 'bpadmin') { bpRenderAdminInfo(); await bpLockRefresh(); }
+}
+async function bpStartView() {
+  _bp.viewOpened = true;
+  bpLogAccess('조회 시작', { cached: !!_bp.all.length });
+  if (!_bp.all.length) await loadBpMaster(false); else renderBpList(true);
+}
+/* 목록 요소(파일 줄 · 도구 줄 · 표 · 쪽수)는 하나뿐이다 — 열려 있는 탭 아래로 옮기고, 조회 탭에서는 「조회 시작」 뒤에만 보인다. */
+function bpPlaceList() {
+  const admWrap = document.getElementById('bp-admin-list'), viewPane = document.getElementById('pane-bpview');
+  const inAdmin = _bpTab === 'bpadmin' && _currentCat === 'bp';
+  const target = inAdmin ? admWrap : viewPane, show = inAdmin || _bp.viewOpened;
+  ['bp-src', 'bp-tools', 'bp-tbl', 'bp-pg'].forEach(id => { const el = document.getElementById(id); if (el.parentNode !== target) target.appendChild(el); el.style.display = show ? '' : 'none'; });
+  const cta = document.getElementById('bp-view-cta'); if (cta) cta.style.display = (!inAdmin && !_bp.viewOpened) ? '' : 'none';
 }
 function bpRefresh() {
   if (_bp.loading) return _bp.loading;
@@ -1691,7 +1785,7 @@ function renderBpList(resetPage) {
   _bp.page = Math.min(_bp.page, pages);
   const cnt = document.getElementById('bp-count');
   cnt.innerHTML = (q ? '검색 <span class="q">「' + esc(_bp.q) + '」</span> · ' : '') + '총 ' + items.length.toLocaleString() + '건' + (items.length !== _bp.all.length ? ' / 전체 ' + _bp.all.length.toLocaleString() + '건' : '');
-  const admin = isBpAdmin();
+  const admin = isBpAdmin() && _bpTab === 'bpadmin';                 // 「수정」 열은 관리 탭에서만(조회 탭에는 없다 · 09-28)
   document.querySelectorAll('.bp-adm-col').forEach(el => el.style.display = admin ? '' : 'none');
   const body = document.getElementById('bp-body');
   const slice = items.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE);
@@ -1709,11 +1803,7 @@ function renderBpList(resetPage) {
   pg.innerHTML = items.length > BP_PAGE ?
     '<button onclick="bpGoPage(' + (_bp.page - 1) + ')"' + (_bp.page <= 1 ? ' disabled' : '') + '>‹</button><span>' + _bp.page + ' / ' + pages + '</span>' +
     '<button onclick="bpGoPage(' + (_bp.page + 1) + ')"' + (_bp.page >= pages ? ' disabled' : '') + '>›</button>' : '';
-  // 관리 탭에도 같은 목록을 보여 준다(표 DOM 하나를 옮겨 붙이는 대신 어느 탭이 열려 있는지에 따라 위치만 바꾼다)
-  const admWrap = document.getElementById('bp-admin-list'), viewPane = document.getElementById('pane-bpview');
-  const tools = document.getElementById('bp-tools'), tbl = document.getElementById('bp-tbl'), src = document.getElementById('bp-src');
-  const target = (_bpTab === 'bpadmin' && _currentCat === 'bp') ? admWrap : viewPane;
-  if (tools.parentNode !== target) { [src, tools, tbl, pg].forEach(el => target.appendChild(el)); }
+  bpPlaceList();                                                     // 열려 있는 탭 아래로
 }
 function bpGoPage(n) { _bp.page = n; renderBpList(false); }
 
@@ -1742,11 +1832,18 @@ function bpMe() { return (user && user.email || user && user.username || '').toL
 async function bpLockRefresh() {
   if (!_bp.driveId) { try { _bp.driveId = await getDocDriveId(); } catch (e) { return; } }
   const h = await bpLockRead();
+  _bpLock.checkedAt = Date.now();
   if (h && h.email.toLowerCase() === bpMe()) { _bpLock.mine = true; _bpLock.holder = h; bpStartHeartbeat(); }
   else { _bpLock.mine = false; _bpLock.holder = h; bpStopHeartbeat(); }
   bpRenderLock(); renderBpList(false);
 }
 async function bpToggleEdit() { if (_bpLock.mine) await bpStopEdit(); else await bpStartEdit(); }
+/* 「상태 확인」 — 눌러도 아무 반응이 없어 보였다(09-28). 팝업을 띄우고, 배너에 확인 시각을 적는다. */
+async function bpCheckLock() {
+  loading(true, '잠금 상태를 확인하는 중...');
+  try { await bpLockRefresh(); } finally { loading(false); }
+  bpLogAdmin('잠금 상태 확인', { holder: _bpLock.holder ? _bpLock.holder.email : '', mine: _bpLock.mine });
+}
 async function bpStartEdit() {
   const btn = document.getElementById('bp-lock-btn'); btn.disabled = true;
   try {
@@ -1793,21 +1890,24 @@ function bpRenderLock() {
   box.classList.remove('other', 'mine', 'free'); box.classList.add('show');
   const h = _bpLock.holder;
   const hm = (ms) => { const d = new Date(Number(ms) + 9 * 3600 * 1000); return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0'); };
+  const hms = (ms) => { const d = new Date(Number(ms) + 9 * 3600 * 1000); return hm(ms) + ':' + String(d.getUTCSeconds()).padStart(2, '0'); };
+  const BTN = 'padding:3px 10px;font-size:.72rem';
   if (_bpLock.mine) {
     box.classList.add('mine'); box.querySelector('.ico').textContent = '✏️';
     txt.innerHTML = '<span class="who">편집 모드</span> — ' + esc(h.name || h.email) + ' (나) · ' + hm(h.since) + ' 부터 · 다른 관리자는 조회만 할 수 있습니다. 활동이 없으면 ' + hm(h.until) + ' 에 자동 해제됩니다.';
-    btn.textContent = '편집 종료'; btn.className = 'btn btn-g'; btn.style.cssText = 'padding:5px 12px;font-size:.76rem';
+    btn.textContent = '편집 종료'; btn.className = 'btn btn-g'; btn.style.cssText = BTN;
     tools.style.opacity = '1'; tools.style.pointerEvents = '';
   } else if (h) {
     box.classList.add('other'); box.querySelector('.ico').textContent = '🔒';
-    txt.innerHTML = '<span class="who">' + esc(h.name || h.email) + '</span> 님이 수정 중입니다 · ' + hm(h.since) + ' 부터 · 조회는 가능하며, 편집은 잠금이 풀린 뒤(' + hm(h.until) + ' 자동 해제) 할 수 있습니다.';
-    btn.textContent = '↻ 상태 확인'; btn.className = 'btn btn-g'; btn.style.cssText = 'padding:5px 12px;font-size:.76rem'; btn.onclick = () => bpLockRefresh();
+    txt.innerHTML = '<span class="who">' + esc(h.name || h.email) + '</span> 님이 수정 중입니다 · ' + hm(h.since) + ' 부터 · 조회는 가능하며, 편집은 잠금이 풀린 뒤(' + hm(h.until) + ' 자동 해제) 할 수 있습니다.' +
+      (_bpLock.checkedAt ? ' <span class="chk">· ' + hms(_bpLock.checkedAt) + ' 확인</span>' : '');
+    btn.textContent = '↻ 상태 확인'; btn.className = 'btn btn-g'; btn.style.cssText = BTN; btn.onclick = () => bpCheckLock();
     tools.style.opacity = '.55'; tools.style.pointerEvents = 'none';
     return;
   } else {
     box.classList.add('free'); box.querySelector('.ico').textContent = '🔓';
     txt.textContent = '편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.';
-    btn.textContent = '✏️ 편집 시작'; btn.className = 'btn btn-p'; btn.style.cssText = 'padding:5px 12px;font-size:.76rem';
+    btn.textContent = '✏️ 편집 시작'; btn.className = 'btn btn-p'; btn.style.cssText = BTN;
     tools.style.opacity = '.55'; tools.style.pointerEvents = 'none';
   }
   btn.onclick = () => bpToggleEdit();
@@ -1840,6 +1940,14 @@ function bpRenderAdminInfo() {
   f.textContent = (_bp.meta && _bp.meta.name) || BP_MASTER_FILE;
   document.getElementById('bp-adm-sheet').textContent = _bp.sheet;
   document.getElementById('bp-adm-next').textContent = bpNextRow().toLocaleString();
+  bpRenderBe1Cols();
+  const m = document.getElementById('bp-log-month'); if (m && !m.value) { m.value = bpLogMonthDefault(); m.max = bpLogMonthDefault(); }
+}
+// Be1 내보내기 열 12개 — 번호 · 이름. 기록에 쓰는 열만 진하게(나머지는 읽지 않는다는 뜻으로 흐리게 · 취소선).
+const BE1_USED = { 0: 'Code', 1: '유형', 2: 'Name 1', 3: '한글이름', 4: '사업자등록번호(VAT 번호가 없을 때)', 7: '사업자등록번호', 8: '상태(Inactive)', 10: 'Bank', 11: 'Account no.' };
+function bpRenderBe1Cols() {
+  const el = document.getElementById('be1-cols'); if (!el || el.childElementCount) return;
+  el.innerHTML = BE1_COLS.map((c, i) => '<span class="c' + (i in BE1_USED ? ' u' : '') + '" title="' + esc(i in BE1_USED ? '→ ' + BE1_USED[i] : '읽지 않음') + '"><i>' + (i + 1) + '</i>' + esc(c) + '</span>').join('');
 }
 function bpNextRow() { return Math.max(BP_FIRST_NEW_ROW, (_bp.lastRow || 0) + 1); }
 function bpFormVals() {
@@ -1978,6 +2086,139 @@ async function bpMasterAppendRows(recs) {
 function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: x.bizNo, inactive: !!x.inactive, bank: x.bank, acct: x.acct } : null; }
 // 외부(BP Master 시스템 등)에서 같은 규칙으로 쓸 수 있게 이름을 고정해 둔다.
 window.bpMasterUpsert = bpMasterUpsert; window.bpMasterAppendRows = bpMasterAppendRows;
+
+/* ── 이력 조회(관리자) ──────────────────────────────────────────
+   SharePoint Logging_data/ACC-Others/BP-Master/{Accessor,Admin}/YYYY-MM-DD/*.json 을 달 단위로 읽어 표로 보여 준다.
+   파일이 행위마다 하나라 자동으로 읽지 않고 「불러오기」를 눌러야 읽는다(그 자체도 Admin 이력에 남는다). */
+const _bpLog = { month: '', kind: '', items: [], view: [], page: 1 };
+const BP_LOG_PAGE = 30;
+function bpLogMonthDefault() { const n = kstNow(); return n.getUTCFullYear() + '-' + String(n.getUTCMonth() + 1).padStart(2, '0'); }
+async function bpReadLogFile(driveId, f, t, _retry = 0) {
+  const url = f.downloadUrl || (GRAPH + '/drives/' + driveId + '/items/' + f.id + '/content');
+  const res = await fetch(url, f.downloadUrl ? { cache: 'no-store' } : { headers: { Authorization: 'Bearer ' + t }, cache: 'no-store' });
+  if ((res.status === 429 || res.status === 503) && _retry < 3) { await new Promise(r => setTimeout(r, 1200 * (_retry + 1))); return bpReadLogFile(driveId, f, t, _retry + 1); }
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+async function bpLoadLogs() {
+  const monthEl = document.getElementById('bp-log-month');
+  const month = monthEl.value || bpLogMonthDefault(), kind = document.getElementById('bp-log-kind').value;
+  if (!/^\d{4}-\d{2}$/.test(month)) { alert('조회할 달을 선택해 주세요.'); return; }
+  const btn = document.getElementById('bp-log-btn'); btn.disabled = true;
+  loading(true, month + ' 이력 목록을 읽는 중...');
+  try {
+    const driveId = await _getLogDriveId();
+    if (!driveId) throw new Error('이력 저장소(STK-DB Documents)에 연결하지 못했습니다.');
+    const t = await token();
+    const kinds = kind ? [kind] : ['Accessor', 'Admin'];
+    const files = [];
+    for (const k of kinds) {
+      let days;
+      try { days = (await apiAll('/drives/' + driveId + '/root:/Logging_data/ACC-Others/BP-Master/' + k + ':/children?$select=id,name,folder')).value; }
+      catch (e) { if (/itemNotFound|not found|404/i.test(String(e.message))) continue; throw e; }   // 폴더가 아직 없으면 그 구분의 이력이 없는 것
+      for (const d of days) {
+        if (!d.folder || !String(d.name).startsWith(month + '-')) continue;
+        const fs = (await apiAll('/drives/' + driveId + '/items/' + d.id + '/children?$select=id,name,file,size,content.downloadUrl')).value;
+        fs.forEach(f => { if (f.file && /\.json$/i.test(f.name)) files.push({ kind: k, day: d.name, id: f.id, name: f.name, downloadUrl: f['@microsoft.graph.downloadUrl'] || '' }); });
+      }
+    }
+    const total = files.length, out = []; let done = 0;
+    loading(true, month + ' 이력 ' + total.toLocaleString() + '건을 읽는 중...');
+    const queue = files.slice();
+    const worker = async () => {
+      while (queue.length) {
+        const f = queue.shift();
+        try { const j = await bpReadLogFile(driveId, f, t); out.push({ ...f, ...(j && typeof j === 'object' ? j : {}) }); }
+        catch (e) { out.push({ ...f, action: '(읽기 실패)', detail: { error: e.message } }); }
+        done++;
+        if (done % 20 === 0 || done === total) loading(true, month + ' 이력을 읽는 중... ' + done.toLocaleString() + ' / ' + total.toLocaleString());
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(6, Math.max(1, total)) }, worker));
+    // 파일 이름(HHmmss_user_rand.json)이 시각이다 — timestampKST 가 없어도 정렬할 수 있게
+    out.forEach(e => { e.ts = e.timestampKST || (e.day + ' ' + e.name.slice(0, 2) + ':' + e.name.slice(2, 4) + ':' + e.name.slice(4, 6)); });
+    out.sort((a, b) => (b.ts > a.ts ? 1 : b.ts < a.ts ? -1 : 0));
+    _bpLog.month = month; _bpLog.kind = kind; _bpLog.items = out;
+    document.getElementById('bp-logs-body').style.display = '';
+    document.getElementById('bp-log-q').value = '';
+    bpRenderLogs(true);
+    bpLogAdmin('이력 조회', { month, kind: kind || '전체', count: out.length });
+  } catch (e) { alert('이력을 읽지 못했습니다.\n\n' + e.message); }
+  finally { loading(false); btn.disabled = false; }
+}
+function bpLogUser(email) {
+  const m = String(email || '').toLowerCase();
+  const r = employeeData.find(x => (x.email || '').toLowerCase() === m);
+  return r && r.name ? '<span class="usr">' + esc(r.name) + ' <small>' + esc(m) + '</small></span>' : '<span class="usr">' + esc(m) + '</span>';
+}
+/* 한 줄 요약 — 행위별로 사람이 읽기 좋은 꼴. 상세(JSON)는 행을 누르면 편다. */
+function bpLogSummary(e) {
+  const d = e.detail || {}, a = e.action || '';
+  const n = v => (v == null || v === '' ? '' : Number(v).toLocaleString());
+  const blank = v => (v == null || v === '' ? '(빈 칸)' : String(v));
+  const filt = [d.query ? '「' + d.query + '」' : '', d.type && d.type !== '전체' ? d.type : '', d.status && d.status !== '전체' ? d.status : ''].filter(Boolean).join(' · ');
+  switch (a) {
+    case '검색': case '검색 초기화': case '유형 선택': case '상태 필터': return (filt || '전체') + (d.results != null ? ' → ' + n(d.results) + '건' : '');
+    case '새로고침': return (filt ? filt + ' · ' : '') + (d.rows != null ? n(d.rows) + '건 다시 읽음' : '');
+    case '조회 열기': case '관리 탭 열기': case '조회 시작': return d.cached ? '읽어 둔 목록 사용' : '';
+    case '편집 시작': return d.until ? '자동 해제 ' + fmtDate(d.until).slice(11) : '';
+    case '편집 시작 실패': return (d.reason || '') + (d.holder ? ' · ' + d.holder : '');
+    case '편집 종료': return d.since ? fmtDate(d.since).slice(11) + ' 부터 편집' : '';
+    case '잠금 상태 확인': return d.holder ? (d.mine ? '내가 편집 중' : d.holder + ' 편집 중') : '잠금 없음';
+    case '등록': case '일괄 등록': return (d.codes || '') + (d.rows ? ' · ' + d.rows + '행' : '');
+    case '일괄 등록 건너뜀': return n(d.count) + '건 · ' + (d.codes || '');
+    case '수정': {
+      const b = d.before || {}, f = d.after || {};
+      const ch = Object.keys(f).filter(k => String(b[k] == null ? '' : b[k]) !== String(f[k] == null ? '' : f[k])).map(k => k + ': ' + blank(b[k]) + ' → ' + blank(f[k]));
+      return (d.code || '') + (d.row ? ' · ' + n(d.row) + '행' : '') + (ch.length ? ' · ' + ch.join(', ') : ' · 변경 없음');
+    }
+    case 'SAP(Be1) 붙여넣기': return n(d.lines) + '줄 · ' + n(d.parsed) + '건 파싱' + (d.invalid ? ' · 문제 ' + n(d.invalid) + '건' : '') + (d.codes ? ' · ' + d.codes : '');
+    case '이력 조회': return (d.month || '') + ' · ' + (d.kind || '') + ' · ' + n(d.count) + '건';
+    case '이력 내보내기': return (d.month || '') + ' · ' + n(d.count) + '건';
+    default: { if (d.error) return '오류: ' + d.error; const s = JSON.stringify(d); return s === '{}' ? '' : s.slice(0, 160); }
+  }
+}
+function bpRenderLogs(resetPage) {
+  const q = (document.getElementById('bp-log-q').value || '').trim().toLowerCase();
+  let items = _bpLog.items;
+  if (q) items = items.filter(e => [e.user, e.action, e.kind, bpLogSummary(e)].some(v => String(v || '').toLowerCase().includes(q)));
+  _bpLog.view = items;
+  if (resetPage) _bpLog.page = 1;
+  const pages = Math.max(1, Math.ceil(items.length / BP_LOG_PAGE)); _bpLog.page = Math.min(_bpLog.page, pages);
+  const acc = _bpLog.items.filter(e => e.kind === 'Accessor').length, adm = _bpLog.items.length - acc;
+  const users = new Set(_bpLog.items.map(e => String(e.user || '').toLowerCase())).size;
+  document.getElementById('bp-log-count').innerHTML = '<b>' + esc(_bpLog.month) + '</b> · Accessor ' + acc.toLocaleString() + '건 · Admin ' + adm.toLocaleString() + '건 · 사용자 ' + users + '명' + (q ? ' · 거른 결과 ' + items.length.toLocaleString() + '건' : '');
+  const slice = items.slice((_bpLog.page - 1) * BP_LOG_PAGE, _bpLog.page * BP_LOG_PAGE);
+  document.getElementById('bp-log-rows').innerHTML = slice.length ? slice.map((e, i) => {
+    const idx = (_bpLog.page - 1) * BP_LOG_PAGE + i;
+    return '<tr class="r" onclick="bpToggleLog(this,' + idx + ')"><td class="t">' + esc(String(e.ts || '').slice(5)) + '</td><td><span class="bp-kind ' + esc(e.kind) + '">' + esc(e.kind) + '</span></td>' +
+      '<td>' + bpLogUser(e.user) + '</td><td class="act">' + esc(e.action || '') + '</td><td class="sum">' + esc(bpLogSummary(e)) + '</td></tr>';
+  }).join('') : '<tr><td colspan="5" class="empty">' + (_bpLog.items.length ? '거른 조건에 맞는 이력이 없습니다.' : '이 달에는 이력이 없습니다.') + '</td></tr>';
+  const pg = document.getElementById('bp-log-pg');
+  pg.innerHTML = items.length > BP_LOG_PAGE ?
+    '<button onclick="bpLogGoPage(' + (_bpLog.page - 1) + ')"' + (_bpLog.page <= 1 ? ' disabled' : '') + '>‹</button><span>' + _bpLog.page + ' / ' + pages + '</span>' +
+    '<button onclick="bpLogGoPage(' + (_bpLog.page + 1) + ')"' + (_bpLog.page >= pages ? ' disabled' : '') + '>›</button>' : '';
+}
+function bpLogGoPage(n) { _bpLog.page = n; bpRenderLogs(false); }
+function bpToggleLog(tr, idx) {
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains('detail')) { next.remove(); return; }
+  const e = _bpLog.view[idx]; if (!e) return;
+  const d = document.createElement('tr'); d.className = 'detail';
+  d.innerHTML = '<td colspan="5"><pre>' + esc(JSON.stringify({ timestampKST: e.timestampKST || e.ts, user: e.user, system: e.system, action: e.action, detail: e.detail || {}, file: e.kind + '/' + e.day + '/' + e.name }, null, 2)) + '</pre></td>';
+  tr.after(d);
+}
+function bpExportLogs() {
+  if (!_bpLog.items.length) { alert('먼저 이력을 불러오세요.'); return; }
+  const rows = [['일시', '구분', '사용자', '이름', '행위', '내용', '상세(JSON)', '파일']];
+  _bpLog.view.forEach(e => { const r = employeeData.find(x => (x.email || '').toLowerCase() === String(e.user || '').toLowerCase());
+    rows.push([e.ts, e.kind, e.user || '', (r && r.name) || '', e.action || '', bpLogSummary(e), JSON.stringify(e.detail || {}), e.kind + '/' + e.day + '/' + e.name]); });
+  const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 19 }, { wch: 9 }, { wch: 30 }, { wch: 16 }, { wch: 18 }, { wch: 60 }, { wch: 70 }, { wch: 44 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'BP-Master 이력');
+  XLSX.writeFile(wb, 'BP-Master_이력_' + _bpLog.month + (_bpLog.kind ? '_' + _bpLog.kind : '') + '.xlsx');
+  bpLogAdmin('이력 내보내기', { month: _bpLog.month, kind: _bpLog.kind || '전체', count: rows.length - 1 });
+}
 
 /* ── SAP(Be1) 내보내기 붙여넣기 ── */
 const BE1_COLS = ['BP Code', 'BP Type', 'BP Name', 'Foreign Name', 'Contract Number', 'E-Mail', 'Creation Date', 'VAT Reg. Number', 'Inactive', 'Concur Employee ID', 'Default Bank', 'Default Account'];
