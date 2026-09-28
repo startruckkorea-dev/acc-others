@@ -324,13 +324,13 @@ body.rd-rule .line-preview.rd-only{display:block}
     <div style="background:#f8faff;border-radius:10px;padding:16px 18px;margin-bottom:24px;text-align:left;border:1px solid #e0eaff">
       <div style="font-size:.85rem;font-weight:700;color:#1e3a5f;margin-bottom:6px">🔒 접근 권한 없음</div>
       <div style="font-size:.8rem;color:#374151;line-height:1.8;word-break:keep-all">
-        ACC Others는 <strong>등록된 담당자</strong>만<br>접근 가능합니다.<br><br>
-        권한이 필요하면 BU Admin에게 요청해 주세요.<br>
-        BU Admin이 아래 시스템으로 티켓을 생성합니다.<br>
+        ACC Others는 <strong>STK 내부 직원</strong>만<br>접근 가능합니다.<br><br>
+        권한 신청은 아래 시스템을 이용해 주세요.<br>
         <a href="https://itsm-ticket.startruckkorea.com/" target="_blank" style="color:#0078d4;font-weight:600;word-break:break-all;text-decoration:none">itsm-ticket.startruckkorea.com</a>
       </div>
     </div>
-    <div style="font-size:.75rem;color:#94a3b8;margin-bottom:20px">BU Admin: <span id="preopen-contact">-</span> &nbsp;·&nbsp; 문의: <a href="mailto:stk_it@hyosung.com" style="color:#0078d4;text-decoration:none">stk_it@hyosung.com</a></div>
+    <!-- 09-28: BU Admin 메일 줄은 뺐다(SSC 와 같은 구성 — 문의처 하나만). -->
+    <div style="font-size:.75rem;color:#94a3b8;margin-bottom:20px">문의: <a href="mailto:stk_it@hyosung.com" style="color:#0078d4;text-decoration:none">stk_it@hyosung.com</a></div>
     <a href="https://aps.startruckkorea.com/" target="_self"
       style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;background:#0078d4;color:#fff;border-radius:10px;padding:10px 28px;font-size:.85rem;font-weight:600;font-family:inherit;box-shadow:0 1px 4px rgba(0,120,212,.25);transition:background .15s"
       onmouseover="this.style.background='#106ebe'" onmouseout="this.style.background='#0078d4'">
@@ -1338,7 +1338,6 @@ async function boot(account) {
     Object.assign(RD_FIXED, cfgVal(cfg, 'ACC-OTHERS_RD', RD_FIXED));
 
     if (!checkAcoAccess()) {
-      setHdrContact('preopen-contact', contact.email);
       document.getElementById('gate-screen').style.display = 'none';
       document.getElementById('preopen-screen').style.display = 'flex';
       console.warn('[ACO] 입장 차단:', user.email);
