@@ -199,6 +199,15 @@ tbody tr:hover{background:#f8f9fb}
 .drop{border:1.5px dashed #d2d0ce;border-radius:4px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#605e5c;background:#fff;transition:all .2s}
 /* 증빙 첨부 안내 — 짙은 빨강 글자, 아이콘은 첫 줄에 맞춘다 */
 .att-notice{display:flex;align-items:flex-start;gap:7px;color:#9F1D1D;margin:2px 0 10px;line-height:1.5}
+/* 상무(RD) 고정 결재 라인 안내(09-28) — 첨부 안내와 같은 붉은 계열, 한 줄. 규칙이 켜질 때만 보인다(body.rd-rule). */
+.rd-notice{display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #b42318;border-radius:6px;
+  padding:8px 12px;margin:0 0 10px;color:#9f1d1d;font-size:.78rem;font-weight:700;line-height:1.5;word-break:keep-all}
+.rd-notice svg{flex:none}
+body.rd-rule .rd-notice{display:flex}
+body.rd-rule .rd-hide{display:none!important}
+.rd-only{display:none}
+body.rd-rule .rd-only{display:block}
+body.rd-rule .line-preview.rd-only{display:block}
 .att-notice svg{flex:none;margin-top:2px}
 .att-notice-main{font-size:.8rem;font-weight:700}
 .att-notice-sub{font-size:.72rem;font-weight:500;color:#B42318;opacity:.9}
@@ -423,14 +432,28 @@ tbody tr:hover{background:#f8f9fb}
         <div id="dev-filelist"></div>
 
         <div class="sec">6. 결재자 지정 (Approvers)</div>
-        <div class="line-preview">
+        <!-- 상무(RD) 소속 요청자(employee_search H열 Boss of Boss = RD)는 BU 1·2차 없이 RD → CFO 로 간다(09-28). applyRdRule() 이 body.rd-rule 로 켠다. -->
+        <div class="rd-notice" id="dev-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>상무 요청 건은 1·2차 BU 결재를 RD 결재 하나로 진행하며, 결재 라인이 고정으로 구성됩니다.</span></div>
+        <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Team Leader</span><span class="line-arrow">→</span></span>
           <span class="line-step"><span class="line-step-badge">2차</span><span>MC</span><span class="line-arrow">→</span></span>
           <span class="line-step"><span class="line-step-badge fixed">3차</span><span>CFO (자동 지정)</span></span>
         </div>
+        <div class="line-preview rd-only">
+          <div class="line-preview-title">📋 결재 라인 <span style="font-weight:500;color:#605e5c">(RD 고정)</span></div>
+          <span class="line-step"><span class="line-step-badge fixed">1차</span><span>RD (자동 지정)</span><span class="line-arrow">→</span></span>
+          <span class="line-step"><span class="line-step-badge fixed">2차</span><span>CFO (자동 지정)</span></span>
+        </div>
+        <div class="appr-block appr-fixed rd-only">
+          <div class="appr-title">1차 결재자 <span class="appr-hint">— RD (자동 지정)</span></div>
+          <div class="appr-info">
+            <input type="text" id="dev-rd-name" readonly placeholder="이름">
+            <input type="email" id="dev-rd-view" readonly placeholder="이메일">
+          </div>
+        </div>
 
-        <div class="appr-block">
+        <div class="appr-block rd-hide">
           <div class="appr-title">1차 결재자 <span class="req">*</span> <span class="appr-hint">— Team Leader</span></div>
           <div class="appr-grid">
             <select id="dev-a1-dept" onchange="apprDept('dev',1)"><option value="">부서</option></select>
@@ -443,7 +466,7 @@ tbody tr:hover{background:#f8f9fb}
           </div>
         </div>
 
-        <div class="appr-block">
+        <div class="appr-block rd-hide">
           <div class="appr-title">2차 결재자 <span class="req">*</span> <span class="appr-hint">— MC</span></div>
           <div class="appr-grid">
             <select id="dev-a2-dept" onchange="apprDept('dev',2)"><option value="">부서</option></select>
@@ -457,7 +480,7 @@ tbody tr:hover{background:#f8f9fb}
         </div>
 
         <div class="appr-block appr-fixed">
-          <div class="appr-title">3차 결재자 <span class="appr-hint">— CFO (자동 지정)</span></div>
+          <div class="appr-title"><span id="dev-cfo-ord">3차</span> 결재자 <span class="appr-hint">— CFO (자동 지정)</span></div>
           <div class="appr-info">
             <input type="text" id="dev-a3-name" readonly placeholder="이름">
             <input type="email" id="dev-a3-view" readonly placeholder="이메일">
@@ -521,13 +544,26 @@ tbody tr:hover{background:#f8f9fb}
         <div id="ccl-filelist"></div>
 
         <div class="sec">4. 결재자 지정 (Approvers)</div>
-        <div class="line-preview">
+        <div class="rd-notice" id="ccl-rd-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>상무 요청 건은 1차 결재를 RD 결재로 고정하여 진행하며, 결재 라인이 자동으로 구성됩니다.</span></div>
+        <div class="line-preview rd-hide">
           <div class="line-preview-title">📋 결재 라인</div>
           <span class="line-step"><span class="line-step-badge">1차</span><span>Department Head</span><span class="line-arrow">→</span></span>
           <span class="line-step"><span class="line-step-badge fixed">2차</span><span>CFO (자동 지정)</span></span>
         </div>
+        <div class="line-preview rd-only">
+          <div class="line-preview-title">📋 결재 라인 <span style="font-weight:500;color:#605e5c">(RD 고정)</span></div>
+          <span class="line-step"><span class="line-step-badge fixed">1차</span><span>RD (자동 지정)</span><span class="line-arrow">→</span></span>
+          <span class="line-step"><span class="line-step-badge fixed">2차</span><span>CFO (자동 지정)</span></span>
+        </div>
+        <div class="appr-block appr-fixed rd-only">
+          <div class="appr-title">1차 결재자 <span class="appr-hint">— RD (자동 지정)</span></div>
+          <div class="appr-info">
+            <input type="text" id="ccl-rd-name" readonly placeholder="이름">
+            <input type="email" id="ccl-rd-view" readonly placeholder="이메일">
+          </div>
+        </div>
 
-        <div class="appr-block">
+        <div class="appr-block rd-hide">
           <div class="appr-title">1차 결재자 <span class="req">*</span> <span class="appr-hint">— Department Head</span></div>
           <div class="appr-grid">
             <select id="ccl-a1-dept" onchange="apprDept('ccl',1)"><option value="">부서</option></select>
@@ -1165,13 +1201,48 @@ async function loadEmployees() {
       dept: (r['Department'] || '').toString().trim(),
       team: (r['Team'] || '').toString().trim(),
       name: (r['EngName'] || '').toString().trim(),
-      email: (r['EMail'] || r['email'] || '').toString().trim()
+      email: (r['EMail'] || r['email'] || '').toString().trim(),
+      // G열 Boss = 직속 상사, H열 Boss of Boss = 부서장(AAC 와 같은 해석). RD 고정 결재 라인 판정에 쓴다(09-28).
+      boss2: (r['Boss of Boss'] || '').toString().trim()
     })).filter(r => r.email && r.name);
     ['dev', 'ccl'].forEach(initDept);
+    applyRdRule();
     console.log('[Employee] 로드:', employeeData.length, '명');
   } catch (e) { console.warn('[Employee] 로드 실패:', e.message); }
 }
 const APPR_SLOTS = { dev: [1, 2], ccl: [1] };   // 직접 지정하는 결재 차수
+
+/* ── 상무(RD) 소속 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
+   employee_search 의 H열(Boss of Boss = 부서장)이 RD 인 요청자는 BU 1·2차 결재 없이 RD 한 단계로 간다.
+     DEV: Team Leader → MC → CFO  ⇒  RD → CFO
+     CCL: Department Head → CFO   ⇒  RD → CFO
+   RD 는 system_config 의 ACC-OTHERS_RD(이름 · 메일). 없으면 이름 'Keuntae Dong' 을 직원 명부에서 찾아 메일을 채운다.
+   메일을 못 찾으면 규칙을 켜지 않는다(결재자 없는 행을 만들지 않게) — 콘솔에 남긴다. */
+const RD_FIXED = { name: 'Keuntae Dong', email: '', role: 'RD' };
+let _rdRule = false;
+function rdRuleApplies() {
+  const mine = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
+  const rec = employeeData.find(e => mine.includes((e.email || '').trim().toLowerCase()));
+  if (!rec) return false;
+  return !!RD_FIXED.name && (rec.boss2 || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase();
+}
+function applyRdRule() {
+  if (!RD_FIXED.email) {
+    const p = employeeData.find(e => (e.name || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase());
+    if (p) RD_FIXED.email = p.email;
+  }
+  _rdRule = rdRuleApplies() && !!RD_FIXED.email;
+  if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 소속이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
+  document.body.classList.toggle('rd-rule', _rdRule);
+  ['dev', 'ccl'].forEach(cat => {
+    const n = document.getElementById(cat + '-rd-name'), m = document.getElementById(cat + '-rd-view');
+    if (n) n.value = _rdRule ? (RD_FIXED.name || '') : '';
+    if (m) m.value = _rdRule ? (RD_FIXED.email || '') : '';
+  });
+  const ord = document.getElementById('dev-cfo-ord');
+  if (ord) ord.textContent = _rdRule ? '2차' : '3차';
+  if (_rdRule) console.log('[RD] 고정 결재 라인 적용:', RD_FIXED.name, RD_FIXED.email);
+}
 function initDept(cat) {
   const depts = [...new Set(employeeData.map(e => e.dept).filter(Boolean))].sort();
   const opt = '<option value="">부서</option>' +
@@ -1263,6 +1334,8 @@ async function boot(account) {
     // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
     Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
     Object.assign(CCL_CFO, cfgVal(cfg, 'ACC-OTHERS_CCL_CFO', cfgVal(cfg, 'CCL_CFO', CCL_CFO)));
+    // RD(상무) — 설정에 있으면 그 값, 없으면 기본 이름으로 두고 직원 명부에서 메일을 찾는다(applyRdRule).
+    Object.assign(RD_FIXED, cfgVal(cfg, 'ACC-OTHERS_RD', RD_FIXED));
 
     if (!checkAcoAccess()) {
       setHdrContact('preopen-contact', contact.email);
@@ -1592,8 +1665,8 @@ function validate(cat) {
     if (!val('dev-desc')) miss.push('Description (내용)');
     if (!val('dev-immediate')) miss.push('Immediate Actions (즉시조치)');
     if (!val('dev-longterm')) miss.push('Long-Term Corrective Measures (장기 개선조치)');
-    if (!val('dev-a1-email')) miss.push('1차 결재자 (Team Leader)');
-    if (!val('dev-a2-email')) miss.push('2차 결재자 (MC)');
+    if (!_rdRule && !val('dev-a1-email')) miss.push('1차 결재자 (Team Leader)');
+    if (!_rdRule && !val('dev-a2-email')) miss.push('2차 결재자 (MC)');
     if (numVal('dev-amount') < 0) miss.push('금액은 0 이상이어야 합니다');
     // 작성일은 오늘로 고정(readonly)이라 이 검사는 곧 「발생일이 미래」 다. 어느 날짜가 걸렸는지 보이게 두 값을 함께 적는다(09-28).
     if (val('dev-incident') && val('dev-date') && val('dev-incident') > val('dev-date'))
@@ -1614,13 +1687,23 @@ function validate(cat) {
       else if (cclDays(val('ccl-from'), val('ccl-to')) > CCL_MAX_DAYS)
         miss.push('적용 기간 — 한시 증액은 최대 ' + CCL_MAX_DAYS + '일까지입니다 (현재 ' + cclDays(val('ccl-from'), val('ccl-to')) + '일)');
     }
-    if (!val('ccl-a1-email')) miss.push('1차 결재자 (Department Head)');
+    if (!_rdRule && !val('ccl-a1-email')) miss.push('1차 결재자 (Department Head)');
     if (numVal('ccl-amount') <= 0) miss.push('증액 금액은 0보다 커야 합니다');
   }
   return miss;
 }
 
 function buildApprovers(cat) {
+  // 상무(RD) 소속 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
+  applyRdRule();
+  if (_rdRule) {
+    const cfo = cat === 'dev' ? DEV_CFO : CCL_CFO;
+    if (!cfo.email) throw new Error('결재자 정보를 불러오지 못했습니다: CFO\nsystem_config_final.xlsx 설정을 확인해 주세요.');
+    return [
+      { name: RD_FIXED.name, email: RD_FIXED.email, role: RD_FIXED.role, order: 1 },
+      { name: cfo.name, email: cfo.email, role: cfo.role, order: 2 },
+    ];
+  }
   // 직접 지정 구간(dev: Team Leader·MC / ccl: Department Head)을 화면 선택값에서 읽는다.
   const ROLES = { dev: ['Team Leader', 'MC'], ccl: ['Department Head'] };
   const picked = APPR_SLOTS[cat].map((n, i) => ({
