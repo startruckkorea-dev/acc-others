@@ -838,7 +838,7 @@ body.rd-rule .line-preview.rd-only{display:block}
     <!-- Excel 을 열어 손으로 고치던 일을 웹에서 한다. 파일 전체를 다시 쓰지 않고 Graph Excel API 로 「해당 행만」 기록해
          다른 열 · 다른 행 · 서식은 건드리지 않는다. 동시 편집은 잠금 파일(acc_others_bp_lock.json)로 한 사람만 허용한다. -->
     <div id="pane-bpadmin" style="display:none">
-      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>접근 · 조회 · 검색 · 편집 내용은 모두 기록</b>되며, 아래 「접근 · 편집 이력」에서 7일 단위로 확인할 수 있습니다.</span></div>
+      <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>접근 · 조회 · 검색 · 편집 내용은 모두 기록</b>되며, 아래 「접근 · 편집 이력」에서 기간을 골라(한 번에 최대 31일) 확인할 수 있습니다.</span></div>
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
         <span class="sp"><button class="btn btn-g" id="bp-lock-btn2" style="padding:3px 10px;font-size:.72rem;display:none" onclick="bpCheckLock()">↻ 상태 확인</button><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
 
@@ -889,13 +889,13 @@ body.rd-rule .line-preview.rd-only{display:block}
         <div class="bp-section-bd" id="bp-admin-list"></div>
       </section>
 
-      <!-- ③ 이력 — 7일 단위(기본 오늘까지 7일). 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
+      <!-- ③ 이력 — 기간 자유(기본 오늘까지 7일 · 최대 31일). 「불러오기」를 눌러야 읽는다(이력 파일 수가 많아 자동으로 읽지 않는다). -->
       <section class="bp-section" id="bp-logs">
         <div class="bp-section-hd"><span class="no">3</span><span class="ttl">접근 · 편집 이력</span>
           <span class="sp bp-log-ctl">
-            <button class="nav" onclick="bpLogShift(-7)" title="7일 앞으로">‹ 7일</button>
+            <button class="nav" onclick="bpLogShift(-1)" title="고른 기간 길이만큼 앞으로">‹ 이전</button>
             <input type="date" id="bp-log-from" onchange="bpLogRangeFix('from')"><span class="tilde">~</span><input type="date" id="bp-log-to" onchange="bpLogRangeFix('to')">
-            <button class="nav" onclick="bpLogShift(7)" title="7일 뒤로">7일 ›</button>
+            <button class="nav" onclick="bpLogShift(1)" title="고른 기간 길이만큼 뒤로">다음 ›</button>
             <button class="nav" onclick="bpLogRangeDefault(true)" title="오늘까지 7일">최근 7일</button>
             <select id="bp-log-kind"><option value="">Accessor + Admin</option><option value="Accessor">Accessor (조회 · 검색)</option><option value="Admin">Admin (편집)</option></select>
             <button class="btn btn-p" id="bp-log-btn" onclick="bpLoadLogs()">불러오기</button>
@@ -2285,7 +2285,8 @@ window.bpMasterUpsert = bpMasterUpsert; window.bpMasterAppendRows = bpMasterAppe
    파일이 행위마다 하나라 자동으로 읽지 않고 「불러오기」를 눌러야 읽는다(그 자체도 Admin 이력에 남는다). */
 const _bpLog = { range: '', from: '', to: '', kind: '', items: [], view: [], page: 1 };
 const BP_LOG_PAGE = 30;
-const BP_LOG_DAYS = 7;                                               // 한 번에 읽는 기간(일) — 기본 오늘까지 7일
+const BP_LOG_DAYS = 7;
+const BP_LOG_MAX_DAYS = 31;                                            // 한 번에 읽을 수 있는 최대 기간(일) — 하루 · 사흘 · 한 달 등 자유롭게(09-29)                                               // 한 번에 읽는 기간(일) — 기본 오늘까지 7일
 function bpDayStr(d) { return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0'); }
 function bpDayAdd(str, n) { const d = new Date(str + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return bpDayStr(d); }
 function bpLogRangeDefault(force) {
@@ -2295,19 +2296,30 @@ function bpLogRangeDefault(force) {
   f.max = today; t.max = today;
 }
 /* 시작 · 끝 중 하나를 바꾸면 다른 쪽을 7일 폭으로 맞춘다 — 언제나 7일 단위 */
+/* 시작 · 끝을 자유롭게 고른다(09-29) — 예전에는 한쪽을 바꾸면 다른 쪽을 7일 폭으로 되돌려 하루짜리 조회가 안 됐다.
+   지키는 것: 시작 ≤ 끝, 끝 ≤ 오늘, 기간 ≤ BP_LOG_MAX_DAYS일(넘으면 바꾼 쪽을 기준으로 다른 쪽을 당긴다). */
 function bpLogRangeFix(which) {
   const f = document.getElementById('bp-log-from'), t = document.getElementById('bp-log-to');
-  if (which === 'from' && f.value) t.value = bpDayAdd(f.value, BP_LOG_DAYS - 1);
-  else if (which === 'to' && t.value) f.value = bpDayAdd(t.value, -(BP_LOG_DAYS - 1));
   const today = bpDayStr(kstNow());
-  if (t.value > today) { t.value = today; f.value = bpDayAdd(today, -(BP_LOG_DAYS - 1)); }
+  if (f.value > today) f.value = today;
+  if (t.value > today) t.value = today;
+  if (which === 'from' && f.value) {
+    if (!t.value || t.value < f.value) t.value = f.value;
+    if (bpDayAdd(f.value, BP_LOG_MAX_DAYS - 1) < t.value) t.value = bpDayAdd(f.value, BP_LOG_MAX_DAYS - 1);
+  } else if (which === 'to' && t.value) {
+    if (!f.value || f.value > t.value) f.value = t.value;
+    if (bpDayAdd(t.value, -(BP_LOG_MAX_DAYS - 1)) > f.value) f.value = bpDayAdd(t.value, -(BP_LOG_MAX_DAYS - 1));
+  }
 }
-function bpLogShift(n) {
+/* ‹ 이전 · 다음 › — 지금 고른 기간 길이만큼 앞뒤로 옮긴다(끝은 오늘까지). */
+function bpLogShift(dir) {
   const f = document.getElementById('bp-log-from'), t = document.getElementById('bp-log-to');
-  if (!f.value || !t.value) bpLogRangeDefault(true);
+  if (!f.value || !t.value || f.value > t.value) bpLogRangeDefault(true);
+  const len = Math.round((new Date(t.value + 'T00:00:00Z') - new Date(f.value + 'T00:00:00Z')) / 86400000) + 1;
   const today = bpDayStr(kstNow());
-  let nt = bpDayAdd(t.value, n); if (nt > today) nt = today;
-  t.value = nt; f.value = bpDayAdd(nt, -(BP_LOG_DAYS - 1));
+  let nf = bpDayAdd(f.value, dir * len), nt = bpDayAdd(t.value, dir * len);
+  if (nt > today) { nt = today; nf = bpDayAdd(today, -(len - 1)); }
+  f.value = nf; t.value = nt;
 }
 async function bpReadLogFile(driveId, f, t, _retry = 0) {
   const url = f.downloadUrl || (GRAPH + '/drives/' + driveId + '/items/' + f.id + '/content');
@@ -2320,6 +2332,7 @@ async function bpLoadLogs() {
   bpLogRangeDefault(false);
   const from = document.getElementById('bp-log-from').value, to = document.getElementById('bp-log-to').value, kind = document.getElementById('bp-log-kind').value;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) { alert('조회 기간을 확인해 주세요.'); return; }
+  if (bpDayAdd(from, BP_LOG_MAX_DAYS - 1) < to) { alert('한 번에 ' + BP_LOG_MAX_DAYS + '일까지 조회할 수 있습니다. 기간을 줄여 주세요.'); return; }
   const range = from + ' ~ ' + to;
   const btn = document.getElementById('bp-log-btn'); btn.disabled = true;
   loading(true, range + ' 이력 목록을 읽는 중...');
