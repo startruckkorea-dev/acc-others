@@ -1670,14 +1670,17 @@ let _badgeTimer = null;
 window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_badgeTimer); });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BP Master(09-28) — BP 코드 마스터 Excel(Master data List) 조회 · 관리
-   ─────────────────────────────────────────────────────────────────────────────
-   · 읽기: 파일을 내려받아 SheetJS 로 읽는다(ACC Voucher · BP Master 와 같은 방식). 시트 DTK, 3행 머리글, 4행부터 데이터.
-     쓰는 열은 A 코드 · B 유형 · C Name 1 · D 한글이름 · E 사업자등록번호 · I Inactivated · K Bank · L Account no. 뿐이다.
-     G(Creation Date) 등 나머지 열과 유형이 Customer · Vendor · Employee 가 아닌 행(COA · GL Account 등)은 건드리지 않는다.
-   · 쓰기: Graph Excel API 로 「그 행의 A~L」 만 PATCH 한다(값 없는 칸은 null = 그대로). 파일 전체를 다시 쓰지 않으므로
-     서식 · 다른 열 · 다른 행이 보존된다. 앞자리 0 이 있는 계좌 · 사업자번호가 숫자로 바뀌지 않게 텍스트 서식(@)으로 기록.
-   · 신규 행: 14,600행부터(BP_FIRST_NEW_ROW). 그 뒤로는 마지막 코드 행 다음에 이어 쓴다. 쓰기 직전 대상 행이 비었는지 서버에서 확인.
+   BP Master(09-28 · 파일 교체 09-30) — BP 코드 마스터 Excel 조회 · 관리
+   ─────────────────────────────────────────────────────────────────
+   · 파일: STK-DB 문서 라이브러리 루트의 BP_MASTER_FILE(BP-Master_목록_…xlsx). 09-30 에 옛 「Master data List 2014_Final」 을
+     이 화면의 「목록 내보내기」 로 정리해 올린 파일이다(불필요한 행 · 열 제거). ACC Voucher · BP Master 의 BP 검색도 같은 파일을 읽는다.
+     이름이 바뀌면(새 내보내기 파일로 교체) 루트에서 BP-Master_목록*.xlsx 가운데 가장 최근 것을 쓴다(bpLocateMaster).
+   · 읽기: 파일을 내려받아 SheetJS 로 읽는다. 시트 「BP Master」, 1행 머리글, 2행부터 데이터.
+     열은 A Code · B 유형 · C Name 1 · D 한글이름 · E 사업자등록번호 · F Bank · G Account no. · H 상태(활성/비활성) · I Row(참고용, 쓰지 않음).
+   · 쓰기: Graph Excel API 로 「그 행의 A~H」 만 PATCH 한다. 파일 전체를 다시 쓰지 않으므로 서식 · 다른 행이 보존된다.
+     앞자리 0 이 있는 계좌 · 사업자번호가 숫자로 바뀌지 않게 텍스트 서식(@)으로 기록.
+   · 신규 행: 14,152행부터(BP_FIRST_NEW_ROW — 정리본의 마지막 행 14,151 다음). 그 뒤로는 마지막 코드 행 다음에 이어 쓴다.
+     쓰기 직전 대상 행이 비었는지 서버에서 확인.
    · 잠금: acc_others_bp_lock.json(문서 루트)을 ETag 조건부 PUT 으로 선점한다 — 한 사람 · 한 창만 편집 모드.
      편집 중에는 60초마다 만료 시각을 5분 뒤로 미룬다(사용자 활동과 무관 — 창이 살아 있으면 계속 연장). 편집 종료 · 창 닫기 때
      해제하고, 창이 멈추면(절전 · 강제 종료) 마지막 연장 뒤 5분에 만료. 조회는 잠금과 무관하게 누구나.
@@ -1687,10 +1690,11 @@ window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_
    · 확장: 쓰기는 bpMasterUpsert(rec) / bpMasterAppendRows(recs) 하나로 모아 두었다 — BP Master 시스템에서 코드가 생기면
      같은 함수(잠금 포함)를 그대로 부르면 된다.
    ═══════════════════════════════════════════════════════════════════════════ */
-const BP_MASTER_FILE = 'Master data List 2014_Final(STK).xlsx';
-const BP_MASTER_SHEET = 'DTK';
+const BP_MASTER_FILE = 'BP-Master_목록_20260930_1756.xlsx';   // STK-DB 문서 라이브러리 루트 — 09-30 정리본(APS 전 시스템 공용)
+const BP_MASTER_SHEET = 'BP Master';
+const BP_MASTER_PATTERN = /^BP-Master_목록.*\.xlsx$/i;   // 정해진 이름이 없을 때 루트에서 가장 최근 것을 고르는 규칙
 const BP_LOCK_FILE = 'acc_others_bp_lock.json';
-const BP_FIRST_NEW_ROW = 14600;
+const BP_FIRST_NEW_ROW = 14152;   // 정리본(14,151행) 다음 행부터 새 코드를 적는다 — 이 번호 이상은 이 화면에서 등록한 행
 const BP_LOCK_TTL_MS = 5 * 60 * 1000;   // 마지막 연장(60초마다) 뒤 이만큼 지나면 만료 — 창이 멈췄을 때만 의미가 있다
 const BP_LOCK_TAG_KEY = 'acc_others_bp_lock_tag';
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
@@ -1728,7 +1732,7 @@ function isBpAdmin() {
   return BP_ADMIN_EMAILS.some(e => me.includes(e));
 }
 function bpNormType(v) { const t = String(v || '').trim().toLowerCase(); return BP_TYPES.find(x => x.toLowerCase() === t) || ''; }
-function bpIsInactive(v) { return /^(x|o|yes|y)$/i.test(String(v || '').trim()); }
+function bpIsInactive(v) { return /^(비활성|x|o|yes|y)$/i.test(String(v || '').trim()); }   // 정리본은 H열 「비활성」, 옛 파일 · Be1 은 Yes/X
 function bpCell(v) { return v == null ? '' : String(v).trim(); }
 
 async function bpOpenTab(tab) {
@@ -1763,6 +1767,22 @@ function bpRefresh() {
 }
 
 /* ── 읽기 ── */
+/* BP 마스터 파일 찾기(09-30) — ① STK-DB 문서 라이브러리 루트의 BP_MASTER_FILE ② 없으면 루트의 BP-Master_목록*.xlsx 가운데
+   이름(날짜 · 시각)이 가장 큰 것. 둘 다 없으면 오류. ACC Voucher · BP Master 검색도 같은 규칙으로 같은 파일을 연다. */
+async function bpLocateMaster() {
+  const driveId = await getDocDriveId();
+  const sel = '$select=id,name,size,lastModifiedDateTime,lastModifiedBy,eTag,file';
+  try {
+    const meta = await api('/drives/' + driveId + '/root:/' + encodeURIComponent(BP_MASTER_FILE) + ':?' + sel);
+    if (meta && meta.id) return { driveId, meta };
+  } catch (e) { console.warn('[BP] 루트에 ' + BP_MASTER_FILE + ' 없음 — 같은 이름 규칙의 최근 파일을 찾는다:', e.message); }
+  const ch = await api('/drives/' + driveId + '/root/children?' + sel + '&$top=500');
+  const cands = (ch.value || []).filter(f => f.file && BP_MASTER_PATTERN.test(String(f.name || '').normalize('NFC')))   // 한글 이름은 NFC 로 맞춰 비교(맥에서 올린 NFD 이름도 잡는다)
+    .sort((a, b) => String(b.name).localeCompare(String(a.name)) || String(b.lastModifiedDateTime || '').localeCompare(String(a.lastModifiedDateTime || '')));
+  if (!cands.length) throw new Error(BP_MASTER_FILE + ' 을 STK-DB 문서 라이브러리에서 찾지 못했습니다');
+  console.warn('[BP] 정해진 이름이 없어 가장 최근 BP-Master_목록 파일을 씁니다:', cands[0].name);
+  return { driveId, meta: cands[0] };
+}
 async function loadBpMaster(force) {
   if (!isBpViewer()) { bpDenyView('목록 읽기'); return; }   // 어디서 불러도 권한 없는 계정은 파일을 받지 않는다(09-30)
   if (_bp.loading) return _bp.loading;
@@ -1774,8 +1794,9 @@ async function loadBpMaster(force) {
   _bp.loading = (async () => {
     try {
       const t = await token();
-      _bp.driveId = await getDocDriveId();
-      const meta = await api('/drives/' + _bp.driveId + '/root:/' + encodeURIComponent(BP_MASTER_FILE) + ':?$select=id,name,size,lastModifiedDateTime,lastModifiedBy,eTag');
+      const loc = await bpLocateMaster();
+      _bp.driveId = loc.driveId;
+      const meta = loc.meta;
       _bp.itemId = meta.id; _bp.meta = meta;
       const res = await fetch(GRAPH + '/drives/' + _bp.driveId + '/items/' + meta.id + '/content', { headers: { Authorization: 'Bearer ' + t } });
       if (!res.ok) throw new Error('파일 내려받기 실패 (' + res.status + ')');
@@ -1793,11 +1814,11 @@ async function loadBpMaster(force) {
         const rowNo = _bp.startRow + i;
         const code = bpCell(r[0]);
         if (code) lastRow = rowNo;
-        if (rowNo < 4 || !code) return;
+        if (rowNo < 2 || !code) return;                             // 1행은 머리글
         const type = bpNormType(r[1]);
         if (!type) return;                                          // COA · GL Account · 빈 유형은 다루지 않는다
         all.push({ row: rowNo, code, type, name: bpCell(r[2]), nameKo: bpCell(r[3]), bizNo: bpCell(r[4]),
-                   inactive: bpIsInactive(r[8]), bank: bpCell(r[10]), acct: bpCell(r[11]) });
+                   bank: bpCell(r[5]), acct: bpCell(r[6]), inactive: bpIsInactive(r[7]) });   // 정리본 열 순서 A~H
       });
       _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now(); _bp.sel.clear();   // 다시 읽으면 행이 바뀔 수 있어 선택은 비운다
       const by = (meta.lastModifiedBy && meta.lastModifiedBy.user && meta.lastModifiedBy.user.displayName) || '';
@@ -1876,7 +1897,7 @@ function renderBpList(resetPage) {
 function bpGoPage(n) { _bp.page = n; renderBpList(false); }
 
 /* ── 일괄 상태 변경(관리 탭) ──────────────────────────────────
-   체크한 행의 I열(Inactivated)만 Yes/No 로 바꾼다. 연속한 행은 한 번의 PATCH 로 묶고, 쓰기 전에 그 구간 A열을 한 번에 읽어
+   체크한 행의 H열(상태)만 활성/비활성 으로 바꾼다. 연속한 행은 한 번의 PATCH 로 묶고, 쓰기 전에 그 구간 A열을 한 번에 읽어
    코드가 화면과 같은지 확인한다(행이 밀렸으면 중단). 편집 잠금을 쥔 사람만. */
 function bpToggleSel(row, on, cb) {
   if (on) _bp.sel.add(row); else _bp.sel.delete(row);
@@ -1918,10 +1939,10 @@ async function bpBulkStatus(inactive) {
     if (bad.length) throw new Error(bad.length + '행의 코드가 화면과 다릅니다(' + bad.slice(0, 3).map(x => x.row.toLocaleString() + '행 ' + x.code).join(', ') + (bad.length > 3 ? ' …' : '') + '). 새로고침 후 다시 시도해 주세요.');
     // 연속한 행은 한 번에
     const runs = []; targets.forEach(x => { const last = runs[runs.length - 1]; if (last && x.row === last.end + 1) last.end = x.row; else runs.push({ start: x.row, end: x.row }); });
-    const val = inactive ? 'Yes' : 'No'; let done = 0;
+    const val = inactive ? '비활성' : '활성'; let done = 0;
     for (const run of runs) {
       const n = run.end - run.start + 1;
-      await bpPatchRange(bpWb() + "/range(address='I" + run.start + ":I" + run.end + "')", Array.from({ length: n }, () => [val]), 1);
+      await bpPatchRange(bpWb() + "/range(address='H" + run.start + ":H" + run.end + "')", Array.from({ length: n }, () => [val]), 1);
       done += n; loading(true, '상태를 바꾸는 중... ' + done + ' / ' + targets.length);
     }
     targets.forEach(x => { x.inactive = inactive; });
@@ -2172,17 +2193,13 @@ async function bpSave() {
    bpMasterAppendRows([rec, ...]) — 여러 행을 한 번의 PATCH 로 이어서 추가(대상 행이 비었는지 먼저 확인). 반환: 기록한 행 번호(들).
    둘 다 편집 잠금을 쥔 사람만 부를 수 있다(외부 시스템에서 쓰려면 bpStartEdit → 쓰기 → bpStopEdit 순서). */
 function bpWb() { return '/drives/' + _bp.driveId + '/items/' + _bp.itemId + "/workbook/worksheets('" + _bp.sheet.replace(/'/g, "''") + "')"; }
-/* 한 행을 세 구간으로 나눠 쓴다 — A:E(코드 · 유형 · 이름 · 한글 · 사업자번호) · I(Inactivated) · K:L(은행 · 계좌).
-   F · G · H · J 는 요청에 넣지 않으므로 그대로 남는다(null 로 「건너뛰기」 를 표현하는 API 해석에 기대지 않는다). */
-function bpRowSegs(rec) {
+/* 한 행의 A~H 를 한 번에 쓴다 — Code · 유형 · Name 1 · 한글이름 · 사업자등록번호 · Bank · Account no. · 상태(활성/비활성).
+   I(Row) 는 내보내기 때 붙는 참고 열이라 손대지 않는다. */
+function bpRowVals(rec) {
   const bank = (rec.bank && rec.bank !== '-1') ? rec.bank : '';
-  return {
-    AE: [rec.code, rec.type, rec.name, rec.nameKo || '', rec.bizNo || ''],
-    I:  [rec.inactive ? 'Yes' : 'No'],
-    KL: [bank, rec.acct || ''],
-  };
+  return [rec.code, rec.type, rec.name, rec.nameKo || '', rec.bizNo || '', bank, rec.acct || '', rec.inactive ? '비활성' : '활성'];
 }
-const BP_SEGS = [['A', 'E', 'AE', 5], ['I', 'I', 'I', 1], ['K', 'L', 'KL', 2]];
+const BP_SEGS = [['A', 'H', 8]];
 async function bpPatchRange(addr, values, width) {
   const numberFormat = values.map(() => Array(width).fill('@'));   // 텍스트 서식 — 앞자리 0 · 긴 숫자 보존
   try { await api(addr, 'PATCH', { values, numberFormat }); }
@@ -2195,8 +2212,8 @@ async function bpPatchRange(addr, values, width) {
 }
 async function bpWriteRows(start, recs) {
   const end = start + recs.length - 1;
-  for (const [c1, c2, key, n] of BP_SEGS) {
-    await bpPatchRange(bpWb() + "/range(address='" + c1 + start + ':' + c2 + end + "')", recs.map(r => bpRowSegs(r)[key]), n);
+  for (const [c1, c2, n] of BP_SEGS) {
+    await bpPatchRange(bpWb() + "/range(address='" + c1 + start + ':' + c2 + end + "')", recs.map(r => bpRowVals(r)), n);
   }
 }
 async function bpEnsureReady() {
