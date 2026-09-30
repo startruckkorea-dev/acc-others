@@ -839,7 +839,7 @@ body.rd-rule .line-preview.rd-only{display:block}
       <!-- ① 등록 · 수정 — SAP 붙여넣기(선택) + 폼. 편집 모드가 아니면 흐리게(bp-admin-tools) -->
       <section class="bp-section" id="bp-sec-edit">
         <div class="bp-section-hd"><span class="no">1</span><span class="ttl">BP 등록 · 수정</span>
-          <span class="sp bp-meta"><span class="chip">파일 <b id="bp-adm-file">-</b></span><span class="chip">시트 <b id="bp-adm-sheet">-</b></span><span class="chip">다음 행 <b id="bp-adm-next">-</b></span></span></div>
+          <span class="sp bp-meta"><span class="chip">시트 <b id="bp-adm-sheet">-</b></span><span class="chip">다음 행 <b id="bp-adm-next">-</b></span></span></div>
         <div class="bp-section-bd" id="bp-admin-tools" style="opacity:.55;pointer-events:none">
           <div class="bp-paste">
             <div class="bp-sub-hd"><span class="t">SAP(Be1) 내보내기 붙여넣기</span><span class="o">선택 — 한 줄이면 아래 폼에 채워지고, 여러 줄이면 미리보기 뒤 한 번에 등록합니다. 흐린 열은 읽지 않습니다.</span></div>
@@ -2139,8 +2139,7 @@ window.addEventListener('beforeunload', () => {
 
 /* ── 관리 화면 ── */
 function bpRenderAdminInfo() {
-  const f = document.getElementById('bp-adm-file'); if (!f) return;
-  f.textContent = bpFileLabel((_bp.meta && _bp.meta.name) || BP_MASTER_FILE);
+  const sh = document.getElementById('bp-adm-sheet'); if (!sh) return;   // 파일 이름 칩은 뺐다(09-30) — 관리 탭 머리에는 시트 · 다음 행만
   document.getElementById('bp-adm-sheet').textContent = _bp.sheet;
   document.getElementById('bp-adm-next').textContent = bpNextRow().toLocaleString();
   bpRenderBe1Cols();
