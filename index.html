@@ -1608,6 +1608,7 @@ async function boot(account) {
     //   IT(ACC-OTHERS_IT_N) · ADMIN_SP 는 자동으로 들어가지 않는다 — 필요하면 위 키에 적는다. (옛 표기 ACC-OTHERS_BP_ADMIN_N 도 읽는다)
     BP_ADMIN_EMAILS = [...new Set([...cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1']), ...cfgSeqEmails(cfg, 'ACC-OTHERS_ADMIN-BP_'), ...cfgSeqEmails(cfg, 'ACC-OTHERS_BP_ADMIN_')]
       .map(e => String(e || '').toLowerCase()).filter(Boolean))];
+    BP_VIEW_EMAILS = bpViewEmails(cfg);   // BP Master 조회 권한(09-30) — 위 BP_ADMIN_EMAILS 뒤에 계산해야 관리자가 포함된다
     // 헤더 BU Admin 연락처 — GW·IT 와 같은 규칙으로 설정 파일에서 읽는다.
     // 키: ACC-OTHERS_CONTACT (없으면 공통 CONTACT_EMAIL)
     const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '' }));
@@ -1684,6 +1685,25 @@ const BP_LOCK_TAG_KEY = 'acc_others_bp_lock_tag';
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
+/* BP Master 조회 권한(09-30) — 앱 입장 제한을 없애면서 BP 코드(고객 · 업체 · 직원 · 계좌 정보)는 따로 막는다.
+   조회 가능 = 입장 제한이 있던 때의 명단 그대로(ACC-OTHERS_ACCESS_N · ADMIN_N · IT · IT_N · DEV_CFO · CCL_CFO · CONTACT · ADMIN_SP · ADMIN_SP_N)
+   + BP 관리자 + 조회 전용 키 ACC-OTHERS_BP_VIEW_N. 설정을 못 읽거나 명단이 비면 아무도 못 본다(닫힌 쪽이 기본). */
+let BP_VIEW_EMAILS = [];
+function bpViewEmails(cfg) {
+  const keys = ['ACC-OTHERS_IT', 'ACC-OTHERS_DEV_CFO', 'ACC-OTHERS_CCL_CFO', 'DEV_CFO', 'CCL_CFO', 'ACC-OTHERS_CONTACT', 'ADMIN_SP'];
+  ['ACC-OTHERS_ACCESS_', 'ACC-OTHERS_ADMIN_', 'ACC-OTHERS_IT_', 'ADMIN_SP_', 'ACC-OTHERS_BP_VIEW_'].forEach(p => {
+    let n = 1; while (cfg && cfg[p + n]) { keys.push(p + n); n++; }
+  });
+  return [...new Set(keys.map(k => (cfg && cfg[k] && cfg[k].email || '').trim().toLowerCase()).filter(Boolean).concat(BP_ADMIN_EMAILS))];
+}
+function isBpViewer() {
+  const me = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
+  return isBpAdmin() || BP_VIEW_EMAILS.some(e => me.includes(e));
+}
+function bpDenyView(where) {
+  bpLogAccess('접근 차단', { where });
+  document.getElementById('no-auth-modal').classList.add('show');
+}
 const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [], viewOpened: false, sel: new Set() };
 /* 이력(09-28) — SharePoint Logging_data/ACC-Others/BP-Master/{Accessor|Admin}/YYYY-MM-DD/… 에 한 행위마다 JSON 한 개.
    Accessor: 조회 열기 · 새로고침 · 유형(Customer/Vendor/Employee/전체) · 상태 필터 · 검색(검색어 포함).
@@ -1713,6 +1733,7 @@ async function bpOpenTab(tab) {
   if (tab === 'bpadmin') { bpRenderAdminInfo(); await bpLockRefresh(); }
 }
 async function bpStartView() {
+  if (!isBpViewer()) { bpDenyView('조회 시작'); return; }
   _bp.viewOpened = true;
   bpLogAccess('조회 시작', { cached: !!_bp.all.length });
   if (!_bp.all.length) await loadBpMaster(false); else renderBpList(true);
@@ -1734,6 +1755,7 @@ function bpRefresh() {
 
 /* ── 읽기 ── */
 async function loadBpMaster(force) {
+  if (!isBpViewer()) { bpDenyView('목록 읽기'); return; }   // 어디서 불러도 권한 없는 계정은 파일을 받지 않는다(09-30)
   if (_bp.loading) return _bp.loading;
   if (!force && _bp.all.length && Date.now() - _bp.loadedAt < 90000) { renderBpList(false); return; }
   const body = document.getElementById('bp-body');
@@ -2478,6 +2500,7 @@ async function bpBulkAdd() {
    BP 쪽 탭은 _bpTab 에 따로 기억한다 — 돌아오면 보던 결재 탭이 다시 열린다. */
 let _bpTab = 'bpview';
 function switchCat(cat) {
+  if (cat === 'bp' && !isBpViewer()) { bpDenyView('BP Master 메뉴'); return; }   // BP 코드는 조회 권한자만(09-30)
   // 종류를 바꾸면 결재함 배지도 그 종류 기준으로 다시 그린다.
   _currentCat = cat;
   document.querySelectorAll('.cat').forEach(el => el.classList.toggle('on', el.dataset.cat === cat));
@@ -2496,6 +2519,7 @@ function switchTab(tab) {
     document.getElementById('no-auth-modal').classList.add('show');
     return;
   }
+  if (tab === 'bpview' && !isBpViewer()) { bpDenyView('BP 코드 조회 탭'); return; }
   if (tab === 'bpview' || tab === 'bpadmin') _bpTab = tab; else _currentTab = tab;
   document.querySelectorAll('.tab').forEach(el => el.classList.toggle('on', el.dataset.tab === tab));
   ['new', 'my', 'apr', 'admin', 'bpview', 'bpadmin'].forEach(t => {
