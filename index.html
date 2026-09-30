@@ -785,7 +785,7 @@ body.rd-rule .line-preview.rd-only{display:block}
         <button class="btn btn-p" onclick="bpStartView()">🔍 조회 시작</button>
       </div>
       <div class="bp-src" id="bp-src" style="display:none">
-        <span><b id="bp-src-name">-</b></span><span id="bp-src-meta"></span>
+        <span><b id="bp-src-name" title="">BP Code 목록</b></span><span id="bp-src-meta"></span>
         <span class="sp"><button class="btn btn-g" style="padding:4px 10px;font-size:.74rem" onclick="bpRefresh()">↻ 새로고침</button></span>
       </div>
       <div class="bp-tools" id="bp-tools" style="display:none">
@@ -1789,7 +1789,7 @@ async function loadBpMaster(force) {
   if (!force && _bp.all.length && Date.now() - _bp.loadedAt < 90000) { renderBpList(false); return; }
   const body = document.getElementById('bp-body');
   // 다른 화면과 같은 차단 팝업(#loading) — 읽는 동안 다른 조작을 막는다. 표 안의 「불러오는 중」 글은 쓰지 않는다(09-28).
-  document.getElementById('bp-src-name').textContent = bpFileLabel(BP_MASTER_FILE);
+  document.getElementById('bp-src-name').title = bpFileLabel(BP_MASTER_FILE);   // 제목은 「BP Code 목록」 으로 고정(09-30) — 실제 파일 이름은 마우스를 올리면 보인다
   loading(true, 'BP 마스터를 불러오는 중...');
   _bp.loading = (async () => {
     try {
@@ -1822,8 +1822,8 @@ async function loadBpMaster(force) {
       });
       _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now(); _bp.sel.clear();   // 다시 읽으면 행이 바뀔 수 있어 선택은 비운다
       const by = (meta.lastModifiedBy && meta.lastModifiedBy.user && meta.lastModifiedBy.user.displayName) || '';
-      document.getElementById('bp-src-name').textContent = bpFileLabel(meta.name);   // 확장자(.xlsx)는 빼고 보여 준다
-      document.getElementById('bp-src-meta').textContent = '시트 ' + _bp.sheet + ' · ' + all.length.toLocaleString() + '건 · 마지막 수정 ' + fmtDate(meta.lastModifiedDateTime) + (by ? ' (' + by + ')' : '');
+      document.getElementById('bp-src-name').title = bpFileLabel(meta.name) + ' · 시트 ' + _bp.sheet;   // 실제 파일 · 시트는 도움말(title)로만
+      document.getElementById('bp-src-meta').textContent = all.length.toLocaleString() + '건 · 마지막 수정 ' + fmtDate(meta.lastModifiedDateTime) + (by ? ' (' + by + ')' : '');
       renderBpList(true);
       bpRenderAdminInfo();
       console.log('[BP] 로드:', all.length, '건 · 마지막 코드 행', lastRow);
@@ -2438,7 +2438,7 @@ function bpExportLogs() {
   const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{ wch: 19 }, { wch: 9 }, { wch: 30 }, { wch: 16 }, { wch: 18 }, { wch: 60 }, { wch: 70 }, { wch: 44 }];
   XLSX.utils.book_append_sheet(wb, ws, 'BP-Master 이력');
-  XLSX.writeFile(wb, 'BP-Master_이력_' + _bpLog.from.replace(/-/g, '') + '-' + _bpLog.to.replace(/-/g, '') + (_bpLog.kind ? '_' + _bpLog.kind : '') + '.xlsx');
+  XLSX.writeFile(wb, 'BP-Master_이력_' + _bpLog.from.replace(/-/g, '') + '-' + _bpLog.to.replace(/-/g, '') + (_bpLog.kind ? '_' + _bpLog.kind : '') + '.xlsx', { compression: true });
   bpLogAdmin('이력 내보내기', { from: _bpLog.from, to: _bpLog.to, kind: _bpLog.kind || '전체', count: rows.length - 1 });
 }
 
@@ -2452,7 +2452,7 @@ function bpExportList() {
   ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 28 }, { wch: 16 }, { wch: 18 }, { wch: 22 }, { wch: 7 }, { wch: 8 }];
   XLSX.utils.book_append_sheet(wb, ws, 'BP Master');
   const d = kstNow(), p = n => String(n).padStart(2, '0');
-  XLSX.writeFile(wb, 'BP-Master_목록_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '.xlsx');
+  XLSX.writeFile(wb, 'BP-Master_목록_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '.xlsx', { compression: true });   // 압축 저장(09-30) — 같은 내용이 5.2MB → 0.8MB 안팎, 시스템들이 내려받는 시간이 준다
   bpLogAdmin('목록 내보내기', { count: rows.length - 1, file: bpFileLabel((_bp.meta && _bp.meta.name) || BP_MASTER_FILE), sheet: _bp.sheet });
 }
 
