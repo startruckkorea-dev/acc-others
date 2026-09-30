@@ -2654,9 +2654,11 @@ function switchCat(cat) {
 }
 function switchTab(tab) {
   if (tab === 'admin' && !isAdmin() && !isIT()) {   // 권한 없음 — 탭은 그대로 두고 안내만 띄운다
+    logAction('Admin', '관리자 탭 접근 차단', { reason: '관리자 명단에 없음' });   // 권한이 없어 막혀도 이력은 남긴다(09-30)
     document.getElementById('no-auth-modal').classList.add('show');
     return;
   }
+  if (tab === 'admin') logAction('Admin', '관리자 탭 열기', {});
   if (tab === 'bpadmin' && !isBpAdmin()) {
     document.getElementById('no-auth-modal').classList.add('show');
     return;
