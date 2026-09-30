@@ -938,18 +938,15 @@ body.rd-rule .line-preview.rd-only{display:block}
   </div>
 </div>
 
-<!-- 결재 처리 모달 -->
-<div class="ov" id="appr-ov">
-  <div class="mod" style="max-width:520px">
-    <div class="mod-hd"><span id="appr-title">결재 처리</span><button onclick="closeApprModal()">&times;</button></div>
-    <div class="mod-bd">
-      <div id="appr-msg" style="font-size:.85rem;margin-bottom:12px"></div>
-      <label>의견 <span id="appr-req" style="color:#a4262c;display:none">*</span></label>
-      <textarea id="appr-comment" maxlength="1000" placeholder="의견을 입력해 주세요."></textarea>
-      <div style="text-align:right;margin-top:14px">
-        <button class="btn btn-g" onclick="closeApprModal()">취소</button>
-        <button class="btn btn-p" id="appr-ok" style="margin-left:6px">확인</button>
-      </div>
+<!-- 결재 처리 모달 — GW · IT-Ticket · BP Master · FA 의 confirm-modal 과 같은 구성 · 같은 값(09-30) -->
+<div class="ov" id="appr-ov" onclick="if(event.target===this)closeApprModal()" style="background:rgba(0,0,0,.6);z-index:1100;padding:0">
+  <div style="background:#fff;border-radius:10px;padding:28px 28px 20px;max-width:420px;width:92%;box-shadow:0 4px 24px rgba(0,0,0,.2)">
+    <div id="appr-title" style="font-size:1rem;font-weight:700;color:#323130;margin-bottom:6px"></div>
+    <div id="appr-msg" style="font-size:.78rem;color:#605e5c;margin-bottom:14px"></div>
+    <textarea id="appr-comment" rows="3" maxlength="1000" placeholder="의견 입력 (선택사항)" style="width:100%;border:1px solid #d2d0ce;border-radius:4px;padding:8px 10px;font-size:.82rem;font-family:inherit;resize:vertical;margin-bottom:14px;min-height:0;line-height:normal"></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button onclick="closeApprModal()" style="background:#fff;border:1px solid #d2d0ce;border-radius:4px;padding:7px 20px;font-size:.85rem;cursor:pointer;font-family:inherit;color:#323130">취소</button>
+      <button id="appr-ok" style="border:none;border-radius:4px;padding:7px 20px;font-size:.85rem;cursor:pointer;font-weight:600;font-family:inherit"></button>
     </div>
   </div>
 </div>
@@ -3342,15 +3339,18 @@ async function openDetail(cat, reqId) {
 let _pendingAppr = null;
 function openApprModal(action, apprId) {
   _pendingAppr = { action, apprId };
-  document.getElementById('appr-title').textContent = action + ' 처리';
-  document.getElementById('appr-msg').innerHTML = action === '승인'
-    ? '이 신청을 <b style="color:#107c10">승인</b>합니다. 의견은 선택 입력입니다.'
-    : '이 신청을 <b style="color:#a4262c">반려</b>합니다. 반려 사유를 반드시 입력해 주세요.';
-  document.getElementById('appr-req').style.display = action === '반려' ? '' : 'none';
-  document.getElementById('appr-comment').value = '';
-  document.getElementById('appr-ok').className = 'btn ' + (action === '승인' ? 'btn-s' : 'btn-r');
-  document.getElementById('appr-ok').textContent = action;
-  document.getElementById('appr-ok').onclick = () => processApproval();
+  // 문구 · 색은 GW · IT-Ticket · BP Master · FA 의 showConfirm 과 같다.
+  const isReject = action === '반려';
+  document.getElementById('appr-title').textContent = isReject ? '❌ 반려 확인' : '✅ 승인 확인';
+  document.getElementById('appr-msg').textContent = isReject ? '반려 사유를 입력해주세요. (필수)' : '이 신청을 승인하시겠습니까?';
+  const cm = document.getElementById('appr-comment');
+  cm.value = '';
+  cm.placeholder = isReject ? '반려 사유 입력 (필수)' : '의견 입력 (선택사항)';
+  const ok = document.getElementById('appr-ok');
+  ok.textContent = isReject ? '반려' : '승인';
+  ok.style.background = isReject ? '#a4262c' : '#107c10';
+  ok.style.color = '#fff';
+  ok.onclick = () => processApproval();
   document.getElementById('appr-ov').classList.add('on');
 }
 function closeApprModal() { document.getElementById('appr-ov').classList.remove('on'); _pendingAppr = null; }
