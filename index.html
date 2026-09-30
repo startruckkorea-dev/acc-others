@@ -403,10 +403,15 @@ body.rd-rule .line-preview.rd-only{display:block}
 .btn-login:disabled{background:#cbd5e0;cursor:not-allowed;transform:none;box-shadow:none}
 #login-err{color:#e53e3e;font-size:.78rem;margin-top:10px;display:none}
 .login-page-footer{position:fixed;bottom:0;left:0;right:0;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.18)}
-#loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.75);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+/* 처리 중 팝업(09-30) — 흐린 배경 위 카드 하나: 고리 스피너 · 제목 · 부제(지금 하는 단계). 문구는 loading(on, 제목, 부제) · loadingSub(부제). */
+#loading{display:none;position:fixed;inset:0;background:rgba(15,23,42,.30);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 #loading.on{display:flex}
-.lbox{background:#fff;border-radius:8px;padding:22px 30px;box-shadow:0 8px 28px rgba(0,0,0,.16);display:flex;align-items:center;gap:13px;font-size:.85rem}
-.spin{width:20px;height:20px;border:3px solid #edebe9;border-top-color:#0078d4;border-radius:50%;animation:sp .8s linear infinite}
+.lbox{background:#fff;border-radius:16px;padding:26px 32px 22px;min-width:300px;max-width:440px;box-shadow:0 22px 48px rgba(15,23,42,.20);border:1px solid rgba(15,23,42,.06);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;animation:lpop .18s ease-out}
+@keyframes lpop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.spin{width:36px;height:36px;border:3px solid #e6ebf2;border-top-color:#0078d4;border-radius:50%;animation:sp .8s linear infinite;margin-bottom:2px}
+.lbox .lt{font-size:.94rem;font-weight:700;color:#1f2937;letter-spacing:-.01em;line-height:1.35}
+.lbox .ls{font-size:.75rem;color:#6b7280;line-height:1.5;min-height:1.1em;word-break:keep-all}
+.lbox .ls:empty{display:none}
 @keyframes sp{to{transform:rotate(360deg)}}
 .foot{text-align:center;font-size:.72rem;color:#a19f9d;padding:16px 0 30px;line-height:1.7}
 @media print{body{background:#fff}.no-print{display:none!important}}
@@ -995,7 +1000,7 @@ body.rd-rule .line-preview.rd-only{display:block}
   </div>
 </div>
 
-<div id="loading"><div class="lbox"><div class="spin"></div><span id="loading-msg">처리 중입니다...</span></div></div>
+<div id="loading" role="status" aria-live="polite"><div class="lbox"><div class="spin"></div><div class="lt" id="loading-msg">처리 중입니다</div><div class="ls" id="loading-sub"></div></div></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════════
@@ -1222,10 +1227,12 @@ function showAlert(title, sub = '', icon = '✅') {
   document.getElementById('it-alert-modal').classList.add('show');
 }
 
-function loading(on, msg) {
-  document.getElementById('loading-msg').textContent = msg || '처리 중입니다...';
+function loading(on, msg, sub) {
+  document.getElementById('loading-msg').textContent = String(msg || '처리 중입니다').replace(/\.{3}$/, '');   // 말줄임표는 스피너가 대신한다
+  document.getElementById('loading-sub').textContent = sub || '';
   document.getElementById('loading').classList.toggle('on', !!on);
 }
+function loadingSub(sub) { const el = document.getElementById('loading-sub'); if (el && document.getElementById('loading').classList.contains('on')) el.textContent = sub || ''; }
 function isAdmin() {
   const e = (user && user.email || '').toLowerCase();
   return ADMIN_EMAILS.some(x => (x || '').toLowerCase() === e);
@@ -1802,7 +1809,7 @@ async function loadBpMaster(force) {
   const body = document.getElementById('bp-body');
   // 다른 화면과 같은 차단 팝업(#loading) — 읽는 동안 다른 조작을 막는다. 표 안의 「불러오는 중」 글은 쓰지 않는다(09-28).
   document.getElementById('bp-src-name').title = bpFileLabel(BP_MASTER_FILE);   // 제목은 「BP Code 목록」 으로 고정(09-30) — 실제 파일 이름은 마우스를 올리면 보인다
-  loading(true, 'BP 마스터를 불러오는 중...');
+  loading(true, 'BP 목록을 불러오는 중', '파일을 내려받아 읽고 있습니다');
   _bp.loading = (async () => {
     try {
       const t = await token();
@@ -1945,7 +1952,7 @@ async function bpBulkStatus(inactive) {
   if (!targets.length) { showAlert('바꿀 행이 없습니다.', '선택한 ' + picked.length + '건이 이미 모두 ' + label + ' 상태입니다.', 'ℹ️'); return; }
   const skip = picked.length - targets.length;
   if (!confirm('선택한 ' + picked.length + '건 중 ' + targets.length + '건을 「' + label + '」 으로 바꿉니다.' + (skip ? '\n(이미 ' + label + '인 ' + skip + '건은 건너뜁니다)' : '') + '\n\n진행할까요?')) return;
-  loading(true, targets.length + '건의 상태를 바꾸는 중...');
+  loading(true, '상태를 바꾸는 중', targets.length.toLocaleString() + '건 · ' + label + ' 으로');
   try {
     await bpEnsureReady();
     await bpWbSession(async () => {
@@ -1966,7 +1973,7 @@ async function bpBulkStatus(inactive) {
       await bpPatchRange(bpWb() + "/range(address='H" + run.start + ":H" + run.end + "')", Array.from({ length: n }, () => [val]), 1);
       await bpPatchRange(bpWb() + "/range(address='K" + run.start + ':K' + run.end + "')", Array.from({ length: n }, () => [who]), 1);
       await bpPatchRange(bpWb() + "/range(address='" + L + run.start + ':' + L + run.end + "')", Array.from({ length: n }, () => [entry]), 1);
-      done += n; loading(true, '상태를 바꾸는 중... ' + done + ' / ' + targets.length);
+      done += n; loadingSub(done.toLocaleString() + ' / ' + targets.length.toLocaleString() + '건 기록');
     }
     targets.forEach(x => { x.inactive = inactive; x.modifier = who; x.history = (x.history || []).concat([entry]); });
     });
@@ -2027,7 +2034,7 @@ function bpLockLost(h, viaAlert) {
 async function bpToggleEdit() { if (_bpLock.mine) await bpStopEdit(); else await bpStartEdit(); }
 /* 「상태 확인」 — 눌러도 아무 반응이 없어 보였다(09-28). 팝업을 띄우고, 배너에 확인 시각을 적는다. */
 async function bpCheckLock() {
-  loading(true, '잠금 상태를 확인하는 중...');
+  loading(true, '잠금 상태를 확인하는 중');
   try { await bpLockRefresh(); } finally { loading(false); }
   bpLogAdmin('잠금 상태 확인', { holder: _bpLock.holder ? _bpLock.holder.email : '', mine: _bpLock.mine });
 }
@@ -2214,7 +2221,7 @@ async function bpSave() {
     const before = _bp.all.find(x => x.row === _bp.editRow);
     if (before && !bpDiff(before, rec).length) { btn.disabled = false; showAlert('바뀐 내용이 없습니다.', rec.code + ' · 그대로 두었습니다.', 'ℹ️'); return; }
   }
-  loading(true, isNew ? 'Excel 에 새 행을 기록하는 중... (처음 한 번은 10초쯤 걸릴 수 있습니다)' : 'Excel 행을 편집하는 중...');
+  loading(true, isNew ? 'Excel에 기록하는 중' : 'Excel 행을 편집하는 중', isNew ? rec.code + ' · 처음 한 번은 10초쯤 걸릴 수 있습니다' : rec.code + ' · ' + _bp.editRow.toLocaleString() + '행');
   try {
     if (isNew) { const r = await bpMasterAppendRows([rec]); showAlert('등록되었습니다.', rec.code + ' · ' + r[0].toLocaleString() + '행', '✅'); }
     else { const r = await bpMasterUpsert({ ...rec, row: _bp.editRow }); showAlert('편집 내용이 저장되었습니다.', rec.code + ' · ' + r.toLocaleString() + '행 · 수정 내역 기록', '✅'); }
@@ -2335,6 +2342,7 @@ async function bpMasterAppendRows(recs) {
   return bpWbSession(async () => {
     /* ① 서버의 A열(코드)을 읽어 중복과 마지막 행을 서버 기준으로 정한다(09-30). 화면 목록이 오래됐거나(다른 창 · 다른 관리자가 그 사이 등록)
        방금 쓴 값이 아직 목록에 없어도 같은 코드를 두 번 쓰지 않는다. */
+    loadingSub('중복 코드 확인 중 (1/3)');
     const scanEnd = Math.max(bpNextRow(), _bp.lastRow || 0) + recs.length + 2000;   // 넉넉히 읽는다 — 누가 Excel 에서 직접 아래에 적어 뒀어도 잡힌다
     const colA = ((await wbApi(bpWb() + "/range(address='A1:A" + scanEnd + "')?$select=values")).values || []).map(r => bpCell(r && r[0]));
     const seen = new Map(); let lastRow = 0;
@@ -2345,12 +2353,14 @@ async function bpMasterAppendRows(recs) {
     const start = Math.max(BP_FIRST_NEW_ROW, lastRow + 1);   // 마지막 코드 행 다음
     const end = start + recs.length - 1;
     if (end > colA.length || colA.slice(start - 1, end).some(Boolean)) throw new Error('빈 행을 찾지 못했습니다(' + start.toLocaleString() + '행부터 ' + recs.length + '행). 새로고침 후 다시 시도해 주세요.');   // 읽은 범위 밖이거나 비어 있지 않으면 쓰지 않는다
+    loadingSub(start.toLocaleString() + (recs.length > 1 ? '~' + end.toLocaleString() : '') + '행에 기록 중 (2/3)');
     await bpWriteRows(start, recs);
     const who = bpWho();
     await bpEnsureHeader(null);
     await bpPatchRange(bpWb() + "/range(address='J" + start + ':J' + end + "')", recs.map(r => [r.creator || who]), 1);   // J 생성자(이름)
     recs.forEach(r => { if (!r.creator) r.creator = who; if (!r.history) r.history = []; });
     /* ② 되읽어 확인 — 같은 세션이라 방금 쓴 값이 보인다. 그래도 잠깐 늦을 수 있어 최대 4번 본다. */
+    loadingSub('기록 확인 중 (3/3)');
     let got = [];
     for (let attempt = 0; attempt < 4; attempt++) {
       const chk = await wbApi(bpWb() + "/range(address='A" + start + ":A" + end + "')?$select=values");
@@ -2430,7 +2440,7 @@ async function bpLoadLogs() {
   if (bpDayAdd(from, BP_LOG_MAX_DAYS - 1) < to) { alert('한 번에 ' + BP_LOG_MAX_DAYS + '일까지 조회할 수 있습니다. 기간을 줄여 주세요.'); return; }
   const range = from + ' ~ ' + to;
   const btn = document.getElementById('bp-log-btn'); btn.disabled = true;
-  loading(true, range + ' 이력 목록을 읽는 중...');
+  loading(true, '이력을 읽는 중', range);
   try {
     const driveId = await _getLogDriveId();
     if (!driveId) throw new Error('이력 저장소(STK-DB Documents)에 연결하지 못했습니다.');
@@ -2448,7 +2458,7 @@ async function bpLoadLogs() {
       }
     }
     const total = files.length, out = []; let done = 0;
-    loading(true, range + ' 이력 ' + total.toLocaleString() + '건을 읽는 중...');
+    loadingSub(range + ' · ' + total.toLocaleString() + '건');
     const queue = files.slice();
     const worker = async () => {
       while (queue.length) {
@@ -2456,7 +2466,7 @@ async function bpLoadLogs() {
         try { const j = await bpReadLogFile(driveId, f, t); out.push({ ...f, ...(j && typeof j === 'object' ? j : {}) }); }
         catch (e) { out.push({ ...f, action: '(읽기 실패)', detail: { error: e.message } }); }
         done++;
-        if (done % 20 === 0 || done === total) loading(true, range + ' 이력을 읽는 중... ' + done.toLocaleString() + ' / ' + total.toLocaleString());
+        if (done % 20 === 0 || done === total) loadingSub(range + ' · ' + done.toLocaleString() + ' / ' + total.toLocaleString() + '건');
       }
     };
     await Promise.all(Array.from({ length: Math.min(6, Math.max(1, total)) }, worker));
@@ -2615,7 +2625,7 @@ async function bpBulkAdd() {
   const skipped = _bp.bulk.filter(r => r.miss.length);
   bpFlushPasteLog();                                               // 붙여넣기 이력이 아직 안 남았으면 등록 전에 남긴다
   const btn = document.getElementById('bp-bulk-btn'); btn.disabled = true;
-  loading(true, recs.length + '건을 Excel 에 기록하는 중...');
+  loading(true, 'Excel에 기록하는 중', recs.length.toLocaleString() + '건 일괄 등록 · ' + bpNextRow().toLocaleString() + '행부터');
   try {
     const rows = await bpMasterAppendRows(recs);
     if (skipped.length) bpLogAdmin('일괄 등록 건너뜀', { count: skipped.length, codes: skipped.map(r => r.code).join(','), reasons: skipped.map(r => r.code + ': ' + r.miss.join(' · ')) });
@@ -3795,7 +3805,7 @@ async function exportDetailPdf() {
 async function exportExcel() {
   if (!isAdmin() && !isIT()) return;
   const cat = _currentCat, L = LISTS[cat];
-  loading(true, 'Excel 생성 중...');
+  loading(true, '내보내기 파일을 만드는 중');
   try {
     const data = await apiAll('/sites/' + siteId + '/lists/' + L.req + '/items?$expand=fields&$top=999');
     const apr = await apiAll('/sites/' + siteId + '/lists/' + L.apr + '/items?$expand=fields&$top=999');
