@@ -1379,22 +1379,27 @@ function cfgVal(cfg, key, def) {
   if (!cfg || !cfg[key]) return def;
   return { ...def, name: cfg[key].name || def.name, email: cfg[key].email || def.email };
 }
+/* 접두어 뒤에 번호가 붙은 키(ACC-OTHERS_ADMIN_1 · _2 · _3 …)를 번호순으로 모두 찾는다.
+   09-30: 예전에는 1 부터 이어지는 동안만 읽어 번호가 비면(_4 없이 _5) 그 뒤가 빠졌다. 이제 설정 파일에 있는 번호는 전부 읽는다.
+   대소문자는 가리지 않는다(acc-others_admin_4 도 같은 키). 접두어 뒤가 숫자만인 키만 잡으므로 ACC-OTHERS_ADMIN-BP_1 은 ADMIN_ 에 섞이지 않는다. */
+function cfgSeqKeys(cfg, prefix) {
+  const P = String(prefix).toUpperCase();
+  return Object.keys(cfg || {})
+    .filter(k => k.toUpperCase().startsWith(P) && /^\d+$/.test(k.slice(P.length)))
+    .sort((a, b) => Number(a.slice(P.length)) - Number(b.slice(P.length)));
+}
 function cfgEmails(cfg, keys) {
   const expanded = [];
   keys.forEach(k => {
     const m = k.match(/^(.+_)[0-9]+$/);
-    if (m && /_(ADMIN|IT)_$/.test(m[1])) {
-      let n = 1;
-      while (cfg && cfg[m[1] + n]) { expanded.push(m[1] + n); n++; }
-    } else expanded.push(k);
+    if (m && /_(ADMIN|IT)_$/.test(m[1])) expanded.push(...cfgSeqKeys(cfg, m[1]));   // _ADMIN_N · _IT_N 은 번호 전체로 확장
+    else expanded.push(k);
   });
   return [...new Set(expanded)].map(k => (cfg && cfg[k] ? cfg[k].email : '')).filter(Boolean);
 }
-// 접두어 뒤에 1, 2, 3… 이 이어지는 키의 메일을 모은다(cfgEmails 는 _ADMIN_ · _IT_ 로 끝나는 접두어만 자동 확장한다).
+// 접두어 뒤에 번호가 붙은 키의 메일을 번호순으로 모은다(cfgEmails 는 _ADMIN_ · _IT_ 로 끝나는 접두어만 자동 확장한다).
 function cfgSeqEmails(cfg, prefix) {
-  const out = [];
-  for (let n = 1; cfg && cfg[prefix + n]; n++) if (cfg[prefix + n].email) out.push(cfg[prefix + n].email);
-  return out;
+  return cfgSeqKeys(cfg, prefix).map(k => cfg[k].email).filter(Boolean);
 }
 async function loadSystemConfig() {
   if (_sysConfig) return _sysConfig;
@@ -1697,9 +1702,7 @@ let BP_ADMIN_EMAILS = [];
 let BP_VIEW_EMAILS = [];
 function bpViewEmails(cfg) {
   const keys = ['ACC-OTHERS_IT', 'ACC-OTHERS_DEV_CFO', 'ACC-OTHERS_CCL_CFO', 'DEV_CFO', 'CCL_CFO', 'ACC-OTHERS_CONTACT', 'ADMIN_SP'];
-  ['ACC-OTHERS_ACCESS_', 'ACC-OTHERS_ADMIN_', 'ACC-OTHERS_IT_', 'ADMIN_SP_', 'ACC-OTHERS_BP_VIEW_'].forEach(p => {
-    let n = 1; while (cfg && cfg[p + n]) { keys.push(p + n); n++; }
-  });
+  ['ACC-OTHERS_ACCESS_', 'ACC-OTHERS_ADMIN_', 'ACC-OTHERS_IT_', 'ADMIN_SP_', 'ACC-OTHERS_BP_VIEW_'].forEach(p => keys.push(...cfgSeqKeys(cfg, p)));
   return [...new Set(keys.map(k => (cfg && cfg[k] && cfg[k].email || '').trim().toLowerCase()).filter(Boolean).concat(BP_ADMIN_EMAILS))];
 }
 function isBpViewer() {
