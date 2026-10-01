@@ -1009,7 +1009,7 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
     <div style="font-size:1rem;font-weight:700;color:#0f2744;margin-bottom:8px">접근 권한 없음</div>
-    <div style="font-size:.83rem;color:#64748b;line-height:1.7;margin-bottom:20px">관리자 전용 메뉴입니다.<br>접근 권한이 없습니다.</div>
+    <div id="no-auth-desc" style="font-size:.83rem;color:#64748b;line-height:1.7;margin-bottom:20px">관리자 전용 메뉴입니다.<br>접근 권한이 없습니다.</div>
     <div style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin-bottom:24px;text-align:left">
       <div style="font-size:.75rem;font-weight:700;color:#1d4ed8;margin-bottom:6px">접근 권한 신청 방법</div>
       <div style="font-size:.78rem;color:#374151;line-height:1.8">
@@ -1767,9 +1767,16 @@ function isBpViewer() {
   const me = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
   return isBpAdmin() || BP_VIEW_EMAILS.some(e => me.includes(e));
 }
+/* 차단 팝업은 관리자 탭과 같은 것(#no-auth-modal) — 설명 줄만 상황에 맞게 바꾼다(10-01). */
+const NO_AUTH_DESC_ADMIN = '관리자 전용 메뉴입니다.<br>접근 권한이 없습니다.';
+const NO_AUTH_DESC_BP = 'BP 코드 조회는 허가된 사용자만 볼 수 있습니다.<br>접근 권한이 없습니다.';
+function showNoAuth(desc) {
+  const d = document.getElementById('no-auth-desc'); if (d) d.innerHTML = desc || NO_AUTH_DESC_ADMIN;
+  document.getElementById('no-auth-modal').classList.add('show');
+}
 function bpDenyView(where) {
   bpLogAccess('접근 차단', { where });
-  document.getElementById('no-auth-modal').classList.add('show');
+  showNoAuth(NO_AUTH_DESC_BP);
 }
 const _bp = { all: [], view: [], loadedAt: 0, loading: null, driveId: null, itemId: null, sheet: BP_MASTER_SHEET, startRow: 1, lastRow: 0, meta: null, page: 1, type: '', q: '', editRow: null, bulk: [], viewOpened: false, sel: new Set() };
 /* 이력(09-28) — SharePoint Logging_data/ACC-Others/BP-Master/{Accessor|Admin}/YYYY-MM-DD/… 에 한 행위마다 JSON 한 개.
@@ -2690,13 +2697,13 @@ function switchCat(cat) {
 function switchTab(tab) {
   if (tab === 'admin' && !isAdmin() && !isIT()) {   // 권한 없음 — 탭은 그대로 두고 안내만 띄운다
     logAction('Admin', '관리자 탭 접근 차단', { reason: '관리자 명단에 없음' });   // 권한이 없어 막혀도 이력은 남긴다(09-30)
-    document.getElementById('no-auth-modal').classList.add('show');
+    showNoAuth(NO_AUTH_DESC_ADMIN);
     return;
   }
   if (tab === 'admin') logAction('Admin', '관리자 탭 열기', {});
   if (tab === 'bpadmin' && !isBpAdmin()) {   // BP 관리 탭(등록 · 수정)은 전처럼 BP 관리자만 — 막힌 시도도 이력에 남긴다(10-01)
     logAction('BP-Master/Admin', '관리 탭 접근 차단', { reason: 'BP 관리자 명단에 없음' });
-    document.getElementById('no-auth-modal').classList.add('show');
+    showNoAuth(NO_AUTH_DESC_ADMIN);
     return;
   }
   if (tab === 'bpview' && !isBpViewer()) { bpDenyView('BP 코드 조회 탭'); return; }
