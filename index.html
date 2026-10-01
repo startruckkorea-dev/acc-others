@@ -1668,7 +1668,7 @@ async function boot(account) {
     //   IT(ACC-OTHERS_IT_N) · ADMIN_SP 는 자동으로 들어가지 않는다 — 필요하면 위 키에 적는다. (옛 표기 ACC-OTHERS_BP_ADMIN_N 도 읽는다)
     BP_ADMIN_EMAILS = [...new Set([...cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1']), ...cfgSeqEmails(cfg, 'ACC-OTHERS_ADMIN-BP_'), ...cfgSeqEmails(cfg, 'ACC-OTHERS_BP_ADMIN_')]
       .map(e => String(e || '').toLowerCase()).filter(Boolean))];
-    BP_VIEW_EMAILS = bpViewEmails(cfg);   // BP Master 조회 권한(09-30) — 위 BP_ADMIN_EMAILS 뒤에 계산해야 관리자가 포함된다
+    BP_VIEW_EMAILS = bpViewEmails(cfg);   // 10-01 부터 조회 판정에는 쓰지 않는다(누구나 조회) — 되돌릴 때를 위해 계산만 남겨 둔다
     // 헤더 BU Admin 연락처 — GW·IT 와 같은 규칙으로 설정 파일에서 읽는다.
     // 키: ACC-OTHERS_CONTACT (없으면 공통 CONTACT_EMAIL)
     const contact = cfgVal(cfg, 'ACC-OTHERS_CONTACT', cfgVal(cfg, 'CONTACT_EMAIL', { name: '', email: '' }));
@@ -1753,9 +1753,10 @@ const BP_LOCK_TAG_KEY = 'acc_others_bp_lock_tag';
 const BP_TYPES = ['Customer', 'Vendor', 'Employee'];
 const BP_PAGE = 25;
 let BP_ADMIN_EMAILS = [];
-/* BP Master 조회 권한(09-30) — 앱 입장 제한을 없애면서 BP 코드(고객 · 업체 · 직원 · 계좌 정보)는 따로 막는다.
-   조회 가능 = 입장 제한이 있던 때의 명단 그대로(ACC-OTHERS_ACCESS_N · ADMIN_N · IT · IT_N · DEV_CFO · CCL_CFO · CONTACT · ADMIN_SP · ADMIN_SP_N)
-   + BP 관리자 + 조회 전용 키 ACC-OTHERS_BP_VIEW_N. 설정을 못 읽거나 명단이 비면 아무도 못 본다(닫힌 쪽이 기본). */
+/* BP Master 조회 권한 — 10-01: 로그인한 STK 직원 누구나 BP 코드를 조회한다(조회 열기 · 조회 시작 · 유형/상태/검색이 BP-Master/Accessor 이력으로
+   전부 남으므로 명단으로 막지 않는다 — 10-01 결정). 관리 탭(등록 · 수정)은 전처럼 BP 관리자(isBpAdmin)만.
+   09-30 ~ 10-01 에는 입장 제한 시절 명단(ACC-OTHERS_ACCESS_N · ADMIN_N · IT · IT_N · DEV_CFO · CCL_CFO · CONTACT · ADMIN_SP · ADMIN_SP_N)
+   + ACC-OTHERS_BP_VIEW_N 만 볼 수 있었다 — 되돌리려면 isBpViewer 를 BP_VIEW_EMAILS 판정으로(아래 bpViewEmails 는 그때를 위해 남겨 둔다). */
 let BP_VIEW_EMAILS = [];
 function bpViewEmails(cfg) {
   const keys = ['ACC-OTHERS_IT', 'ACC-OTHERS_DEV_CFO', 'ACC-OTHERS_CCL_CFO', 'DEV_CFO', 'CCL_CFO', 'ACC-OTHERS_CONTACT', 'ADMIN_SP'];
@@ -1763,8 +1764,7 @@ function bpViewEmails(cfg) {
   return [...new Set(keys.map(k => (cfg && cfg[k] && cfg[k].email || '').trim().toLowerCase()).filter(Boolean).concat(BP_ADMIN_EMAILS))];
 }
 function isBpViewer() {
-  const me = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
-  return isBpAdmin() || BP_VIEW_EMAILS.some(e => me.includes(e));
+  return !!user;   // 로그인만 돼 있으면 조회 가능(10-01). 명단 판정으로 되돌리려면: isBpAdmin() || BP_VIEW_EMAILS.some(e => me.includes(e))
 }
 function bpDenyView(where) {
   bpLogAccess('접근 차단', { where });
@@ -2676,7 +2676,7 @@ async function bpBulkAdd() {
    BP 쪽 탭은 _bpTab 에 따로 기억한다 — 돌아오면 보던 결재 탭이 다시 열린다. */
 let _bpTab = 'bpview';
 function switchCat(cat) {
-  if (cat === 'bp' && !isBpViewer()) { bpDenyView('BP Master 메뉴'); return; }   // BP 코드는 조회 권한자만(09-30)
+  if (cat === 'bp' && !isBpViewer()) { bpDenyView('BP Master 메뉴'); return; }   // 로그인한 직원은 누구나(10-01) — 로그인 전에만 막힌다
   // 종류를 바꾸면 결재함 배지도 그 종류 기준으로 다시 그린다.
   _currentCat = cat;
   document.querySelectorAll('.cat').forEach(el => el.classList.toggle('on', el.dataset.cat === cat));
@@ -2693,7 +2693,8 @@ function switchTab(tab) {
     return;
   }
   if (tab === 'admin') logAction('Admin', '관리자 탭 열기', {});
-  if (tab === 'bpadmin' && !isBpAdmin()) {
+  if (tab === 'bpadmin' && !isBpAdmin()) {   // BP 관리 탭(등록 · 수정)은 전처럼 BP 관리자만 — 막힌 시도도 이력에 남긴다(10-01)
+    logAction('BP-Master/Admin', '관리 탭 접근 차단', { reason: 'BP 관리자 명단에 없음' });
     document.getElementById('no-auth-modal').classList.add('show');
     return;
   }
