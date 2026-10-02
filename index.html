@@ -331,22 +331,24 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-kind.Admin{background:#fdf1e3;color:#b45309}
 .bp-tools .cnt{margin-left:auto;font-size:.78rem;color:#605e5c;white-space:nowrap}
 .bp-tools .cnt .q{color:#0078d4;font-weight:600}
-/* 표 글자(09-28) — 이름 · 은행처럼 길어 두 줄이 되는 칸이 많다. 한 단계 작게 해 행 높이를 줄인다(BP 표에만). */
-#bp-tbl table{font-size:.72rem}
-#bp-tbl th{padding:5px 8px;font-size:.68rem}
-#bp-tbl td{padding:4px 8px;line-height:1.35;font-size:.72rem;white-space:nowrap}
-/* 두 줄로 내려가던 칸(이름 · 한글이름 · 은행)은 한 줄로 고정하고 넘치면 줄임표(전체 글은 title). 긴 글은 한 단계 더 작게(.sm). */
-#bp-tbl td.clip{max-width:300px;overflow:hidden;text-overflow:ellipsis}
-#bp-tbl td.clip.ko{max-width:210px}
-#bp-tbl td.clip.bank{max-width:170px}
-#bp-tbl td.clip.sm{font-size:.64rem;letter-spacing:-.01em}
-#bp-tbl th.sel,#bp-tbl td.sel{width:28px;padding:0 4px;text-align:center}
+/* BP 표(10-02) — 열 너비를 colgroup 비율로 고정(table-layout:fixed). 쪽마다 글 길이에 따라 열이 흔들리던 것을 없앤다.
+   모든 칸 한 줄 · 넘치면 줄임표, 잘린 칸에 마우스를 올리면 전체 글이 말풍선으로 뜬다(#bp-tip). 좁은 화면에서는 가로 스크롤. */
+#bp-tbl table{font-size:.72rem;table-layout:fixed;width:100%;min-width:940px}
+#bp-tbl th{padding:6px 8px;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bp-tbl td{padding:0 8px;height:27px;line-height:27px;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+#bp-tbl td.tag{padding:0 4px 0 8px;text-overflow:clip}
+#bp-tbl th.sel,#bp-tbl td.sel{padding:0;text-align:center;text-overflow:clip}
+#bp-tbl th.c,#bp-tbl td.c{text-align:center;padding:0 4px;text-overflow:clip}
 #bp-tbl input[type=checkbox]{width:14px;height:14px;margin:0;vertical-align:middle;cursor:pointer;accent-color:#0078d4}
 #bp-tbl tr.on td{background:#f0f6ff}
 #bp-tbl .bp-code{font-size:.72rem}
-#bp-tbl .bp-num{font-size:.7rem}
-#bp-tbl .bp-type,#bp-tbl .bp-st{font-size:.62rem;padding:0 7px;line-height:1.6}
-#bp-tbl .bp-edit-btn{padding:2px 8px;font-size:.66rem}
+#bp-tbl .bp-num{font-size:.7rem;font-variant-numeric:tabular-nums;color:#3b3a39}
+#bp-tbl .bp-type,#bp-tbl .bp-st{font-size:.62rem;padding:0 7px;line-height:1.6;vertical-align:middle}
+#bp-tbl .bp-edit-btn{padding:2px 8px;font-size:.66rem;line-height:1.4;vertical-align:middle}
+#bp-tbl .bp-who .n{line-height:1.5}
+#bp-tip{position:fixed;z-index:3000;max-width:420px;padding:6px 10px;border-radius:6px;background:#323130;color:#fff;font-size:.74rem;line-height:1.5;
+  white-space:pre-wrap;word-break:break-all;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;opacity:0;transform:translateY(2px);transition:opacity .12s,transform .12s}
+#bp-tip.show{opacity:1;transform:none}
 
 /* 첨부 */
 .opt-danger{color:#a4262c;font-weight:700}
@@ -854,7 +856,8 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
         </span>
       </div>
       <div class="tbl-wrap" id="bp-tbl" style="display:none"><table>
-        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th style="width:96px">Code</th><th style="width:84px">유형</th><th>Name 1</th><th>한글이름</th><th style="width:130px">사업자등록번호</th><th style="width:150px">Bank</th><th style="width:150px">Account no.</th><th style="width:64px">상태</th><th class="bp-adm-col" style="width:60px">편집</th><th style="width:104px">생성자</th><th style="width:104px">수정자</th></tr></thead>
+        <colgroup id="bp-cols"></colgroup>
+        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th class="c">상태</th><th class="c bp-adm-col">편집</th><th>생성자</th><th>수정자</th></tr></thead>
         <tbody id="bp-body"></tbody>
       </table></div>
       <div class="pg" id="bp-pg" style="display:none"></div>
@@ -1915,6 +1918,40 @@ function bpSearch() {
   renderBpList(true);
   bpLogAccess(q ? '검색' : '검색 초기화', { ...bpFilterState(), results: _bp.view.length });
 }
+// 열 비율(%) — 조회 탭 10열 · 관리 탭 12열(선택 · 편집 추가). 합 100. 표 폭이 바뀌어도 비율이 같아 쪽을 넘겨도 열이 움직이지 않는다.
+const BP_COLS_VIEW  = [7.5, 6.5, 22, 14, 9, 12, 11.5, 5, 6.25, 6.25];
+const BP_COLS_ADMIN = [3, 7.5, 7, 17, 11, 9.5, 10, 12, 5, 5, 6.5, 6.5];
+let _bpColsMode = null;
+function bpSetCols(admin) {
+  const cg = document.getElementById('bp-cols'); if (!cg || _bpColsMode === admin) return;
+  cg.innerHTML = (admin ? BP_COLS_ADMIN : BP_COLS_VIEW).map(w => '<col style="width:' + w + '%">').join('');
+  _bpColsMode = admin;
+}
+// 잘린 칸 말풍선 — 표 하나에 한 번만 건다. 글이 다 보이는 칸(수정 내역이 없는)은 띄우지 않는다.
+function bpTipInit() {
+  const tbl = document.getElementById('bp-tbl'); if (!tbl || tbl._tip) return; tbl._tip = true;
+  let tip = document.getElementById('bp-tip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'bp-tip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+  let cur = null;
+  const hide = () => { cur = null; tip.classList.remove('show'); };
+  tbl.addEventListener('mouseover', e => {
+    const td = e.target.closest && e.target.closest('td[data-tip]');
+    if (!td || td === cur) return;
+    const txt = td.getAttribute('data-tip') || '';
+    const cut = td.scrollWidth > td.clientWidth + 1, multi = txt.indexOf('\n') >= 0;
+    if (!txt || (!cut && !multi)) { hide(); return; }
+    cur = td; tip.textContent = txt;
+    const r = td.getBoundingClientRect();
+    tip.style.left = '0px'; tip.style.top = '0px'; tip.classList.add('show');
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = Math.min(r.left, window.innerWidth - tw - 8), y = r.bottom + 4;
+    if (y + th > window.innerHeight - 8) y = r.top - th - 4;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  });
+  tbl.addEventListener('mouseleave', hide);
+  tbl.addEventListener('mouseout', e => { if (cur && !(e.relatedTarget && cur.contains(e.relatedTarget)) && e.target.closest && e.target.closest('td[data-tip]') === cur) hide(); });
+  window.addEventListener('scroll', hide, true);
+}
 function renderBpList(resetPage) {
   if (_bp.loading && !_bp.all.length) return;                      // 아직 읽는 중 — 팝업이 닫힌 뒤 그린다
   const q = (_bp.q || '').toLowerCase();
@@ -1933,19 +1970,20 @@ function renderBpList(resetPage) {
   cnt.innerHTML = (q ? '검색 <span class="q">「' + esc(_bp.q) + '」</span> · ' : '') + '총 ' + items.length.toLocaleString() + '건' + (items.length !== _bp.all.length ? ' / 전체 ' + _bp.all.length.toLocaleString() + '건' : '');
   const admin = isBpAdmin() && _bpTab === 'bpadmin';                 // 「수정」 열은 관리 탭에서만(조회 탭에는 없다 · 09-28)
   document.querySelectorAll('.bp-adm-col').forEach(el => el.style.display = admin ? '' : 'none');
+  bpSetCols(admin);
   const body = document.getElementById('bp-body');
   const slice = items.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE);
-  // 긴 글은 한 줄로 두고 줄임표 — 글자 수가 많으면 한 단계 작게(.sm). 전체 글은 title 로.
-  const clip = (v, cls, lim) => '<td class="clip ' + cls + (v.length > lim ? ' sm' : '') + '" title="' + esc(v) + '">' + esc(v) + '</td>';
+  // 모든 글 칸은 한 줄 · 줄임표(글자 크기는 그대로). 잘린 칸에만 마우스를 올리면 전체 글 말풍선(data-tip · bpTipInit).
+  const clip = (v, cls) => '<td class="' + cls + '" data-tip="' + esc(v || '') + '">' + esc(v || '') + '</td>';
   body.innerHTML = slice.length ? slice.map(x =>
     '<tr class="' + (x.row >= BP_FIRST_NEW_ROW ? 'bp-row-new' : '') + (_bp.sel.has(x.row) ? ' on' : '') + '" data-row="' + x.row + '">' +
     (admin ? '<td class="sel"><input type="checkbox"' + (_bp.sel.has(x.row) ? ' checked' : '') + ' onchange="bpToggleSel(' + x.row + ', this.checked, this)"></td>' : '') +
-    '<td class="bp-code">' + esc(x.code) + '</td>' +
-    '<td><span class="bp-type ' + x.type + '">' + x.type + '</span></td>' +
-    clip(x.name, 'nm', 30) + clip(x.nameKo, 'ko', 14) +
-    '<td class="bp-num">' + esc(x.bizNo) + '</td>' + clip(x.bank, 'bank', 16) + '<td class="bp-num">' + esc(x.acct) + '</td>' +
-    '<td><span class="bp-st ' + (x.inactive ? 'off">비활성' : 'on">활성') + '</span></td>' +
-    (admin ? '<td><button class="bp-edit-btn" ' + (_bpLock.mine ? '' : 'disabled title="편집 모드에서만 편집할 수 있습니다"') + ' onclick="bpEditRow(' + x.row + ')" title="' + x.row.toLocaleString() + '행">편집</button></td>' : '') +
+    clip(x.code, 'bp-code') +
+    '<td class="tag"><span class="bp-type ' + x.type + '">' + x.type + '</span></td>' +
+    clip(x.name, 'nm') + clip(x.nameKo, 'ko') +
+    clip(x.bizNo, 'bp-num') + clip(x.bank, 'bank') + clip(x.acct, 'bp-num') +
+    '<td class="c"><span class="bp-st ' + (x.inactive ? 'off">비활성' : 'on">활성') + '</span></td>' +
+    (admin ? '<td class="c"><button class="bp-edit-btn" ' + (_bpLock.mine ? '' : 'disabled title="편집 모드에서만 편집할 수 있습니다"') + ' onclick="bpEditRow(' + x.row + ')" title="' + x.row.toLocaleString() + '행">편집</button></td>' : '') +
     bpWhoCell(x.creator, '', '') + bpWhoCell(x.modifier, (x.history || []).length, (x.history || []).join('\n')) +
     '</tr>').join('') : '<tr><td colspan="' + (admin ? 12 : 10) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
   const pageCb = document.getElementById('bp-sel-page');
@@ -1956,11 +1994,12 @@ function renderBpList(resetPage) {
     '<button onclick="bpGoPage(' + (_bp.page - 1) + ')"' + (_bp.page <= 1 ? ' disabled' : '') + '>‹</button><span>' + _bp.page + ' / ' + pages + '</span>' +
     '<button onclick="bpGoPage(' + (_bp.page + 1) + ')"' + (_bp.page >= pages ? ' disabled' : '') + '>›</button>' : '';
   bpPlaceList();                                                     // 열려 있는 탭 아래로
+  bpTipInit();
 }
 function bpGoPage(n) { _bp.page = n; renderBpList(false); }
 // 생성자 · 수정자 칸 — 이름(정리본의 옛 행은 비어 있다). 수정자 칸은 수정 횟수를 배지로, 마우스를 올리면 수정 내역 전부.
 function bpWhoCell(name, n, title) {
-  return name ? '<td class="bp-who" title="' + esc(title || '') + '">' + esc(name) + (n > 0 ? '<span class="n" title="수정 ' + n + '회">' + n + '</span>' : '') + '</td>' : '<td class="bp-who none">—</td>';
+  return name ? '<td class="bp-who" data-tip="' + esc(title ? name + '\n' + title : name) + '">' + esc(name) + (n > 0 ? '<span class="n">' + n + '</span>' : '') + '</td>' : '<td class="bp-who none">—</td>';
 }
 
 /* ── 일괄 상태 변경(관리 탭) ──────────────────────────────────
