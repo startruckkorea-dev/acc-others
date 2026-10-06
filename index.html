@@ -22,6 +22,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .wrap{max-width:960px;margin:0 auto;padding:24px 16px 48px}
 /* 목록(내 신청·결재함·관리자)은 열이 많아 960px 로는 좁다. 목록 탭에서만 넓힌다(작성 화면은 그대로). */
 body.wide-list .wrap{max-width:1360px}
+/* BP 조회 · 관리(10-06) — 생성자 · 생성일시 · 수정자 · 수정일시 네 열이 더해져 1360px 로는 일시가 잘린다. BP 탭에서만 1600px. */
+body.wide-bp .wrap{max-width:1600px}
 .card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:22px 26px;margin-bottom:16px}
 .card.body{margin:0 16px 16px;padding:24px}
 
@@ -280,6 +282,11 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-who{font-size:.72rem;color:#605e5c;white-space:nowrap}
 .bp-who .n{display:inline-block;min-width:16px;margin-left:4px;padding:0 5px;border-radius:8px;background:#e1f0ff;color:#0078d4;font-size:.62rem;font-weight:700;text-align:center;vertical-align:1px}
 .bp-who.none{color:#c8c6c4}
+.bp-who{color:#323130;font-weight:500}
+.bp-when{font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.01em}
+.bp-when .d{color:#8a8886}
+.bp-when .t{color:#323130;font-weight:600;margin-left:5px}
+.bp-when.none{color:#c8c6c4}
 .bp-hist{margin:0 14px 10px;padding:8px 12px;background:#faf9f8;border:1px solid #edebe9;border-radius:6px;font-size:.72rem;color:#605e5c}
 .bp-hist b{color:#323130}
 .bp-hist ol{margin:4px 0 0 18px;padding:0}
@@ -344,7 +351,7 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-tools .cnt .q{color:#0078d4;font-weight:600}
 /* BP 표(10-02) — 열 너비를 colgroup 비율로 고정(table-layout:fixed). 쪽마다 글 길이에 따라 열이 흔들리던 것을 없앤다.
    모든 칸 한 줄 · 넘치면 줄임표, 잘린 칸에 마우스를 올리면 전체 글이 말풍선으로 뜬다(#bp-tip). 좁은 화면에서는 가로 스크롤. */
-#bp-tbl table{font-size:.72rem;table-layout:fixed;width:100%;min-width:940px}
+#bp-tbl table{font-size:.72rem;table-layout:fixed;width:100%;min-width:1480px}
 #bp-tbl th{padding:6px 8px;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bp-tbl td{padding:0 8px;height:27px;line-height:27px;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 #bp-tbl td.tag{padding:0 4px 0 8px;text-overflow:clip}
@@ -357,6 +364,10 @@ body:not(.cat-bp) .bp-tab{display:none}
 #bp-tbl .bp-type,#bp-tbl .bp-st{font-size:.62rem;padding:0 7px;line-height:1.6;vertical-align:middle}
 #bp-tbl .bp-edit-btn{padding:2px 8px;font-size:.66rem;line-height:1.4;vertical-align:middle}
 #bp-tbl .bp-who .n{line-height:1.5}
+.bp-migrate{display:flex;align-items:center;gap:14px;margin:0 0 12px;padding:12px 14px;border:1px solid #f3d38b;border-radius:8px;background:#fffaf0;font-size:.76rem;line-height:1.6;color:#5c4813}
+.bp-migrate .tx{flex:1}
+.bp-migrate .btn{white-space:nowrap}
+#bp-tbl td.bp-when{font-size:.68rem;padding:0 6px}
 #bp-tip{position:fixed;z-index:3000;max-width:420px;padding:6px 10px;border-radius:6px;background:#323130;color:#fff;font-size:.74rem;line-height:1.5;
   white-space:pre-wrap;word-break:break-all;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;opacity:0;transform:translateY(2px);transition:opacity .12s,transform .12s}
 #bp-tip.show{opacity:1;transform:none}
@@ -868,7 +879,7 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
       </div>
       <div class="tbl-wrap" id="bp-tbl" style="display:none"><table>
         <colgroup id="bp-cols"></colgroup>
-        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th class="c">상태</th><th class="c bp-adm-col">편집</th><th>생성자</th><th>수정자</th></tr></thead>
+        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th class="c">상태</th><th class="c bp-adm-col">편집</th><th>생성자</th><th>생성일시</th><th>수정자</th><th>수정일시</th></tr></thead>
         <tbody id="bp-body"></tbody>
       </table></div>
       <div class="pg" id="bp-pg" style="display:none"></div>
@@ -881,6 +892,14 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
       <div class="bp-audit" role="note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><b>접근 · 조회 · 검색 · 편집 내용은 모두 기록</b>되며, 아래 「접근 · 편집 이력」에서 기간을 골라(한 번에 최대 31일) 확인할 수 있습니다.</span></div>
       <div class="bp-lock free show" id="bp-lock"><span class="ico">🔓</span><span id="bp-lock-txt">편집 모드가 아닙니다. 「편집 시작」을 누르면 다른 관리자는 조회만 할 수 있게 잠깁니다.</span>
         <span class="sp"><button class="btn btn-g" id="bp-lock-btn2" style="padding:3px 10px;font-size:.72rem;display:none" onclick="bpCheckLock()">↻ 상태 확인</button><button class="btn btn-p" id="bp-lock-btn" style="padding:3px 10px;font-size:.72rem" onclick="bpToggleEdit()">✏️ 편집 시작</button></span></div>
+
+      <!-- 열 정리(10-06) — 예전 구조(J 생성자 · K 수정자 · L… 수정 내역) 파일일 때만 보인다 -->
+      <div class="bp-migrate" id="bp-migrate" style="display:none">
+        <div class="tx"><b>생성일시 · 수정일시 열을 추가해야 합니다.</b><br>
+          「열 정리」 를 한 번 누르면 원본을 백업한 뒤 K · M 자리에 빈 열을 끼워 넣고(J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역),
+          이미 있는 건의 수정일시는 마지막 수정 내역의 시각으로, 생성일시는 이력(Logging_data)의 「등록」 시각으로 채웁니다. 다 될 때까지 등록 · 편집은 잠시 막힙니다.</div>
+        <button class="btn btn-p" id="bp-migrate-btn" onclick="bpMigrateCols()">열 정리</button>
+      </div>
 
       <!-- ① 등록 · 수정 — SAP 붙여넣기(선택) + 폼. 편집 모드가 아니면 흐리게(bp-admin-tools) -->
       <section class="bp-section" id="bp-sec-edit">
@@ -1741,7 +1760,11 @@ window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_
      이름이 바뀌면(새 내보내기 파일로 교체) 루트에서 BP-Master_목록*.xlsx 가운데 가장 최근 것을 쓴다(bpLocateMaster).
    · 읽기: 파일을 내려받아 SheetJS 로 읽는다. 시트 「BP Master」, 1행 머리글, 2행부터 데이터.
      열은 A Code · B 유형 · C Name 1 · D 한글이름 · E 사업자등록번호 · F Bank · G Account no. · H 상태(활성/비활성) · I Row(참고용, 쓰지 않음)
-     · J 생성자 · K 수정자 · L, M, N … 수정 내역(수정 한 번마다 다음 열에 「일시 이름 · 항목: 전 → 후」 한 칸)(09-30). I 는 열 위치를 고정하려고 그대로 둔다.
+     · J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N, O, P … 수정 내역(수정 한 번마다 다음 열에 「일시 이름 · 항목: 전 → 후」 한 칸).
+       I 는 열 위치를 고정하려고 그대로 둔다. 일시는 KST 「YYYY-MM-DD HH:mm」 글자(텍스트 서식 — 수정 내역 앞머리와 같은 모양).
+     · (10-06) 예전 구조는 J 생성자 · K 수정자 · L… 수정 내역(09-30). 관리 탭 「열 정리」 가 한 번 K · M 에 빈 열을 끼워 넣어 지금 구조로 바꾼다
+       (백업 → 열 끼워 넣기 → 수정일시는 마지막 수정 내역의 시각, 생성일시는 Logging_data 의 「등록」 기록 시각으로 채움 → 확인).
+       예전 구조 파일에는 쓰지 않는다(열이 어긋나므로) — 읽기는 두 구조 모두 된다. ACC Voucher · BP Master 는 A~H 만 읽어 영향 없음.
    · 쓰기: Graph Excel API 로 「그 행의 A~H」 만 PATCH 한다. 파일 전체를 다시 쓰지 않으므로 서식 · 다른 행이 보존된다.
      앞자리 0 이 있는 계좌 · 사업자번호가 숫자로 바뀌지 않게 텍스트 서식(@)으로 기록.
    · 신규 행: 14,152행부터(BP_FIRST_NEW_ROW — 정리본의 마지막 행 14,151 다음). 그 뒤로는 마지막 코드 행 다음에 이어 쓴다.
@@ -1761,7 +1784,8 @@ window.addEventListener('beforeunload', () => { if (_badgeTimer) clearInterval(_
 const BP_MASTER_FILE = 'BP-Master_목록_20260930_1756.xlsx';   // STK-DB 문서 라이브러리 루트 — 09-30 정리본(APS 전 시스템 공용)
 const BP_MASTER_SHEET = 'BP Master';
 const BP_MASTER_PATTERN = /^BP-Master_목록.*\.xlsx$/i;   // 정해진 이름이 없을 때 루트에서 가장 최근 것을 고르는 규칙
-const BP_LOCK_FILE = 'acc_others_bp_lock.json';
+const BP_LOCK_FILE = 'acc_others_bp_lock_v2.json';   // 10-06: 열 구조를 바꾸며 새 이름 — 옛 이름(acc_others_bp_lock.json)은 「새로고침 안내」 로 늘 점유해 옛 화면이 편집을 못 하게 한다
+const BP_LOCK_FILE_OLD = 'acc_others_bp_lock.json';
 const BP_FIRST_NEW_ROW = 14152;   // 정리본(14,151행) 다음 행부터 새 코드를 적는다 — 이 번호 이상은 이 화면에서 등록한 행
 const BP_LOCK_TTL_MS = 5 * 60 * 1000;   // 마지막 연장(60초마다) 뒤 이만큼 지나면 만료 — 창이 멈췄을 때만 의미가 있다
 const BP_LOCK_TAG_KEY = 'acc_others_bp_lock_tag';
@@ -1886,6 +1910,8 @@ async function loadBpMaster(force) {
       // raw:true — 숫자 셀은 숫자 그대로 받아 String() 한다. raw:false 면 General 서식의 긴 계좌번호가 6.2E+13 처럼 나온다.
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: true, defval: '', raw: true });
       const all = []; let lastRow = 0;
+      _bp.layout = bpLayoutOf(_bp.startRow === 1 ? rows[0] : [], rows);
+      const v2 = _bp.layout !== 'v1';
       rows.forEach((r, i) => {
         const rowNo = _bp.startRow + i;
         const code = bpCell(r[0]);
@@ -1895,7 +1921,9 @@ async function loadBpMaster(force) {
         if (!type) return;                                          // COA · GL Account · 빈 유형은 다루지 않는다
         all.push({ row: rowNo, code, type, name: bpCell(r[2]), nameKo: bpCell(r[3]), bizNo: bpCell(r[4]),
                    bank: bpCell(r[5]), acct: bpCell(r[6]), inactive: bpIsInactive(r[7]),   // 정리본 열 순서 A~H
-                   creator: bpCell(r[9]), modifier: bpCell(r[10]), history: r.slice(11).map(bpCell).filter(Boolean) });   // J 생성자 · K 수정자 · L… 수정 내역(09-30)
+                   ...(v2 ? { creator: bpCell(r[9]), created: bpCell(r[10]), modifier: bpCell(r[11]), modified: bpCell(r[12]), history: r.slice(13).map(bpCell).filter(Boolean) }    // J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역(10-06)
+                         : { creator: bpCell(r[9]), created: '', modifier: bpCell(r[10]), modified: '', history: r.slice(11).map(bpCell).filter(Boolean) }) });   // 예전 구조 J 생성자 · K 수정자 · L… 수정 내역(09-30)
+        const x = all[all.length - 1]; if (x && !x.modified && x.history.length) x.modified = bpHistTime(x.history[x.history.length - 1]);   // 예전 구조 · 빈 칸이면 마지막 수정 내역의 시각
       });
       _bp.all = all; _bp.lastRow = lastRow; _bp.loadedAt = Date.now(); _bp.sel.clear();   // 다시 읽으면 행이 바뀔 수 있어 선택은 비운다
       const by = (meta.lastModifiedBy && meta.lastModifiedBy.user && meta.lastModifiedBy.user.displayName) || '';
@@ -1903,11 +1931,12 @@ async function loadBpMaster(force) {
       document.getElementById('bp-src-meta').textContent = all.length.toLocaleString() + '건 · 마지막 수정 ' + fmtDate(meta.lastModifiedDateTime) + (by ? ' (' + by + ')' : '');
       renderBpList(true);
       bpRenderAdminInfo();
-      console.log('[BP] 로드:', all.length, '건 · 마지막 코드 행', lastRow);
+      bpRenderMigrate();
+      console.log('[BP] 로드:', all.length, '건 · 마지막 코드 행', lastRow, '· 열 구조', _bp.layout);
     } catch (e) {
       console.warn('[BP] 로드 실패:', e.message);
       document.getElementById('bp-src-meta').textContent = '불러오지 못했습니다: ' + e.message;
-      if (body) body.innerHTML = '<tr><td colspan="12" class="empty">BP 마스터를 불러오지 못했습니다. ' + esc(e.message) + '</td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="14" class="empty">BP 마스터를 불러오지 못했습니다. ' + esc(e.message) + '</td></tr>';
     } finally { _bp.loading = null; loading(false); }
   })();
   return _bp.loading;
@@ -1930,8 +1959,10 @@ function bpSearch() {
   bpLogAccess(q ? '검색' : '검색 초기화', { ...bpFilterState(), results: _bp.view.length });
 }
 // 열 비율(%) — 조회 탭 10열 · 관리 탭 12열(선택 · 편집 추가). 합 100. 표 폭이 바뀌어도 비율이 같아 쪽을 넘겨도 열이 움직이지 않는다.
-const BP_COLS_VIEW  = [7.5, 6.5, 22, 14, 9, 12, 11.5, 5, 6.25, 6.25];
-const BP_COLS_ADMIN = [3, 7.5, 7, 17, 11, 9.5, 10, 12, 5, 5, 6.5, 6.5];
+/* 10-06: 생성일시 · 수정일시 두 열을 더하면서 BP 탭만 1600px 로 넓히고(body.wide-bp), 여유가 있던 Name 1 · 한글이름을 조금씩 줄였다.
+   일시 칸(8.3% ≈ 122px)은 「2026-10-06 15:54」 가 잘리지 않는 폭, 이름 칸(6.5% ≈ 96px)은 영문 이름(Hyunju Gong)이 들어가는 폭. 좁은 화면은 표 안에서 가로 스크롤(min-width 1480). */
+const BP_COLS_VIEW  = [5.6, 5.3, 19.6, 13.4, 7.2, 7.5, 8, 3.8, 6.5, 8.3, 6.5, 8.3];                 // 합 100 — Code · 유형 · Name 1 · 한글 · 사업자 · Bank · 계좌 · 상태 · 생성자 · 생성일시 · 수정자 · 수정일시
+const BP_COLS_ADMIN = [2.2, 5.3, 5.3, 15.9, 11.4, 7.2, 7.5, 8, 3.8, 3.8, 6.5, 8.3, 6.5, 8.3];       // 합 100 — 앞에 선택 · 상태 뒤에 편집
 let _bpColsMode = null;
 function bpSetCols(admin) {
   const cg = document.getElementById('bp-cols'); if (!cg || _bpColsMode === admin) return;
@@ -1995,8 +2026,8 @@ function renderBpList(resetPage) {
     clip(x.bizNo, 'bp-num') + clip(x.bank, 'bank') + clip(x.acct, 'bp-num') +
     '<td class="c"><span class="bp-st ' + (x.inactive ? 'off">비활성' : 'on">활성') + '</span></td>' +
     (admin ? '<td class="c"><button class="bp-edit-btn" ' + (_bpLock.mine ? '' : 'disabled title="편집 모드에서만 편집할 수 있습니다"') + ' onclick="bpEditRow(' + x.row + ')" title="' + x.row.toLocaleString() + '행">편집</button></td>' : '') +
-    bpWhoCell(x.creator, '', '') + bpWhoCell(x.modifier, (x.history || []).length, (x.history || []).join('\n')) +
-    '</tr>').join('') : '<tr><td colspan="' + (admin ? 12 : 10) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
+    bpWhoCell(x.creator, '', '') + bpWhenCell(x.created) + bpWhoCell(x.modifier, (x.history || []).length, (x.history || []).join('\n')) + bpWhenCell(x.modified) +
+    '</tr>').join('') : '<tr><td colspan="' + (admin ? 14 : 12) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
   const pageCb = document.getElementById('bp-sel-page');
   if (pageCb) { const allOn = slice.length > 0 && slice.every(x => _bp.sel.has(x.row)); pageCb.checked = allOn; pageCb.indeterminate = !allOn && slice.some(x => _bp.sel.has(x.row)); }
   bpRenderBulk();
@@ -2009,6 +2040,11 @@ function renderBpList(resetPage) {
 }
 function bpGoPage(n) { _bp.page = n; renderBpList(false); }
 // 생성자 · 수정자 칸 — 이름(정리본의 옛 행은 비어 있다). 수정자 칸은 수정 횟수를 배지로, 마우스를 올리면 수정 내역 전부.
+// 일시 칸(10-06) — 날짜는 흐리게 · 시각은 진하게, 숫자 폭을 고정해 줄마다 세로로 맞춘다. 값이 없으면 흐린 「—」.
+function bpWhenCell(v) {
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/.exec(String(v || ''));
+  return m ? '<td class="bp-when"><span class="d">' + m[1] + '</span><span class="t">' + m[2] + '</span></td>' : '<td class="bp-when none">—</td>';
+}
 function bpWhoCell(name, n, title) {
   return name ? '<td class="bp-who" data-tip="' + esc(title ? name + '\n' + title : name) + '">' + esc(name) + (n > 0 ? '<span class="n">' + n + '</span>' : '') + '</td>' : '<td class="bp-who none">—</td>';
 }
@@ -2055,20 +2091,20 @@ async function bpBulkStatus(inactive) {
     const vals = colA.values || [];
     const bad = targets.filter(x => bpCell(vals[x.row - min] && vals[x.row - min][0]).toUpperCase() !== x.code.toUpperCase());
     if (bad.length) throw new Error(bad.length + '행의 코드가 화면과 다릅니다(' + bad.slice(0, 3).map(x => x.row.toLocaleString() + '행 ' + x.code).join(', ') + (bad.length > 3 ? ' …' : '') + '). 새로고침 후 다시 시도해 주세요.');
-    // 연속한 행은 한 번에 — 수정 내역 열(L, M, …)이 같은 행끼리(내역 수가 같은 행끼리) 묶는다
+    // 연속한 행은 한 번에 — 수정 내역 열(N, O, …)이 같은 행끼리(내역 수가 같은 행끼리) 묶는다
     const runs = []; targets.forEach(x => { const hn = (x.history || []).length, last = runs[runs.length - 1]; if (last && x.row === last.end + 1 && last.hn === hn) last.end = x.row; else runs.push({ start: x.row, end: x.row, hn }); });
-    const val = inactive ? '비활성' : '활성', who = bpWho(); let done = 0;
-    const entry = bpHistEntry(who, [{ label: '상태', from: inactive ? '활성' : '비활성', to: val }], '일괄');
+    const val = inactive ? '비활성' : '활성', who = bpWho(), when = bpNowStr(); let done = 0;
+    const entry = bpHistEntry(who, [{ label: '상태', from: inactive ? '활성' : '비활성', to: val }], '일괄', when);
     await bpEnsureHeader(null);
     for (const run of runs) {
       const n = run.end - run.start + 1, histCol = BP_COL_HIST0 + run.hn, L = bpColLetter(histCol);
       await bpEnsureHeader(histCol);
       await bpPatchRange(bpWb() + "/range(address='H" + run.start + ":H" + run.end + "')", Array.from({ length: n }, () => [val]), 1);
-      await bpPatchRange(bpWb() + "/range(address='K" + run.start + ':K' + run.end + "')", Array.from({ length: n }, () => [who]), 1);
+      await bpPatchRange(bpWb() + "/range(address='L" + run.start + ':M' + run.end + "')", Array.from({ length: n }, () => [who, when]), 2);   // L 수정자 · M 수정일시
       await bpPatchRange(bpWb() + "/range(address='" + L + run.start + ':' + L + run.end + "')", Array.from({ length: n }, () => [entry]), 1);
       done += n; loadingSub(done.toLocaleString() + ' / ' + targets.length.toLocaleString() + '건 기록');
     }
-    targets.forEach(x => { x.inactive = inactive; x.modifier = who; x.history = (x.history || []).concat([entry]); });
+    targets.forEach(x => { x.inactive = inactive; x.modifier = who; x.modified = when; x.history = (x.history || []).concat([entry]); });
     });
     bpLogAdmin('일괄 상태 변경', { to: label, by: bpWho(), count: targets.length, skipped: skip, codes: targets.map(x => x.code).join(','), rows: [...new Set(targets.map(x => x.row))].sort((a, b) => a - b).reduce((acc, r) => { const l = acc[acc.length - 1]; if (l && r === l.end + 1) l.end = r; else acc.push({ start: r, end: r }); return acc; }, []).map(r => r.start === r.end ? String(r.start) : r.start + '~' + r.end).join(',') });
     _bp.sel.clear(); renderBpList(false);
@@ -2089,6 +2125,16 @@ async function bpLockRead() {
     const j = res.ok ? await res.json().catch(() => null) : null;
     return j && j.email && Number(j.until) > Date.now() ? j : null;
   } catch (e) { _bpLock.itemId = null; _bpLock.eTag = ''; return null; }   // 파일이 아직 없으면 잠금 없음
+}
+/* 옛 화면 막기(10-06) — 배포 전에 열어 둔 옛 화면은 예전 열 번호(K 수정자 · L… 수정 내역)로 쓴다. 지금 구조 파일에 그대로 쓰면 수정자가 생성일시 칸에 들어간다.
+   옛 화면은 옛 잠금 파일만 보므로, 그 파일을 「IT · 새로고침 안내」 이름으로 아주 먼 만료까지 잡아 두면 옛 화면은 「다른 관리자가 편집 중」 이 되어 쓰지 못한다.
+   편집을 시작할 때마다(덮어써도 해가 없다) 다시 적는다. */
+async function bpBlockOldPages() {
+  try {
+    const t = await token();
+    await fetch(GRAPH + '/drives/' + _bp.driveId + '/root:/' + BP_LOCK_FILE_OLD + ':/content', { method: 'PUT', headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'stk_it@hyosung.com', name: '새 버전 — 화면을 새로고침해 주세요(Ctrl+F5)', since: Date.now(), until: Date.now() + 3650 * 86400e3, tag: 'v2-block' }) });
+  } catch (e) { console.warn('[BP] 옛 잠금 점유 실패(무시):', e.message); }
 }
 async function bpLockWrite(rec, create) {
   const t = await token();
@@ -2148,6 +2194,7 @@ async function bpStartEdit() {
     _bpLock.token = await token();
     bpLockRemember(rec.tag);
     _bpLock.mine = true; _bpLock.holder = rec; bpStartHeartbeat(); bpRenderLock(); renderBpList(false);
+    bpBlockOldPages();
     bpLogAdmin('편집 시작', { until: new Date(rec.until).toISOString(), ...(takeover ? { from: '다른 창의 편집 모드를 이 창으로 가져옴' } : {}) });
   } catch (e) { showAlert('편집 모드를 켜지 못했습니다.', e.message, '⚠️'); }
   finally { btn.disabled = false; }
@@ -2178,6 +2225,7 @@ function bpStartHeartbeat() {
 }
 function bpStopHeartbeat() { if (_bpLock.timer) { clearInterval(_bpLock.timer); _bpLock.timer = null; } }
 function bpRenderLock() {
+  bpRenderMigrate();   // 열 정리 단추는 편집 모드에서만 눌린다(10-06)
   const box = document.getElementById('bp-lock'), txt = document.getElementById('bp-lock-txt'), btn = document.getElementById('bp-lock-btn'), btn2 = document.getElementById('bp-lock-btn2'), tools = document.getElementById('bp-admin-tools');
   if (!box) return;
   box.classList.remove('other', 'mine', 'free'); box.classList.add('show');
@@ -2289,7 +2337,8 @@ function bpEditRow(row) {
   const hist = document.getElementById('bp-form-hist');
   if (hist) {
     const h = x.history || [];
-    hist.innerHTML = '생성자 <b>' + esc(x.creator || '—') + '</b> · 수정자 <b>' + esc(x.modifier || '—') + '</b> · 수정 <b>' + h.length + '회</b>' + (h.length ? '<ol>' + h.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '');
+    hist.innerHTML = '생성자 <b>' + esc(x.creator || '—') + '</b>' + (x.created ? ' <span style="color:#8a8886">' + esc(x.created) + '</span>' : '') +
+      ' · 수정자 <b>' + esc(x.modifier || '—') + '</b>' + (x.modified ? ' <span style="color:#8a8886">' + esc(x.modified) + '</span>' : '') + ' · 수정 <b>' + h.length + '회</b>' + (h.length ? '<ol>' + h.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '');
     hist.style.display = '';
   }
   document.getElementById('bp-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2349,7 +2398,20 @@ async function bpWbSession(fn) {
 /* 한 행의 A~H 를 한 번에 쓴다 — Code · 유형 · Name 1 · 한글이름 · 사업자등록번호 · Bank · Account no. · 상태(활성/비활성).
    I(Row) 는 내보내기 때 붙는 참고 열이라 손대지 않는다. */
 function bpColLetter(i) { let n = i + 1, s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }   // 0 → A · 25 → Z · 26 → AA
-const BP_COL_CREATOR = 9, BP_COL_MODIFIER = 10, BP_COL_HIST0 = 11;   // J · K · L(0 기준 열 번호)
+const BP_COL_CREATOR = 9, BP_COL_CREATED = 10, BP_COL_MODIFIER = 11, BP_COL_MODIFIED = 12, BP_COL_HIST0 = 13;   // J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역(0 기준 · 10-06)
+const BP_META_HDR = ['생성자', '생성일시', '수정자', '수정일시'];
+/* 열 구조 판별(10-06) — 머리글 J1~M1 로 본다.
+   v2: L1 「수정자」 또는 M1 「수정일시」(지금 구조) · v1: K1 「수정자」(예전 구조 — 「열 정리」 전)
+   blank: J~M 머리글이 비고 J 열 이후에 값이 없는 파일(처음 쓸 때 v2 머리글을 적는다) · unknown: 그 밖(쓰지 않는다) */
+function bpLayoutOf(hdr, rows) {
+  const c = i => bpCell(hdr && hdr[i]);
+  if (/^수정 \d/.test(c(12)) || /^수정 \d/.test(c(10))) return 'unknown';                      // 반쯤 바뀐 파일(K 만 끼워 넣음 → M1 「수정 1」) — 쓰지 않는다
+  if (c(12) === '수정일시' || (c(11) === '수정자' && c(12) === '')) return 'v2';
+  if (c(10) === '수정자' || (c(9) === '생성자' && c(10) === '' && c(11).indexOf('수정') === 0)) return 'v1';
+  if (!c(9) && !c(10) && !c(11) && !c(12)) return (rows || []).slice(1).some(r => r && r.slice(9).some(v => bpCell(v))) ? 'unknown' : 'blank';
+  return 'unknown';
+}
+function bpHistTime(entry) { const m = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/.exec(String(entry || '')); return m ? m[1] : ''; }
 function bpWho() {   // 직원 명부의 영문 이름 → 없으면 로그인 표시 이름 → 메일
   const me = bpMe(); const rec = employeeData.find(e => (e.email || '').trim().toLowerCase() === me);
   return (rec && rec.name) || (user && user.name) || me;
@@ -2360,11 +2422,11 @@ function bpDiff(before, after) {   // 바뀐 항목만 [{key,label,from,to}]
   const v = (r, k) => k === 'inactive' ? (r.inactive ? '비활성' : '활성') : (k === 'bank' && r.bank === '-1' ? '' : String(r[k] == null ? '' : r[k]).trim());
   return Object.keys(BP_FIELD_LABELS).filter(k => v(before, k) !== v(after, k)).map(k => ({ key: k, label: BP_FIELD_LABELS[k], from: v(before, k), to: v(after, k) }));
 }
-function bpHistEntry(who, changes, tag) { const b = x => x === '' ? '(빈 칸)' : x; return bpNowStr() + ' ' + who + ' · ' + changes.map(c => c.label + ': ' + b(c.from) + ' → ' + b(c.to)).join(' · ') + (tag ? ' (' + tag + ')' : ''); }
+function bpHistEntry(who, changes, tag, when) { const b = x => x === '' ? '(빈 칸)' : x; return (when || bpNowStr()) + ' ' + who + ' · ' + changes.map(c => c.label + ': ' + b(c.from) + ' → ' + b(c.to)).join(' · ') + (tag ? ' (' + tag + ')' : ''); }
 // 머리글 — J1 · K1 은 한 번, 수정 내역 열(L1, M1, …)은 그 열을 처음 쓸 때. 페이지마다 한 번씩만 보낸다(같은 값을 다시 써도 해가 없다).
 const _bpHdrDone = new Set();
 async function bpEnsureHeader(colIdx) {
-  if (!_bpHdrDone.has('JK')) { await bpPatchRange(bpWb() + "/range(address='J1:K1')", [['생성자', '수정자']], 2); _bpHdrDone.add('JK'); }
+  if (!_bpHdrDone.has('JM')) { await bpPatchRange(bpWb() + "/range(address='J1:M1')", [BP_META_HDR], 4); _bpHdrDone.add('JM'); }   // 10-06: J~M 네 칸
   if (colIdx != null && colIdx >= BP_COL_HIST0 && !_bpHdrDone.has(colIdx)) { const L = bpColLetter(colIdx); await bpPatchRange(bpWb() + "/range(address='" + L + '1:' + L + "1')", [['수정 ' + (colIdx - BP_COL_HIST0 + 1)]], 1); _bpHdrDone.add(colIdx); }
 }
 function bpRowVals(rec) {
@@ -2388,7 +2450,7 @@ async function bpWriteRows(start, recs) {
     await bpPatchRange(bpWb() + "/range(address='" + c1 + start + ':' + c2 + end + "')", recs.map(r => bpRowVals(r)), n);
   }
 }
-async function bpEnsureReady() {
+async function bpEnsureReady(opt) {
   if (!_bp.all.length) await loadBpMaster(false);
   if (!_bp.driveId || !_bp.itemId) throw new Error('BP 마스터 파일 정보를 아직 못 읽었습니다. 새로고침 후 다시 시도해 주세요.');
   if (!_bpLock.mine) throw new Error('편집 모드가 아닙니다. 「편집 시작」을 눌러 잠금을 얻은 뒤 저장하세요.');
@@ -2397,11 +2459,25 @@ async function bpEnsureReady() {
   const h = await bpLockRead();
   if (!bpLockIsMine(h)) throw new Error(bpLockLost(h, false));
   _bpLock.holder = h;
+  if (opt && opt.migrating) return;
+  /* 열 구조 확인(10-06) — 화면이 읽은 구조와 서버 머리글을 쓰기 직전에 다시 본다. 예전 구조에 지금 열 번호로 쓰면 수정자가 생성일시 칸에 들어간다. */
+  if (_bp.layout === 'v1') throw new Error('BP Master 파일이 예전 열 구조입니다. 관리 탭 위쪽의 「열 정리」 를 먼저 눌러 주세요(한 번만 하면 됩니다).');
+  if (_bp.layout === 'unknown') throw new Error('BP Master 파일의 J~M 열 머리글을 알아볼 수 없어 쓰지 않습니다. IT(stk_it@hyosung.com)에 알려 주세요.');
+  const hd = await api(bpWb() + "/range(address='J1:M1')?$select=values");
+  const sv = ((hd.values && hd.values[0]) || []).map(bpCell);
+  const exact = BP_META_HDR.every((x, i) => sv[i] === x), empty = sv.every(x => !x);
+  if (!(exact || (empty && _bp.layout === 'blank'))) {
+    const lay = bpLayoutOf([0, 0, 0, 0, 0, 0, 0, 0, 0].concat(sv), []);
+    if (lay === 'v1') { _bp.layout = 'v1'; bpRenderMigrate(); }
+    throw new Error('BP Master 파일의 J~M 열 머리글이 예상과 달라 쓰지 않습니다(' + (sv.join(' · ') || '빈 칸') + '). ' + (lay === 'v1' ? '「새로고침」 뒤 「열 정리」 를 눌러 주세요.' : 'IT(stk_it@hyosung.com)에 알려 주세요.'));
+  }
 }
 function bpApplyLocal(rec, row) {
   const i = _bp.all.findIndex(x => x.row === row); const prev = i >= 0 ? _bp.all[i] : null;
   const item = { row, code: rec.code, type: rec.type, name: rec.name, nameKo: rec.nameKo || '', bizNo: rec.bizNo || '', inactive: !!rec.inactive, bank: (rec.bank && rec.bank !== '-1') ? rec.bank : '', acct: rec.acct || '',
-    creator: rec.creator != null ? rec.creator : (prev ? prev.creator : ''), modifier: rec.modifier != null ? rec.modifier : (prev ? prev.modifier : ''), history: rec.history || (prev ? prev.history : []) || [] };
+    creator: rec.creator != null ? rec.creator : (prev ? prev.creator : ''), created: rec.created != null ? rec.created : (prev ? prev.created || '' : ''),
+    modifier: rec.modifier != null ? rec.modifier : (prev ? prev.modifier : ''), modified: rec.modified != null ? rec.modified : (prev ? prev.modified || '' : ''),
+    history: rec.history || (prev ? prev.history : []) || [] };
   if (i >= 0) _bp.all[i] = item; else _bp.all.push(item);
   if (row > _bp.lastRow) _bp.lastRow = row;
 }
@@ -2410,18 +2486,18 @@ async function bpMasterUpsert(rec) {
   if (rec.row) {
     const row = Number(rec.row);
     const before = _bp.all.find(x => x.row === row) || null;
-    const who = bpWho(), changes = before ? bpDiff(before, rec) : [], entry = bpHistEntry(who, changes.length ? changes : [{ label: '저장', from: '', to: '' }]);
-    const hist = (before && before.history) || [], histCol = BP_COL_HIST0 + hist.length;   // 다음 빈 수정 내역 열(L, M, …)
+    const who = bpWho(), when = bpNowStr(), changes = before ? bpDiff(before, rec) : [], entry = bpHistEntry(who, changes.length ? changes : [{ label: '저장', from: '', to: '' }], '', when);
+    const hist = (before && before.history) || [], histCol = BP_COL_HIST0 + hist.length;   // 다음 빈 수정 내역 열(N, O, …)
     await bpWbSession(async () => {
     const cur = await wbApi(bpWb() + "/range(address='A" + row + ":A" + row + "')?$select=values");
     const curCode = bpCell(cur.values && cur.values[0] && cur.values[0][0]);
     if (curCode.toUpperCase() !== String(rec.code).toUpperCase()) throw new Error(row + '행의 코드가 화면과 다릅니다(' + (curCode || '빈 칸') + '). 새로고침 후 다시 시도해 주세요.');
     await bpWriteRows(row, [rec]);
     await bpEnsureHeader(histCol);
-    await bpPatchRange(bpWb() + "/range(address='K" + row + ':K' + row + "')", [[who]], 1);                                     // K 수정자
-    const L = bpColLetter(histCol); await bpPatchRange(bpWb() + "/range(address='" + L + row + ':' + L + row + "')", [[entry]], 1);   // L, M, … 수정 내역
+    await bpPatchRange(bpWb() + "/range(address='L" + row + ':M' + row + "')", [[who, when]], 2);                               // L 수정자 · M 수정일시(10-06)
+    const L = bpColLetter(histCol); await bpPatchRange(bpWb() + "/range(address='" + L + row + ':' + L + row + "')", [[entry]], 1);   // N, O, … 수정 내역
     });
-    bpApplyLocal({ ...rec, modifier: who, history: hist.concat([entry]) }, row);
+    bpApplyLocal({ ...rec, modifier: who, modified: when, history: hist.concat([entry]) }, row);
     bpLogAdmin('수정', { row, code: rec.code, by: who, changes: changes.map(c => c.label + ': ' + c.from + ' → ' + c.to), entry, histCol: bpColLetter(histCol), before: before ? bpLogRec(before) : null, after: bpLogRec(_bp.all.find(x => x.row === row)) });
     return row;
   }
@@ -2447,10 +2523,10 @@ async function bpMasterAppendRows(recs) {
     if (end > colA.length || colA.slice(start - 1, end).some(Boolean)) throw new Error('빈 행을 찾지 못했습니다(' + start.toLocaleString() + '행부터 ' + recs.length + '행). 새로고침 후 다시 시도해 주세요.');   // 읽은 범위 밖이거나 비어 있지 않으면 쓰지 않는다
     loadingSub(start.toLocaleString() + (recs.length > 1 ? '~' + end.toLocaleString() : '') + '행에 기록 중 (2/3)');
     await bpWriteRows(start, recs);
-    const who = bpWho();
+    const who = bpWho(), when = bpNowStr();
     await bpEnsureHeader(null);
-    await bpPatchRange(bpWb() + "/range(address='J" + start + ':J' + end + "')", recs.map(r => [r.creator || who]), 1);   // J 생성자(이름)
-    recs.forEach(r => { if (!r.creator) r.creator = who; if (!r.history) r.history = []; });
+    await bpPatchRange(bpWb() + "/range(address='J" + start + ':K' + end + "')", recs.map(r => [r.creator || who, r.created || when]), 2);   // J 생성자 · K 생성일시(10-06)
+    recs.forEach(r => { if (!r.creator) r.creator = who; if (!r.created) r.created = when; if (!r.history) r.history = []; });
     /* ② 되읽어 확인 — 같은 세션이라 방금 쓴 값이 보인다. 그래도 잠깐 늦을 수 있어 최대 4번 본다. */
     loadingSub('기록 확인 중 (3/3)');
     let got = [];
@@ -2473,7 +2549,139 @@ async function bpMasterAppendRows(recs) {
     return rows;
   });
 }
-function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: x.bizNo, inactive: !!x.inactive, bank: x.bank, acct: x.acct, creator: x.creator || '', modifier: x.modifier || '' } : null; }
+function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: x.bizNo, inactive: !!x.inactive, bank: x.bank, acct: x.acct, creator: x.creator || '', created: x.created || '', modifier: x.modifier || '', modified: x.modified || '' } : null; }
+/* ── 열 정리(10-06) ─────────────────────────────────────────────
+   예전 구조(J 생성자 · K 수정자 · L… 수정 내역) → 지금 구조(J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역).
+   ① 편집 모드(잠금)에서만 · ② 원본을 Backup/BP-Master 에 복사 · ③ 서버 머리글로 다시 예전 구조인지 확인
+   ④ K 열 · M 열에 빈 열 끼워 넣기(오른쪽으로 밀기 — 수정자는 L 로, 수정 내역은 N 부터) · ⑤ J1~M1 머리글
+   ⑥ 수정일시 = 마지막 수정 내역 맨 앞의 시각, 생성일시 = Logging_data 의 「등록 · 일괄 등록」 기록 시각(09-30 이후 이 화면에서 만든 건만 — 정리본의 옛 행은 원래 비어 있다)
+   ⑦ 머리글을 되읽어 확인 → 목록 다시 읽기. 끼워 넣기 전에 멈추면 파일은 그대로, 끼워 넣은 뒤 멈추면 화면이 지금 구조로 읽으므로 다시 누르지 않는다(머리글로 판별). */
+function bpRenderMigrate() {
+  const el = document.getElementById('bp-migrate'); if (!el) return;
+  const show = _bp.layout === 'v1' && isBpAdmin();
+  el.style.display = show ? '' : 'none';
+  const b = document.getElementById('bp-migrate-btn');
+  if (b) { b.disabled = !_bpLock.mine; b.title = _bpLock.mine ? '' : '「편집 시작」 을 누른 뒤 할 수 있습니다'; }
+}
+async function bpCreatedTimesFromLogs(codes) {
+  const want = new Set(codes.map(c => String(c).toUpperCase())), out = {};
+  if (!want.size) return out;
+  const driveId = await _getLogDriveId(); if (!driveId) return out;
+  const t = await token();
+  let days = [];
+  try { days = (await apiAll('/drives/' + driveId + '/root:/Logging_data/ACC-Others/BP-Master/Admin:/children?$select=id,name,folder')).value || []; }
+  catch (e) { if (/itemNotFound|not found|404/i.test(String(e.message))) return out; throw e; }
+  const files = [];
+  for (const d of days.filter(d => d.folder && /^\d{4}-\d{2}-\d{2}$/.test(d.name) && d.name >= '2026-09-30')) {
+    const fs = (await apiAll('/drives/' + driveId + '/items/' + d.id + '/children?$select=id,name,file,content.downloadUrl')).value || [];
+    fs.forEach(f => { if (f.file && /\.json$/i.test(f.name)) files.push({ day: d.name, id: f.id, name: f.name, downloadUrl: f['@microsoft.graph.downloadUrl'] || '' }); });
+  }
+  const queue = files.slice(); let done = 0;
+  const worker = async () => {
+    while (queue.length) {
+      const f = queue.shift();
+      try {
+        const j = await bpReadLogFile(driveId, f, t);
+        if (j && (j.action === '등록' || j.action === '일괄 등록') && j.detail) {
+          const ts = String(j.timestampKST || (f.day + ' ' + f.name.slice(0, 2) + ':' + f.name.slice(2, 4))).slice(0, 16);
+          const codesIn = (j.detail.records || []).map(r => r && r.code).concat(String(j.detail.codes || '').split(','));
+          codesIn.forEach(c => { const k = String(c || '').trim().toUpperCase(); if (k && want.has(k) && (!out[k] || ts < out[k])) out[k] = ts; });   // 가장 이른 등록 시각
+        }
+      } catch (e) { /* 읽지 못한 기록은 건너뛴다 — 그 건의 생성일시만 비어 남는다 */ }
+      if (++done % 20 === 0) loadingSub('등록 기록 읽는 중 ' + done + ' / ' + files.length);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(6, Math.max(1, files.length)) }, worker));
+  return out;
+}
+async function bpMigrateCols() {
+  if (_bp.layout !== 'v1') { bpRenderMigrate(); return; }
+  if (!_bpLock.mine) { showAlert('편집 모드에서만 할 수 있습니다.', '「편집 시작」 을 누른 뒤 다시 눌러 주세요.', '🔒'); return; }
+  await loadBpMaster(true);                                           // 지금 서버 내용으로 시작(그 사이 다른 편집이 있었을 수 있다)
+  if (_bp.layout !== 'v1') { bpRenderMigrate(); showAlert('이미 정리된 파일입니다.', '열 구조: ' + _bp.layout, 'ℹ️'); return; }
+  const withHist = _bp.all.filter(x => (x.history || []).length), withCreator = _bp.all.filter(x => x.creator);
+  if (!confirm('BP Master 파일에 생성일시 · 수정일시 열을 추가합니다.\n\n'
+    + '· 원본을 Backup/BP-Master 에 먼저 복사합니다\n· K · M 자리에 빈 열을 끼워 넣습니다(수정자 → L, 수정 내역 → N 부터)\n'
+    + '· 수정일시 ' + withHist.length + '건 · 생성일시 ' + withCreator.length + '건을 채웁니다\n\n진행할까요?')) return;
+  const step = { backup: '', inserted: false };
+  loading(true, '열 정리 중', '준비');
+  try {
+    await bpEnsureReady({ migrating: true });
+    const t = await token(), driveId = _bp.driveId;
+    { const hd0 = await api(bpWb() + "/range(address='J1:M1')?$select=values");   // 백업 전에도 한 번 — 이미 정리된 파일이면 백업도 만들지 않는다
+      const l0 = bpLayoutOf([0, 0, 0, 0, 0, 0, 0, 0, 0].concat((hd0.values && hd0.values[0]) || []), []);
+      if (l0 !== 'v1') throw new Error('서버 파일이 예전 구조가 아닙니다(' + l0 + ') — 「새로고침」 해 주세요.'); }
+    // ② 백업
+    loadingSub('원본 백업 (1/5)');
+    const res = await fetch(GRAPH + '/drives/' + driveId + '/items/' + _bp.itemId + '/content', { headers: { Authorization: 'Bearer ' + t }, cache: 'no-store' });
+    if (!res.ok) throw new Error('백업용으로 내려받지 못했습니다 (' + res.status + ')');
+    const buf = await res.arrayBuffer(); if (!buf.byteLength) throw new Error('내려받은 파일이 비어 있습니다');
+    if (!(await _ensureLogFolder(driveId, 'Backup/BP-Master', t))) throw new Error('백업 폴더(Backup/BP-Master)를 만들지 못했습니다');
+    const d = kstNow(), p = n => String(n).padStart(2, '0');
+    const bname = String((_bp.meta && _bp.meta.name) || BP_MASTER_FILE).replace(/\.xlsx$/i, '') + '_열정리전_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + p(d.getUTCSeconds()) + '.xlsx';
+    const up = await fetch(GRAPH + '/drives/' + driveId + '/root:/Backup/BP-Master/' + encodeURIComponent(bname) + ':/content', { method: 'PUT', headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/octet-stream' }, body: buf });
+    if (!up.ok) throw new Error('백업 파일을 올리지 못했습니다 (' + up.status + ')');
+    step.backup = 'Backup/BP-Master/' + bname;
+    // ⑥ 생성일시 — 등록 기록에서(쓰기 전에 다 모아 둔다)
+    loadingSub('등록 기록 읽는 중 (2/5)');
+    const createdBy = await bpCreatedTimesFromLogs(withCreator.map(x => x.code));
+    let nMod = 0, nCre = 0;
+    await bpWbSession(async () => {
+      if (!_bpWs.id) throw new Error('워크북 세션을 열지 못했습니다 — 열 구조를 바꾸는 일은 세션 안에서만 합니다. 잠시 뒤 다시 시도해 주세요.');
+      const lk = await bpLockRead(); if (!bpLockIsMine(lk)) throw new Error(bpLockLost(lk, false));   // 백업 · 기록 읽기 사이에 잠금이 넘어갔는지
+      // ③ 서버 머리글로 다시 확인
+      loadingSub('열 구조 확인 (3/5)');
+      const hd = await wbApi(bpWb() + "/range(address='J1:M1')?$select=values");
+      const lay = bpLayoutOf([0, 0, 0, 0, 0, 0, 0, 0, 0].concat((hd.values && hd.values[0]) || []), []);
+      if (lay !== 'v1') throw new Error('서버 파일이 예전 구조가 아닙니다(' + lay + ') — 이미 정리됐을 수 있습니다. 「새로고침」 해 주세요.');
+      // ④ 끼워 넣기 — K 열(→ 생성일시), 그다음 M 열(→ 수정일시). 첫 번째 뒤에 옛 K(수정자)는 L, 옛 L(수정 1)은 M 에 있다.
+      loadingSub('열 끼워 넣는 중 (4/5)');
+      step.tried = true;
+      await wbApi(bpWb() + "/range(address='K:K')/insert", 'POST', { shift: 'Right' });
+      try { await wbApi(bpWb() + "/range(address='M:M')/insert", 'POST', { shift: 'Right' }); }
+      catch (e) {
+        // 둘째 끼워 넣기만 실패하면 반쯤 바뀐 파일(L1 수정자 · M1 수정 1)이 지금 구조로 잘못 읽힌다 — 첫째를 되돌린다
+        try { await wbApi(bpWb() + "/range(address='K:K')/delete", 'POST', { shift: 'Left' }); }
+        catch (e2) { step.inserted = true; throw new Error('M 열 끼워 넣기 실패(' + e.message + ') 뒤 되돌리기도 실패(' + e2.message + ') — 백업 ' + step.backup + ' 으로 되돌려 주세요'); }
+        throw new Error('M 열을 끼워 넣지 못해 K 열을 되돌렸습니다(' + e.message + ')');
+      }
+      step.inserted = true;
+      _bp.layout = 'v2'; _bpHdrDone.clear();
+      await bpEnsureHeader(null);                                         // J1~M1 = 생성자 · 생성일시 · 수정자 · 수정일시
+      // ⑥ 값 채우기 — 수정일시(M) · 생성일시(K)
+      loadingSub('일시 채우는 중 (5/5)');
+      for (const x of withHist) {
+        const when = bpHistTime(x.history[x.history.length - 1]); if (!when) continue;
+        await bpPatchRange(bpWb() + "/range(address='M" + x.row + ':M' + x.row + "')", [[when]], 1); x.modified = when; nMod++;
+      }
+      for (const x of withCreator) {
+        const when = createdBy[String(x.code).toUpperCase()]; if (!when) continue;
+        await bpPatchRange(bpWb() + "/range(address='K" + x.row + ':K' + x.row + "')", [[when]], 1); x.created = when; nCre++;
+      }
+      // ⑦ 확인
+      const chk = await wbApi(bpWb() + "/range(address='J1:N1')?$select=values");
+      const v = ((chk.values && chk.values[0]) || []).map(bpCell);
+      if (v[0] !== '생성자' || v[1] !== '생성일시' || v[2] !== '수정자' || v[3] !== '수정일시') throw new Error('머리글 확인 실패: ' + v.join(' · '));
+    });
+    bpLogAdmin('열 정리', { backup: step.backup, from: 'J 생성자 · K 수정자 · L… 수정 내역', to: 'J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역', modified: nMod, created: nCre, createdMissing: withCreator.length - nCre });
+    loading(false);
+    showAlert('열 정리를 마쳤습니다.', '수정일시 ' + nMod + '건 · 생성일시 ' + nCre + '건을 채웠습니다' + (withCreator.length - nCre ? ' (등록 기록이 없는 ' + (withCreator.length - nCre) + '건은 비워 둠)' : '') + '.\n백업: ' + step.backup, '✅');
+    bpBlockOldPages();
+    // 세션으로 고친 내용이 SharePoint 파일에 저장되기까지 잠깐 걸린다 — 새 구조가 보일 때까지 다시 읽는다(최대 약 60초)
+    for (let i = 0; i < 12; i++) { await loadBpMaster(true); if (_bp.layout === 'v2') break; await new Promise(r => setTimeout(r, 5000)); }
+    if (_bp.layout !== 'v2') { _bp.layout = 'v2'; bpRenderMigrate(); }  // 서버 머리글은 확인했다 — 파일 저장만 늦는 것. 다음 새로고침 때 맞게 읽힌다
+  } catch (e) {
+    loading(false);
+    let actual = '';
+    if (step.tried) { try { const c = await api(bpWb() + "/range(address='J1:N1')?$select=values"); actual = ((c.values && c.values[0]) || []).map(bpCell).join(' · '); } catch (e3) { actual = '(확인 실패)'; } }
+    bpLogAdmin('열 정리 실패', { backup: step.backup, inserted: step.inserted, actualHeader: actual, error: e.message });
+    alert('열 정리를 마치지 못했습니다.\n\n' + e.message
+      + (step.inserted ? '\n\n열은 이미 끼워 넣었습니다 — 다시 누르지 마세요.' : step.tried ? '' : '\n\n파일은 바뀌지 않았습니다.')
+      + (actual ? '\n지금 서버 머리글(J~N): ' + actual : '') + (step.backup ? '\n백업: ' + step.backup : ''));
+    try { await loadBpMaster(true); } catch (e2) {}
+  } finally { loading(false); }
+}
+
 // 외부(BP Master 시스템 등)에서 같은 규칙으로 쓸 수 있게 이름을 고정해 둔다.
 window.bpMasterUpsert = bpMasterUpsert; window.bpMasterAppendRows = bpMasterAppendRows;
 
@@ -2651,11 +2859,11 @@ function bpExportLogs() {
 function bpExportList() {
   if (!_bp.all.length) { alert('목록을 아직 읽지 않았습니다. 「새로고침」 뒤 다시 눌러 주세요.'); return; }
   const maxH = _bp.all.reduce((m, x) => Math.max(m, (x.history || []).length), 0);
-  const rows = [['Code', '유형', 'Name 1', '한글이름', '사업자등록번호', 'Bank', 'Account no.', '상태', 'Row', '생성자', '수정자'].concat(Array.from({ length: maxH }, (_, i) => '수정 ' + (i + 1)))];
-  // I(Row) 는 마스터 파일의 열 위치(J 생성자 · K 수정자 · L… 수정 내역)를 그대로 유지하려고 남긴다 — 화면에는 보이지 않는다(09-30)
-  _bp.all.slice().sort((a, b) => a.row - b.row).forEach(x => rows.push([x.code || '', x.type || '', x.name || '', x.nameKo || '', x.bizNo || '', x.bank || '', x.acct || '', x.inactive ? '비활성' : '활성', String(x.row || ''), x.creator || '', x.modifier || ''].concat(Array.from({ length: maxH }, (_, i) => (x.history || [])[i] || ''))));
+  const rows = [['Code', '유형', 'Name 1', '한글이름', '사업자등록번호', 'Bank', 'Account no.', '상태', 'Row'].concat(BP_META_HDR).concat(Array.from({ length: maxH }, (_, i) => '수정 ' + (i + 1)))];
+  // I(Row) 는 마스터 파일의 열 위치(J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역)를 그대로 유지하려고 남긴다 — 화면에는 보이지 않는다(09-30 · 10-06)
+  _bp.all.slice().sort((a, b) => a.row - b.row).forEach(x => rows.push([x.code || '', x.type || '', x.name || '', x.nameKo || '', x.bizNo || '', x.bank || '', x.acct || '', x.inactive ? '비활성' : '활성', String(x.row || ''), x.creator || '', x.created || '', x.modifier || '', x.modified || ''].concat(Array.from({ length: maxH }, (_, i) => (x.history || [])[i] || ''))));
   const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 28 }, { wch: 16 }, { wch: 18 }, { wch: 22 }, { wch: 7 }, { wch: 8 }, { wch: 14 }, { wch: 14 }].concat(Array.from({ length: maxH }, () => ({ wch: 60 })));
+  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 28 }, { wch: 16 }, { wch: 18 }, { wch: 22 }, { wch: 7 }, { wch: 8 }, { wch: 14 }, { wch: 17 }, { wch: 14 }, { wch: 17 }].concat(Array.from({ length: maxH }, () => ({ wch: 60 })));
   XLSX.utils.book_append_sheet(wb, ws, 'BP Master');
   const d = kstNow(), p = n => String(n).padStart(2, '0');
   XLSX.writeFile(wb, 'BP-Master_목록_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '.xlsx', { compression: true });   // 압축 저장(09-30) — 같은 내용이 5.2MB → 0.8MB 안팎, 시스템들이 내려받는 시간이 준다
@@ -2766,6 +2974,7 @@ function switchTab(tab) {
   });
   // 목록 탭은 열이 많아 화면을 넓게 쓴다(작성 화면은 읽기 폭을 유지).
   document.body.classList.toggle('wide-list', tab !== 'new');
+  document.body.classList.toggle('wide-bp', tab === 'bpview' || tab === 'bpadmin');
   if (tab === 'my') loadMy();
   if (tab === 'apr') loadApr();
   if (tab === 'admin') loadAdmin();
