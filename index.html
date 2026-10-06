@@ -351,7 +351,8 @@ body:not(.cat-bp) .bp-tab{display:none}
 .bp-tools .cnt .q{color:#0078d4;font-weight:600}
 /* BP 표(10-02) — 열 너비를 colgroup 비율로 고정(table-layout:fixed). 쪽마다 글 길이에 따라 열이 흔들리던 것을 없앤다.
    모든 칸 한 줄 · 넘치면 줄임표, 잘린 칸에 마우스를 올리면 전체 글이 말풍선으로 뜬다(#bp-tip). 좁은 화면에서는 가로 스크롤. */
-#bp-tbl table{font-size:.72rem;table-layout:fixed;width:100%;min-width:1480px}
+#bp-tbl table{font-size:.72rem;table-layout:fixed;width:100%;min-width:940px}
+#bp-tbl.adm table{min-width:1480px}
 #bp-tbl th{padding:6px 8px;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bp-tbl td{padding:0 8px;height:27px;line-height:27px;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 #bp-tbl td.tag{padding:0 4px 0 8px;text-overflow:clip}
@@ -879,7 +880,7 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
       </div>
       <div class="tbl-wrap" id="bp-tbl" style="display:none"><table>
         <colgroup id="bp-cols"></colgroup>
-        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th class="c">상태</th><th class="c bp-adm-col">편집</th><th>생성자</th><th>생성일시</th><th>수정자</th><th>수정일시</th></tr></thead>
+        <thead><tr><th class="sel bp-adm-col"><input type="checkbox" id="bp-sel-page" onchange="bpSelPage(this.checked)" title="이 쪽 전체 선택"></th><th>Code</th><th>유형</th><th>Name 1</th><th>한글이름</th><th>사업자등록번호</th><th>Bank</th><th>Account no.</th><th class="c">상태</th><th class="c bp-adm-col">편집</th><th class="bp-adm-col">생성자</th><th class="bp-adm-col">생성일시</th><th class="bp-adm-col">수정자</th><th class="bp-adm-col">수정일시</th></tr></thead>
         <tbody id="bp-body"></tbody>
       </table></div>
       <div class="pg" id="bp-pg" style="display:none"></div>
@@ -1961,7 +1962,7 @@ function bpSearch() {
 // 열 비율(%) — 조회 탭 10열 · 관리 탭 12열(선택 · 편집 추가). 합 100. 표 폭이 바뀌어도 비율이 같아 쪽을 넘겨도 열이 움직이지 않는다.
 /* 10-06: 생성일시 · 수정일시 두 열을 더하면서 BP 탭만 1600px 로 넓히고(body.wide-bp), 여유가 있던 Name 1 · 한글이름을 조금씩 줄였다.
    일시 칸(8.3% ≈ 122px)은 「2026-10-06 15:54」 가 잘리지 않는 폭, 이름 칸(6.5% ≈ 96px)은 영문 이름(Hyunju Gong)이 들어가는 폭. 좁은 화면은 표 안에서 가로 스크롤(min-width 1480). */
-const BP_COLS_VIEW  = [5.6, 5.3, 19.6, 13.4, 7.2, 7.5, 8, 3.8, 6.5, 8.3, 6.5, 8.3];                 // 합 100 — Code · 유형 · Name 1 · 한글 · 사업자 · Bank · 계좌 · 상태 · 생성자 · 생성일시 · 수정자 · 수정일시
+const BP_COLS_VIEW  = [8, 7, 29, 17, 10, 11, 12.5, 5.5];   // 조회 탭 — 생성 · 수정 네 열 없이 8열(10-06 요청), 합 100                 // 합 100 — Code · 유형 · Name 1 · 한글 · 사업자 · Bank · 계좌 · 상태 · 생성자 · 생성일시 · 수정자 · 수정일시
 const BP_COLS_ADMIN = [2.2, 5.3, 5.3, 15.9, 11.4, 7.2, 7.5, 8, 3.8, 3.8, 6.5, 8.3, 6.5, 8.3];       // 합 100 — 앞에 선택 · 상태 뒤에 편집
 let _bpColsMode = null;
 function bpSetCols(admin) {
@@ -2013,6 +2014,7 @@ function renderBpList(resetPage) {
   const admin = isBpAdmin() && _bpTab === 'bpadmin';                 // 「수정」 열은 관리 탭에서만(조회 탭에는 없다 · 09-28)
   document.querySelectorAll('.bp-adm-col').forEach(el => el.style.display = admin ? '' : 'none');
   bpSetCols(admin);
+  document.getElementById('bp-tbl').classList.toggle('adm', admin);   // 관리 탭만 최소 폭 1480(일시 칸이 잘리지 않게)
   const body = document.getElementById('bp-body');
   const slice = items.slice((_bp.page - 1) * BP_PAGE, _bp.page * BP_PAGE);
   // 모든 글 칸은 한 줄 · 줄임표(글자 크기는 그대로). 잘린 칸에만 마우스를 올리면 전체 글 말풍선(data-tip · bpTipInit).
@@ -2026,8 +2028,8 @@ function renderBpList(resetPage) {
     clip(x.bizNo, 'bp-num') + clip(x.bank, 'bank') + clip(x.acct, 'bp-num') +
     '<td class="c"><span class="bp-st ' + (x.inactive ? 'off">비활성' : 'on">활성') + '</span></td>' +
     (admin ? '<td class="c"><button class="bp-edit-btn" ' + (_bpLock.mine ? '' : 'disabled title="편집 모드에서만 편집할 수 있습니다"') + ' onclick="bpEditRow(' + x.row + ')" title="' + x.row.toLocaleString() + '행">편집</button></td>' : '') +
-    bpWhoCell(x.creator, '', '') + bpWhenCell(x.created) + bpWhoCell(x.modifier, (x.history || []).length, (x.history || []).join('\n')) + bpWhenCell(x.modified) +
-    '</tr>').join('') : '<tr><td colspan="' + (admin ? 14 : 12) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
+    (admin ? bpWhoCell(x.creator, '', '') + bpWhenCell(x.created) + bpWhoCell(x.modifier, (x.history || []).length, (x.history || []).join('\n')) + bpWhenCell(x.modified) : '') +   // 생성 · 수정 네 열은 관리 탭에서만(10-06)
+    '</tr>').join('') : '<tr><td colspan="' + (admin ? 14 : 8) + '" class="empty">조건에 맞는 BP 가 없습니다.</td></tr>';
   const pageCb = document.getElementById('bp-sel-page');
   if (pageCb) { const allOn = slice.length > 0 && slice.every(x => _bp.sel.has(x.row)); pageCb.checked = allOn; pageCb.indeterminate = !allOn && slice.some(x => _bp.sel.has(x.row)); }
   bpRenderBulk();
@@ -2974,7 +2976,7 @@ function switchTab(tab) {
   });
   // 목록 탭은 열이 많아 화면을 넓게 쓴다(작성 화면은 읽기 폭을 유지).
   document.body.classList.toggle('wide-list', tab !== 'new');
-  document.body.classList.toggle('wide-bp', tab === 'bpview' || tab === 'bpadmin');
+  document.body.classList.toggle('wide-bp', tab === 'bpadmin');   // 넓은 화면은 생성 · 수정 열이 있는 관리 탭만(조회 탭은 1360px 그대로)
   if (tab === 'my') loadMy();
   if (tab === 'apr') loadApr();
   if (tab === 'admin') loadAdmin();
