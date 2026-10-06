@@ -149,9 +149,10 @@ tbody tr:hover{background:#f8f9fb}
 /* 목록 세 표(내 신청 · 결재함 · 관리자) — 10-06: 열 폭을 자동에 맡겨 좁아지면 Title(DEV-2026-10-06_ID-4) · 발생일 · 신청일이 두 줄로 꺾였다.
    GW · IT 처럼 폭은 머리글이 정하고(table-layout fixed) 모든 칸은 한 줄 — 넘치면 말줄임, 전체는 마우스를 올리면 보인다.
    남는 폭은 「요청 제목」 이 받는다. 화면이 좁으면 표 안에서 가로 스크롤(최소 폭). */
-table.lst{table-layout:fixed;min-width:1040px}
+table.lst{table-layout:fixed;min-width:1240px}   /* 고정 열 합(최대 CCL 결재함 · 관리자 ≈1040) + 요청 제목 최소 ≈200 */
 table.lst th{white-space:nowrap}
 table.lst td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.lst td.empty{white-space:normal}   /* 「불러오기 실패: …」 안내는 접지 않는다 */
 table.lst td > span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 table.lst td > span.st{display:inline-block}
 table.lst td > button{max-width:100%}
@@ -3459,13 +3460,13 @@ function listCols(cat, kind) {
     // 그만큼을 적용 기간에 넘겨 시작일·종료일이 잘리지 않게 한다(09-21 지적).
     cols.push({ label: '증액 구분', w: '86px', cell: (f) => esc(f.IncreaseType || '-') });
     cols.push({ label: '증액 금액', w: '116px', align: 'right', cell: (f) => money(f.IncreaseAmount) });
-    cols.push({ label: '적용 기간', w: '250px', cell: (f) =>
+    cols.push({ label: '적용 기간', w: '200px', cell: (f) =>
       '<span class="c-dur" title="' + esc(f.Duration || '') + '">' + esc(cclDurShort(f.Duration)) + '</span>' });
   }
   /* 「내 결재순서」 열은 뺐다 — 결재함에 뜬 건은 어차피 내 차례이고,
      상세를 열면 결재 이력에 단계와 역할이 그대로 나온다(09-21 요청). */
   cols.push(stat, rdate);
-  if (kind === 'my') cols.push({ label: '', w: '84px', cell: (f, it) =>
+  if (kind === 'my') cols.push({ label: '', w: '96px', cell: (f, it) =>
     (f.Status || '').trim() === '대기'
       // 철회 버튼은 BP·FA·GA·IT 와 같은 모양·같은 문구로 맞춘다(09-21 지적).
       ? '<button onclick="event.stopPropagation();withdrawRequest(\'' + cat + '\',' + it.id + ')"'
