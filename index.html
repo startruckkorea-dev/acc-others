@@ -518,6 +518,32 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
 .appr-block .appr-title::before,.appr-title::before{content:none!important;display:none!important}
 @media (max-width:640px){.appr-select-row{grid-template-columns:1fr}.appr-info{grid-template-columns:1fr}}
 .appr-tag.flex{color:#0b5fa5;background:#e1f0ff}
+/* 추가 결재자(10-07) — IT Ticket · ACC Voucher 와 같은 삽입선 · 접이식 안내 · 노란 블록 */
+.appr-insert{display:flex;align-items:center;gap:10px;margin:2px 0 6px;padding:5px 2px;cursor:pointer;border-radius:6px;transition:background .12s ease}
+.appr-insert-line{flex:1;height:0;border-top:2px dashed #b9c6d6;transition:border-color .12s ease}
+.appr-insert-btn{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;background:#fff;color:#0078d4;border:1.5px dashed #7fb4e0;border-radius:14px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.2px;transition:all .12s ease}
+.appr-insert-plus{font-size:14px;line-height:1;font-weight:800}
+.appr-insert:not(.is-full):hover{background:#f0f6ff}
+.appr-insert:not(.is-full):hover .appr-insert-line{border-top-color:#0078d4}
+.appr-insert:not(.is-full):hover .appr-insert-btn{background:#0078d4;color:#fff;border-color:#0078d4;border-style:solid}
+.appr-insert.is-full{cursor:default}
+.appr-insert.is-full .appr-insert-line{border-top-color:#e1e1e1}
+.appr-insert.is-full .appr-insert-btn{color:#a19f9d;border-color:#dcdcdc;border-style:solid;font-weight:600}
+.appr-help{margin-top:9px;padding-top:8px;border-top:1px dashed #c7e0f4}
+.appr-help>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#0b5fa5;user-select:none;padding:1px 0}
+.appr-help>summary::-webkit-details-marker{display:none}
+.appr-help>summary:hover{text-decoration:underline}
+.appr-help .chev{font-size:9px;line-height:1;transition:transform .15s ease;display:inline-block}
+.appr-help[open] .chev{transform:rotate(90deg)}
+.appr-help .used{margin-left:auto;font-weight:600;color:#8a6116;background:#fdf6e3;border:1px solid #f0d9a0;border-radius:9px;padding:1px 8px;font-size:10px}
+.appr-help-body{margin-top:7px;font-size:11px;line-height:1.55;color:#605e5c}
+.appr-help-body table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.5}
+.appr-help-body td{padding:4px 8px;border-bottom:1px solid #dbe7f3;vertical-align:top}
+.appr-help-body td.k{padding:4px 10px 4px 0;white-space:nowrap;font-weight:700;color:#0b5fa5}
+.appr-help-body tr:last-child td{border-bottom:none}
+.appr-block.appr-extra{background:#fffdf5;border-color:#e8cf8f;border-left:3px solid #d9a41a}
+.btn-exdel{float:right;background:#fff;color:#a4262c;border:1px solid #e6b3b3;border-radius:5px;padding:3px 16px;font-size:10px;font-weight:600;cursor:pointer;line-height:1.4}
+.btn-exdel:hover{background:#a4262c;color:#fff;border-color:#a4262c}
 .appr-block.appr-flex .appr-block-title .req-mark{display:none}   /* Flex 연동으로 채워진 칸은 고를 게 없으니 필수(*) 표시를 뺀다 — 직접 선택으로 되돌아오면 다시 보인다(10-01) */
 .flex-note{font-size:11px;color:#a4262c;background:#fdf0f1;border:1px solid #f1c0c4;border-radius:6px;padding:6px 10px;margin:0 0 8px;line-height:1.5}
 </style>
@@ -660,11 +686,11 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
           </div>
         </div>
         <!-- 결재 라인 미리보기 · 결재자 블록 — ACC Voucher 와 같은 모양(09-30) -->
-        <div class="appr-line-preview rd-hide">
+        <div class="appr-line-preview rd-hide" id="dev-line-preview">
         <div class="appr-line-title">📋 결재 라인 (Deviation Report 기준 자동 구성)</div>
         <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge">1차</span><span class="line-step-label">Team Leader (팀장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge">2차</span><span class="line-step-label">MC (부서장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">3차</span><span class="line-step-label">CFO</span></span></div>
       </div>
-        <div class="appr-line-preview rd-only">
+        <div class="appr-line-preview rd-only" id="dev-line-preview-rd">
         <div class="appr-line-title">📋 결재 라인 (RD 고정 — MC 본인 · RD 직속 요청)</div>
         <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge fixed">1차</span><span class="line-step-label">RD</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">CFO</span></span></div>
       </div>
@@ -701,6 +727,9 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
             <input type="email" id="dev-a2-email" readonly placeholder="이메일">
           </div>
         </div>
+
+        <!-- 추가 결재자(10-07) — CFO 바로 앞에만, 최대 3명. acoRenderApprLine 이 그린다(RD 고정 라인에서도 RD 와 CFO 사이) -->
+        <div id="dev-extra-area"></div>
 
         <div class="appr-block appr-fixed">
           <div class="appr-block-title"><span id="dev-cfo-ord">3차</span> 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— CFO</span></div>
@@ -775,11 +804,11 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
           </div>
         </div>
         <!-- 결재 라인 미리보기 · 결재자 블록 — ACC Voucher 와 같은 모양(09-30) -->
-        <div class="appr-line-preview rd-hide">
+        <div class="appr-line-preview rd-hide" id="ccl-line-preview">
         <div class="appr-line-title">📋 결재 라인 (Credit Card Limit 기준 자동 구성)</div>
         <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge">1차</span><span class="line-step-label">Department Head (부서장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">CFO</span></span></div>
       </div>
-        <div class="appr-line-preview rd-only">
+        <div class="appr-line-preview rd-only" id="ccl-line-preview-rd">
         <div class="appr-line-title">📋 결재 라인 (RD 고정 — MC 본인 · RD 직속 요청)</div>
         <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge fixed">1차</span><span class="line-step-label">RD</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">CFO</span></span></div>
       </div>
@@ -804,8 +833,11 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
           </div>
         </div>
 
+        <!-- 추가 결재자(10-07) — CFO 바로 앞에만, 최대 3명. acoRenderApprLine 이 그린다(RD 고정 라인에서도 RD 와 CFO 사이) -->
+        <div id="ccl-extra-area"></div>
+
         <div class="appr-block appr-fixed">
-          <div class="appr-block-title">2차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— CFO</span></div>
+          <div class="appr-block-title"><span id="ccl-cfo-ord">2차</span> 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— CFO</span></div>
           <div class="appr-info">
             <input type="text" id="ccl-a2-name" readonly placeholder="이름">
             <input type="email" id="ccl-a2-view" readonly placeholder="이메일">
@@ -1585,9 +1617,121 @@ async function loadEmployees() {
     applyRdRule();
     applyFlexApprovers();   // Team Leader · MC · Department Head — Flex 연동(10-01). RD 고정 라인이면 블록 자체가 숨는다
     console.log('[Employee] 로드:', employeeData.length, '명');
-  } catch (e) { console.warn('[Employee] 로드 실패:', e.message); applyFlexApprovers(); }   // 못 읽었으면 직접 선택 칸을 연다
+  } catch (e) { console.warn('[Employee] 로드 실패:', e.message); applyFlexApprovers(); ['dev', 'ccl'].forEach(acoRenderApprLine); }   // 못 읽었으면 직접 선택 칸을 연다
 }
 const APPR_SLOTS = { dev: [1, 2], ccl: [1] };   // 직접 지정하는 결재 차수
+
+/* ══ 추가 결재자 (10-07 · IT Ticket · ACC Voucher 「Adding an Additional Approver」 와 같은 방식) ══
+   유관 부서나 지정 담당자의 별도 · 추가 승인이 필요한 경우가 있어, CFO(최종) 바로 앞에 결재자를 최대 3명까지 끼워 넣는다.
+   · 일반 라인: DEV Team Leader → MC → [추가] → CFO / CCL Department Head → [추가] → CFO. RD 고정 라인: RD → [추가] → CFO.
+   · 값은 DOM 이 아니라 acoExtra[cat] 배열에 둔다 — 다시 그려도(RD 규칙 재판정 포함) 고른 부서 · 팀 · 직원이 유지된다.
+   · 결재행 역할은 IT · ACC 와 같은 「Extra Approver」, 차수는 앞 단계 다음부터 차례로, CFO 는 맨 뒤로 밀린다.
+     결재 진행 · 상세 · Excel 결재 이력 · APS · AAC 는 차수 순 기존 로직 그대로다. */
+const ACO_MAX_EXTRA = 3;
+const ACO_EXTRA_ROLE = 'Extra Approver';
+const acoExtra = { dev: [], ccl: [] };
+const _acoHelpOpen = { dev: false, ccl: false };
+let _acoExSeq = 0;
+const ACO_BU_STEPS = { dev: ['Team Leader (팀장)', 'MC (부서장)'], ccl: ['Department Head (부서장)'] };
+const ACO_LINE_NAME = { dev: 'Deviation Report', ccl: 'Credit Card Limit' };
+const ACO_WHERE = { dev: 'After the Team Leader · MC steps (or RD) and before the CFO (final step) only.',
+                    ccl: 'After the Department Head step (or RD) and before the CFO (final step) only.' };
+function acoExBase(cat) { return _rdRule ? 1 : APPR_SLOTS[cat].length; }   // 추가 결재자 앞에 오는 단계 수
+function acoRenderApprLine(cat) {
+  const list = acoExtra[cat] || [];
+  const help =
+    '<details class="appr-help"' + (_acoHelpOpen[cat] ? ' open' : '') + ' ontoggle="_acoHelpOpen[\'' + cat + '\']=this.open">' +
+      '<summary><span class="chev">▶</span>Adding an Additional Approver<span class="used">' + list.length + ' of ' + ACO_MAX_EXTRA + ' used</span></summary>' +
+      '<div class="appr-help-body">' +
+        '<div style="margin-bottom:5px">Some requests may need separate or additional approval from a related department or a designated contact. ' +
+        'In that case, click the dashed <span style="color:#0078d4;font-weight:700">＋ 결재자 추가</span> line below to add an approver before the CFO step.</div>' +
+        '<table>' +
+          '<tr><td class="k">Where</td><td>' + ACO_WHERE[cat] + '</td></tr>' +
+          '<tr><td class="k">How</td><td>Select Department → Team → Employee.</td></tr>' +
+          '<tr><td class="k">Order</td><td>Approval runs top to bottom. The CFO step moves down by one for each approver added, and each approver is notified only after the previous step is approved.</td></tr>' +
+          '<tr><td class="k">Scope</td><td>Applies to this request only. Use <span style="color:#a4262c;font-weight:700">✕ 삭제</span> to remove it before submitting.</td></tr>' +
+          '<tr><td class="k">Limit</td><td>Up to <b>' + ACO_MAX_EXTRA + '</b> additional approvers per request. Once the limit is reached, the dashed line is disabled until you remove one.</td></tr>' +
+        '</table>' +
+      '</div>' +
+    '</details>';
+  const line = (title, steps) =>
+    '<div class="appr-line-title">📋 ' + title + '</div>' +
+    '<div class="appr-line-steps">' + steps.map((st, i) =>
+      '<span class="line-step"><span class="line-step-badge ' + st.cls + '">' + (i + 1) + '차</span><span class="line-step-label">' + st.label + '</span>' +
+      (i < steps.length - 1 ? '<span class="line-arrow">→</span>' : '') + '</span>').join('') + '</div>' + help;
+  const ex = list.map(x => ({ label: x.name ? esc(x.name) + ' (추가)' : '추가 결재자 (미지정)', cls: 'extra' }));
+  const cfo = [{ label: 'CFO', cls: 'fixed' }];
+  const pv = document.getElementById(cat + '-line-preview');
+  if (pv) pv.innerHTML = line('결재 라인 (' + ACO_LINE_NAME[cat] + ' 기준 자동 구성)', ACO_BU_STEPS[cat].map(l => ({ label: l, cls: '' })).concat(ex, cfo));
+  const pr = document.getElementById(cat + '-line-preview-rd');
+  if (pr) pr.innerHTML = line('결재 라인 (RD 고정 — MC 본인 · RD 직속 요청)', [{ label: 'RD', cls: 'fixed' }].concat(ex, cfo));
+  const base = acoExBase(cat);
+  const area = document.getElementById(cat + '-extra-area');
+  if (area) {
+    const depts = [...new Set(employeeData.map(e => e.dept).filter(Boolean))].sort();
+    const deptOpts = depts.map(d => '<option value="' + esc(d) + '">' + esc(d) + '</option>').join('');
+    const full = list.length >= ACO_MAX_EXTRA;
+    area.innerHTML = list.map((x, i) =>
+      '<div class="appr-block appr-extra">' +
+        '<div class="appr-block-title">' + (base + i + 1) + '차 결재자 <span class="req-mark">*</span><span class="appr-tag extra">추가 지정</span> <span class="hint">— 추가 승인</span>' +
+          '<span class="btn-exdel" onclick="acoExDel(\'' + cat + '\',\'' + x.uid + '\')">✕ 삭제</span></div>' +
+        '<div class="appr-select-row">' +
+          '<select id="' + x.uid + '-dept" onchange="acoExDept(\'' + cat + '\',\'' + x.uid + '\')"><option value="">부서</option>' + deptOpts + '</select>' +
+          '<select id="' + x.uid + '-team" onchange="acoExTeam(\'' + cat + '\',\'' + x.uid + '\')" disabled><option value="">팀</option></select>' +
+          '<select id="' + x.uid + '-person" onchange="acoExPerson(\'' + cat + '\',\'' + x.uid + '\')" disabled><option value="">직원 선택</option></select>' +
+        '</div>' +
+        '<div class="appr-info">' +
+          '<input type="text" id="' + x.uid + '-name" value="' + esc(x.name) + '" readonly placeholder="이름">' +
+          '<input type="email" id="' + x.uid + '-email" value="' + esc(x.email) + '" readonly placeholder="이메일">' +
+        '</div></div>').join('') +
+      (full
+        ? '<div class="appr-insert is-full" title="추가 결재자는 최대 ' + ACO_MAX_EXTRA + '명까지 지정할 수 있습니다"><span class="appr-insert-line"></span><span class="appr-insert-btn">Maximum ' + ACO_MAX_EXTRA + ' reached</span><span class="appr-insert-line"></span></div>'
+        : '<div class="appr-insert" onclick="acoExAdd(\'' + cat + '\')" title="CFO 앞에 결재자 추가"><span class="appr-insert-line"></span><span class="appr-insert-btn"><span class="appr-insert-plus">+</span> 결재자 추가</span><span class="appr-insert-line"></span></div>');
+    // 다시 그린 뒤 보관해 둔 부서 → 팀 → 직원 선택을 되살린다
+    list.forEach(x => {
+      const d = document.getElementById(x.uid + '-dept'), t = document.getElementById(x.uid + '-team'), pe = document.getElementById(x.uid + '-person');
+      if (!d || !t || !pe || !x.dept) return;
+      d.value = x.dept; _acoFillTeams(x.dept, t); t.disabled = false;
+      if (!x.team) return;
+      t.value = x.team; _acoFillPeople(x.dept, x.team, pe); pe.disabled = false;
+      if (x.email) pe.value = x.email;
+    });
+  }
+  const ord = document.getElementById(cat + '-cfo-ord');
+  if (ord) ord.textContent = (base + list.length + 1) + '차';
+}
+function _acoFillTeams(dept, sel) {
+  const teams = [...new Set(employeeData.filter(e => e.dept === dept).map(e => e.team).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">팀</option>' + teams.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join('');
+}
+function _acoFillPeople(dept, team, sel) {
+  const people = employeeData.filter(e => e.dept === dept && e.team === team);
+  sel.innerHTML = '<option value="">직원 선택</option>' + people.map(e => '<option value="' + esc(e.email) + '">' + esc(e.name) + '</option>').join('');
+}
+function _acoEx(cat, uid) { return (acoExtra[cat] || []).find(x => x.uid === uid); }
+function acoExAdd(cat) {
+  if ((acoExtra[cat] || []).length >= ACO_MAX_EXTRA) return;
+  acoExtra[cat].push({ uid: 'acoex' + (++_acoExSeq), dept: '', team: '', name: '', email: '' });
+  acoRenderApprLine(cat);
+}
+function acoExDel(cat, uid) { acoExtra[cat] = (acoExtra[cat] || []).filter(x => x.uid !== uid); acoRenderApprLine(cat); }
+function acoExDept(cat, uid) {
+  const x = _acoEx(cat, uid); if (!x) return;
+  x.dept = document.getElementById(uid + '-dept').value; x.team = ''; x.name = ''; x.email = '';
+  acoRenderApprLine(cat);
+}
+function acoExTeam(cat, uid) {
+  const x = _acoEx(cat, uid); if (!x) return;
+  x.team = document.getElementById(uid + '-team').value; x.name = ''; x.email = '';
+  acoRenderApprLine(cat);
+}
+function acoExPerson(cat, uid) {
+  const x = _acoEx(cat, uid); if (!x) return;
+  const email = document.getElementById(uid + '-person').value;
+  const e = employeeData.find(r => r.email === email);
+  x.email = e ? e.email : ''; x.name = e ? e.name : '';
+  acoRenderApprLine(cat);
+}
 
 /* ── RD 직속 · MC 본인 요청 건 — 고정 결재 라인(09-28) ─────────────────────────────
    employee_search 의 G열(Boss = 직속 상사)이 RD 인 요청자(MC 본인, RD 직속 조직)는 BU 1·2차 결재 없이 RD 한 단계로 간다.
@@ -1618,6 +1762,7 @@ function applyRdRule() {
   });
   const ord = document.getElementById('dev-cfo-ord');
   if (ord) ord.textContent = _rdRule ? '2차' : '3차';
+  ['dev', 'ccl'].forEach(acoRenderApprLine);   // 추가 결재자 차수 · 결재 라인 미리보기도 RD 규칙에 맞춰(10-07)
   if (_rdRule) console.log('[RD] 고정 결재 라인 적용:', RD_FIXED.name, RD_FIXED.email);
 }
 function initDept(cat) {
@@ -3242,6 +3387,7 @@ function resetForm(cat) {
     if (p2) { p2.innerHTML = '<option value="">직원 선택</option>'; p2.disabled = true; }
   });
   applyFlexApprovers();   // Flex 연동 결재자는 비운 뒤 다시 채운다(10-01)
+  acoExtra[cat] = []; acoRenderApprLine(cat);   // 추가 결재자도 비운다(10-07)
 }
 
 /* ── 상신 ─────────────────────────────────────────────────── */
@@ -3291,12 +3437,18 @@ function validate(cat) {
 function buildApprovers(cat) {
   // RD 직속 · MC 본인 요청 건 — BU 단계를 RD 하나로 대신하고 CFO 가 2차(09-28). 상신 직전에 규칙을 다시 판정한다.
   applyRdRule();
+  // 추가 결재자(10-07) — 직원을 고르지 않은 칸이 있으면 막는다. CFO 바로 앞에 차례로 들어간다.
+  const _ex = (acoExtra[cat] || []).slice();
+  const _exMiss = _ex.findIndex(x => !x.email);
+  if (_exMiss >= 0) throw new Error((acoExBase(cat) + _exMiss + 1) + '차 추가 결재자를 지정하거나 「✕ 삭제」로 지워 주세요.');
+  const _exRows = base => _ex.map((x, i) => ({ name: x.name, email: x.email, role: ACO_EXTRA_ROLE, order: base + i + 1 }));
   if (_rdRule) {
     const cfo = cat === 'dev' ? DEV_CFO : CCL_CFO;
     if (!cfo.email) throw new Error('결재자 정보를 불러오지 못했습니다: CFO\nsystem_config_final.xlsx 설정을 확인해 주세요.');
     return [
       { name: RD_FIXED.name, email: RD_FIXED.email, role: RD_FIXED.role, order: 1 },
-      { name: cfo.name, email: cfo.email, role: cfo.role, order: 2 },
+      ..._exRows(1),
+      { name: cfo.name, email: cfo.email, role: cfo.role, order: 2 + _ex.length },
     ];
   }
   // 직접 지정 구간(dev: Team Leader·MC / ccl: Department Head)을 화면 선택값에서 읽는다.
@@ -3319,7 +3471,7 @@ function buildApprovers(cat) {
   if (missing.length) throw new Error('결재자 정보를 불러오지 못했습니다: ' + missing.join(', ') +
     '\nsystem_config_final.xlsx 설정을 확인해 주세요.');
   const base = picked.length;
-  return [...picked, ...fixed.map((a, i) => ({ name: a.name, email: a.email, role: a.role, order: base + i + 1 }))];
+  return [...picked, ..._exRows(base), ...fixed.map((a, i) => ({ name: a.name, email: a.email, role: a.role, order: base + _ex.length + i + 1 }))];
 }
 
 
@@ -3484,6 +3636,7 @@ function resetFormSilent(cat) {
     if (p2) { p2.innerHTML = '<option value="">직원 선택</option>'; p2.disabled = true; }
   });
   applyFlexApprovers();   // Flex 연동 결재자는 비운 뒤 다시 채운다(10-01)
+  acoExtra[cat] = []; acoRenderApprLine(cat);   // 추가 결재자도 비운다(10-07)
 }
 
 /* ── 목록 조회 ────────────────────────────────────────────── */
