@@ -442,6 +442,22 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
 .lbox .ls{font-size:.75rem;color:#6b7280;line-height:1.5;min-height:1.1em;word-break:keep-all}
 .lbox .ls:empty{display:none}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* 데이터 로딩 카드(APS 공통 · 10-07 · aps-uiunify) — 목록 · 결재함 · 관리자를 읽는 동안. BP Master 의 처리 중 카드와 같은 모양(어두운 반투명 배경 · 흰 카드 · 32px 회전 표시 · 15px 글자).
+   상세 창 · 알림 · 확인 창 아래, 처리 중 오버레이 위, 본문 위. 로더 함수를 감싸 켜고 끈다(아래 apsDyn*). */
+#aps-dyn{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:997;align-items:center;justify-content:center}
+#aps-dyn.show{display:flex}
+#aps-dyn .dyn-box{background:#fff;border-radius:6px;padding:28px 40px;font-size:15px;color:#323130;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:min(92vw,420px);text-align:center}
+#aps-dyn .dyn-spinner{width:32px;height:32px;border:3px solid #edebe9;border-top:3px solid #0078d4;border-radius:50%;animation:sp .8s linear infinite}
+#aps-dyn .dyn-msg{font-size:15px;color:#323130;display:flex;align-items:center;gap:6px}
+#aps-dyn .dyn-sub{font-size:.78rem;color:#605e5c;line-height:1.5}
+#aps-dyn .dyn-sub:empty{display:none}
+#aps-dyn .dyn-refresh{display:none;background:#0078d4;color:#fff;border:none;border-radius:4px;padding:8px 20px;font-size:.82rem;cursor:pointer;font-family:inherit;margin-top:4px}
+#aps-dyn .dyn-refresh:hover{background:#106ebe}
+.dyn-dots{display:inline-flex;gap:3px}
+.dyn-dots span{width:4px;height:4px;background:#0078d4;border-radius:50%;animation:dotPulse 1.2s infinite}
+.dyn-dots span:nth-child(2){animation-delay:.2s}
+.dyn-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
 .foot{text-align:center;font-size:.72rem;color:#a19f9d;padding:16px 0 30px;line-height:1.7}
 @media print{body{background:#fff}.no-print{display:none!important}}
 
@@ -572,7 +588,7 @@ body.rd-rule .appr-line-preview.rd-only{display:block}
     <div class="login-logo">🧾</div>
     <div style="font-size:1.15rem;font-weight:800;color:#0f2744;margin-bottom:6px">ACC Others</div>
     <div style="font-size:.82rem;color:#0078d4;font-weight:600;margin-bottom:22px">Accounting — Others · Star Truck Korea</div>
-    <div id="gate-msg" style="font-size:.85rem;color:#374151;line-height:1.8">⏳ 시스템 설정을 불러오는 중입니다…</div>
+    <div id="gate-msg" style="font-size:.85rem;color:#374151;line-height:1.8;display:flex;align-items:center;justify-content:center;gap:6px"><span>접근 권한을 확인하는 중입니다</span><span class="dyn-dots"><span></span><span></span><span></span></span></div>   <!-- 10-07: 정지된 「…」 대신 움직이는 점 — 다른 로딩 카드와 같은 모양 -->
     <div id="gate-retry" style="display:none;margin-top:18px">
       <button onclick="location.reload()" style="background:#0078d4;color:#fff;border:none;border-radius:10px;padding:10px 26px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit">다시 시도</button>
     </div>
@@ -1841,7 +1857,7 @@ async function boot(account) {
 
     // 설정(CFO · 관리자 · 결재선 규칙)을 못 읽으면 신청서가 잘못 만들어지므로 열지 않고 다시 시도 화면을 띄운다
     if (!cfg) {
-      document.getElementById('gate-msg').innerHTML = '⚠️ 시스템 설정을 불러오지 못했습니다.<br>잠시 후 다시 시도해 주세요.';
+      document.getElementById('gate-msg').style.display = 'block'; document.getElementById('gate-msg').innerHTML = '⚠️ 시스템 설정을 불러오지 못했습니다.<br>잠시 후 다시 시도해 주세요.';
       document.getElementById('gate-retry').style.display = 'block';
       return;
     }
@@ -1893,7 +1909,7 @@ async function boot(account) {
   } catch (e) {
     // 게이트 단계의 오류는 열지 않고 다시 시도 화면으로. 앱이 이미 열린 뒤의 오류만 예전처럼 안내한다.
     if (document.getElementById('app').style.display !== 'block') {
-      document.getElementById('gate-msg').innerHTML = '⚠️ 연결에 실패했습니다.<br>' + esc(e.message || '') + '<br>잠시 후 다시 시도해 주세요.';
+      document.getElementById('gate-msg').style.display = 'block'; document.getElementById('gate-msg').innerHTML = '⚠️ 연결에 실패했습니다.<br>' + esc(e.message || '') + '<br>잠시 후 다시 시도해 주세요.';
       document.getElementById('gate-retry').style.display = 'block';
     } else alert('SharePoint 연결 오류: ' + e.message);
   }
@@ -3901,7 +3917,10 @@ function renderPaged(key, items, rowFn, cols) {
   const pgEl = document.getElementById(key + '-pg');
   const nCols = cols || 7;
   if (!items.length) {
-    tb.innerHTML = '<tr><td colspan="' + nCols + '" class="empty">데이터가 없습니다.</td></tr>';
+    // 빈 문구는 APS 공통(10-07): 내 신청 목록 「신청 내역이 없습니다.」 · 결재함 「결재 대기 항목이 없습니다.」 · 관리자(조건 있을 때 포함) 「조회 결과가 없습니다.」
+    const _flt = key === 'my' && (((document.getElementById('my-status') || {}).value || '') || ((document.getElementById('my-search') || {}).value || '').trim());
+    const _msg = key === 'apr' ? '결재 대기 항목이 없습니다.' : (key === 'my' && !_flt) ? '신청 내역이 없습니다.' : '조회 결과가 없습니다.';
+    tb.innerHTML = '<tr><td colspan="' + nCols + '" class="empty">' + _msg + '</td></tr>';
     pgEl.innerHTML = ''; return;
   }
   const pages = Math.ceil(items.length / PG_SIZE);
@@ -4630,6 +4649,45 @@ function logAction(systemName, action, detail) {
   })();
 }
 
+</script>
+<!-- 데이터 로딩 카드(APS 공통 · 10-07) -->
+<div id="aps-dyn">
+  <div class="dyn-box">
+    <div class="dyn-spinner"></div>
+    <div class="dyn-msg"><span id="aps-dyn-text">데이터 불러오는 중</span><div class="dyn-dots"><span></span><span></span><span></span></div></div>
+    <div class="dyn-sub" id="aps-dyn-sub"></div>
+    <button class="dyn-refresh" id="aps-dyn-refresh" onclick="location.reload()">🔄 새로고침</button>
+  </div>
+</div>
+<script>
+/* 데이터 로딩 카드(APS 공통 · 10-07 · aps-uiunify) — IT · BP 와 같은 동작: 목록 · 결재함 · 관리자 로더가 도는 동안 카드를 띄우고(메시지 2.5초마다 순환),
+   15초가 지나면 「연결이 지연되고 있습니다」 와 새로고침 단추. 로더 함수 본문은 손대지 않고 감싼다 — 어떤 경로로 끝나든(정상 · 빈 목록 · 오류) finally 로 끈다.
+   겹쳐 불리면(같은 탭을 연달아) 마지막 호출이 끝날 때 닫힌다. */
+(function () {
+  var MSGS = ['데이터 불러오는 중', '결재 정보 확인 중', '시스템 연결 중', '잠시만 기다려주세요'], depth = 0, rot = null, slow = null;
+  function el(id) { return document.getElementById(id); }
+  function start(msg) {
+    var box = el('aps-dyn'); if (!box) return;
+    depth++;
+    if (depth > 1) { if (msg) el('aps-dyn-text').textContent = msg; return; }
+    var i = 0; el('aps-dyn-text').textContent = msg || MSGS[0]; el('aps-dyn-sub').textContent = ''; el('aps-dyn-sub').style.color = ''; el('aps-dyn-refresh').style.display = 'none';
+    box.classList.add('show');
+    rot = setInterval(function () { i = (i + 1) % MSGS.length; el('aps-dyn-text').textContent = MSGS[i]; }, 2500);
+    slow = setTimeout(function () { el('aps-dyn-text').textContent = '연결이 지연되고 있습니다'; el('aps-dyn-sub').textContent = '데이터 로딩이 오래 걸리고 있습니다. 페이지를 새로고침해 주세요.'; el('aps-dyn-sub').style.color = '#a4262c'; el('aps-dyn-refresh').style.display = 'inline-block'; }, 15000);
+  }
+  function end() {
+    var box = el('aps-dyn'); if (!box) return;
+    depth = Math.max(0, depth - 1); if (depth) return;
+    box.classList.remove('show'); if (rot) { clearInterval(rot); rot = null; } if (slow) { clearTimeout(slow); slow = null; }
+  }
+  window.apsDynStart = start; window.apsDynEnd = end;
+  // 검색 · 상태 필터로 다시 읽을 때(입력칸에 초점이 있을 때)는 카드를 띄우지 않는다 — 글자마다 화면이 어두워지지 않게
+  function quiet() { var a = document.activeElement; return !!(a && (a.tagName === 'INPUT' || a.tagName === 'SELECT') && /search|status|filter|-f-/.test(a.id || '')); }
+  window.apsDynWrap = function (fn, msg) { return async function () { var q = quiet(); if (!q) start(msg); try { return await fn.apply(this, arguments); } finally { if (!q) end(); } }; };
+})();
+window.loadMy = apsDynWrap(loadMy, '데이터 불러오는 중');
+window.loadApr = apsDynWrap(loadApr, '결재 정보 확인 중');
+window.loadAdmin = apsDynWrap(loadAdmin, '데이터 불러오는 중');
 </script>
 </body>
 </html>
