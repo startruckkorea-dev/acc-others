@@ -701,10 +701,21 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
 ::-webkit-scrollbar-thumb:hover { background: #94A3B8; background-clip: padding-box; }
 </style>
 <style id="aps-mobile">
-/* APS 모바일(10-09 · aps-mobile) — 767px 이하 전용. 웹 화면 무변경 */
+/* APS 모바일(10-09 · aps-mobile · 10-10 2차 점검) — 767px 이하 전용. 웹 화면 무변경 */
 /* ACC Others(Deviation Report · Credit Card Limit · BP Master): 문서 넘침은 원래 없음 — 카테고리 · 하위 탭 한 줄 가로 스크롤, 고정 폭(.fld 200px · 상세 라벨 200px · 검색칸 230px · 로딩 카드 300px) 해제,
-   목록 · BP 표(1,240 · 940 · 1,480px)는 표 상자만 가로 스크롤. BP 관리(SAP 붙여넣기 · 이력)는 PC 작업 전제라 넘치지 않게만 정리한다. */
-@media (max-width: 767px) {
+   목록 · BP 표(1,240 · 940 · 1,480px)는 표 상자만 가로 스크롤. BP 관리(SAP 붙여넣기 · 이력)는 PC 작업 전제라 넘치지 않게만 정리한다.
+   결재내용 PDF 는 상세 본문(#detail-body)을 html2canvas windowWidth:700 으로 다시 그리므로 상세 모달 규칙은 안쪽 @media (max-width: 699px) 에 둔다(PDF 배치 무변경). */
+@media screen and (max-width: 767px) {
+  /* ── iPhone(Safari) · Galaxy 방어(10-10) — 가로 돌림 글자 확대 · 날짜 칸 폭 · iOS 날짜 칸 높이(일반 입력칸 38px) ── */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  input:not([type=checkbox]):not([type=radio]), select, textarea, button { max-width: 100%; box-sizing: border-box; }
+  input[type=date], input[type=time], input[type=month], input[type=datetime-local] { min-width: 0; }
+  @supports (-webkit-touch-callout: none) {
+    input[type=date], input[type=time], input[type=month], input[type=datetime-local] { -webkit-appearance: none; appearance: none; display: block; min-height: 38px; line-height: normal; text-align: left; }
+    .bp-log-ctl input[type=date] { display: inline-block; min-height: 36px; }
+    input::-webkit-date-and-time-value { text-align: left; min-height: 1.2em; }
+  }
+
   /* ── 바탕 · 카드 ── */
   .wrap { padding: 12px 12px 32px; }
   .card { padding: 16px 14px; }
@@ -713,7 +724,7 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
 
   /* ── 헤더(V3) — 띠 한 줄 · 제목 한 단계 작게 · BU Admin 메일 줄바꿈 허용 ── */
   .card.hd.aps-hdr { padding: 0 16px 14px; margin-bottom: 14px; }
-  .aps-hdr .aps-band { margin: 0 -16px 10px; padding: 0 16px; }
+  .aps-hdr .aps-band { margin: 0 -16px 10px; padding: 0 16px; flex: 0 0 auto; width: calc(100% + 32px); }   /* 641~767px(가로 배치)에서 flex-basis 100%+48px 가 남아 띠가 3px 삐져나가 문서가 넘치던 것(10-10) */
   .aps-band-crumb { flex: 1 1 auto; }
   .aps-band-crumb > span { overflow: hidden; text-overflow: ellipsis; }
   .hd h1 { font-size: 1rem; }
@@ -743,6 +754,10 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
   #ccl-range input[type=date] { min-width: 0; }
   .appr-block { padding: 12px; }
   .appr-select-row, .appr-info { grid-template-columns: minmax(0, 1fr); }
+  /* 첨부 목록 — 긴 파일 이름이 줄바꿈되지 않아 「삭제」 단추가 밀리거나 세로로 꺾이고 문서가 넘치던 것(10-10) */
+  .fitem { gap: 8px; }
+  .fitem > span { min-width: 0; overflow-wrap: anywhere; }
+  .fitem > button { flex: none; white-space: nowrap; min-height: 32px; }
   #form-dev > div[style*="text-align:right"], #form-ccl > div[style*="text-align:right"] { display: flex; gap: 8px; }
   #form-dev > div[style*="text-align:right"] > .btn, #form-ccl > div[style*="text-align:right"] > .btn { flex: 1 1 0; min-height: 44px; margin-left: 0 !important; }
 
@@ -771,24 +786,34 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
   .bp-form-ft { flex-wrap: wrap; }
   .bp-form-ft .ft-note { flex: 1 1 100%; margin-right: 0; }
   .bp-form-ft .btn { flex: 1 1 0; height: 36px; }
+  /* 이력 기간 줄 — 날짜 · 구분(36px)과 이전 · 다음 · 최근 7일 · 불러오기(28px) 높이를 36px 로 맞춤(10-10) */
+  .bp-log-ctl .nav, .bp-log-ctl #bp-log-btn { height: 36px; }
+  /* SAP 붙여넣기 미리보기 — 요약 한 줄 · 단추 두 개 반씩(「지우기」 가 세로로 꺾이던 것) */
+  #bp-prev-wrap > div:last-child { flex-wrap: wrap; }
+  #bp-prev-sum { flex: 1 1 100%; }
+  #bp-prev-wrap > div:last-child > span:nth-child(2) { display: none; }   /* 빈 간격 띄우개 */
+  #bp-prev-wrap > div:last-child > .btn { flex: 1 1 0; min-height: 36px; white-space: nowrap; }
   .bp-migrate { flex-wrap: wrap; }
   .bp-cta { padding: 22px 14px; }
 
-  /* ── 상세 모달 — 좌우 10px 거의 전체 폭 · 최대 높이 90% · 라벨 폭 축소 ── */
-  .ov { padding: 10px; }
-  .ov > .modal-box { width: 100%; max-width: none; max-height: 90vh; max-height: 90dvh; padding: 18px 14px 20px; }
-  .modal-box .modal-close { top: 8px; right: 8px; width: 36px; height: 36px; }
-  .modal-title { padding-right: 34px; flex-wrap: wrap; row-gap: 8px; font-size: .95rem; }
-  .modal-title button { white-space: nowrap; }
-  .det-row { gap: 8px; }
-  .det-lbl { width: 96px; }
-  .det-val { min-width: 0; overflow-wrap: anywhere; }
-  .det-full .det-lbl { width: auto; }
-  .dl dt { flex-basis: 96px; }
-  .appr-item > div:first-child { min-width: 0; overflow-wrap: anywhere; }
-  .appr-item > span:last-child { flex: none; white-space: nowrap; }
-  .modal-action .btn-approve, .modal-action .btn-reject { min-height: 46px; }
-  .mod { max-height: 90vh; max-height: 90dvh; }
+  /* ── 상세 모달(10-10: PDF 700px 재렌더와 겹치지 않게 699px 이하만) ── */
+  @media (max-width: 699px) {
+    /* 상세 모달 — 좌우 10px 거의 전체 폭 · 최대 높이 90% · 라벨 폭 축소 ── */
+    .ov { padding: 10px; }
+    .ov > .modal-box { width: 100%; max-width: none; max-height: 90vh; max-height: 90dvh; padding: 18px 14px 20px; }
+    .modal-box .modal-close { top: 8px; right: 8px; width: 36px; height: 36px; }
+    .modal-title { padding-right: 34px; flex-wrap: wrap; row-gap: 8px; font-size: .95rem; }
+    .modal-title button { white-space: nowrap; }
+    .det-row { gap: 8px; }
+    .det-lbl { width: 96px; }
+    .det-val { min-width: 0; overflow-wrap: anywhere; }
+    .det-full .det-lbl { width: auto; }
+    .dl dt { flex-basis: 96px; }
+    .appr-item > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+    .appr-item > span:last-child { flex: none; white-space: nowrap; }
+    .modal-action .btn-approve, .modal-action .btn-reject { min-height: 46px; }
+    .mod { max-height: 90vh; max-height: 90dvh; }
+  }
 
   /* 결재 확인 · 알림 · 권한 없음 · 처리 중 · 설정 확인 화면 */
   #appr-ov > div { width: calc(100% - 20px) !important; padding: 20px 16px 16px !important; }
