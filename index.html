@@ -4860,8 +4860,12 @@ async function exportDetailPdf() {
     a.download = fileName;
     document.body.appendChild(a); a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    // 출력 기록(10-10 pdflog) — 파일을 내려보낸 뒤 Logging_data 에 남긴다(Excel 내보내기와 같은 logAction · 같은 DEV/CCL 폴더).
+    // logAction 은 기다리지 않는 비차단 호출이고 안에서 오류를 삼킨다 — 기록이 실패 · 지연돼도 PDF 는 그대로 나간다.
+    try { logAction(LISTS[_detail.cat].prefix, 'PDF 출력', { 신청: f.Title || '', id: _detail.reqId || '', 상태: f.Status || '', 종류: '결재내용 통합 PDF', 파일: fileName, 페이지: mainDoc.getPageCount() }); } catch (le) { console.warn('[Log] PDF 출력 기록 생략:', le && le.message); }
 
   } catch(e) {
+    try { const _ld = _detail || {}; logAction((LISTS[_ld.cat || _currentCat] || LISTS.dev).prefix, 'PDF 출력 실패', { 신청: (_ld.fields && _ld.fields.Title) || '', id: _ld.reqId || '', 상태: (_ld.fields && _ld.fields.Status) || '', 종류: '결재내용 통합 PDF', 오류: String((e && e.message) || e || '').slice(0, 200) }); } catch (le) { console.warn('[Log] PDF 출력 실패 기록 생략:', le && le.message); }
     alert('PDF 생성 오류: ' + e.message);
     console.error(e);
   } finally {
