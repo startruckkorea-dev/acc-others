@@ -3025,7 +3025,9 @@ async function bpMasterUpsert(rec) {
     const L = bpColLetter(histCol); await bpPatchRange(bpWb() + "/range(address='" + L + row + ':' + L + row + "')", [[entry]], 1);   // N, O, … 수정 내역
     });
     bpApplyLocal({ ...rec, modifier: who, modified: when, history: hist.concat([entry]) }, row);
-    bpLogAdmin('수정', { row, code: rec.code, by: who, changes: changes.map(c => c.label + ': ' + c.from + ' → ' + c.to), entry, histCol: bpColLetter(histCol), before: before ? bpLogRec(before) : null, after: bpLogRec(_bp.all.find(x => x.row === row)) });
+    // 10-15: 기록에는 계좌 · 사업자번호 뒤 4자리만(bpLogChanges) — Excel 수정 내역 칸(entry)은 그대로 쓴다
+    bpLogAdmin('수정', { row, code: rec.code, by: who, changes: bpLogChanges(changes).map(c => c.label + ': ' + c.from + ' → ' + c.to),
+      entry: bpHistEntry(who, changes.length ? bpLogChanges(changes) : [{ label: '저장', from: '', to: '' }], '', when), histCol: bpColLetter(histCol), before: before ? bpLogRec(before) : null, after: bpLogRec(_bp.all.find(x => x.row === row)) });
     return row;
   }
   const rows = await bpMasterAppendRows([rec]);
@@ -3076,7 +3078,21 @@ async function bpMasterAppendRows(recs) {
     return rows;
   });
 }
-function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: x.bizNo, inactive: !!x.inactive, bank: x.bank, acct: x.acct, creator: x.creator || '', created: x.created || '', modifier: x.modifier || '', modified: x.modified || '' } : null; }
+function bpLogRec(x) { return x ? { code: x.code, type: x.type, name: x.name, nameKo: x.nameKo, bizNo: bpMask(x.bizNo), inactive: !!x.inactive, bank: x.bank, acct: bpMask(x.acct), creator: x.creator || '', created: x.created || '', modifier: x.modifier || '', modified: x.modified || '' } : null; }
+/* 기록용 마스킹(10-15) — 계좌번호 · 사업자번호는 뒤 4자리만 남긴다(1234-5678-9012 → ********9012). Employee BP 는 개인 계좌라 전체가 기록에 남으면 안 된다.
+   마스터 파일(Excel) · 화면 · 목록 내보내기 값은 그대로 — 기록(Logging_data)에만 적용한다. */
+function bpMask(v) {
+  const s = String(v == null ? '' : v).replace(/[\s-]/g, '');
+  if (!s) return '';
+  return s.length > 4 ? '*'.repeat(s.length - 4) + s.slice(-4) : '*'.repeat(s.length);
+}
+function bpLogChanges(changes) { return (changes || []).map(c => (c.key === 'acct' || c.key === 'bizNo') ? Object.assign({}, c, { from: bpMask(c.from), to: bpMask(c.to) }) : c); }
+// 붙여넣은 SAP(Be1) 원문 — 읽어 낸 계좌 · 사업자번호와, 숫자 10자리 이상 덩어리(계좌 · 사업자 · 전화번호 꼴)를 뒤 4자리만 남긴다
+function bpMaskText(txt, recs) {
+  let s = String(txt || '');
+  (recs || []).forEach(r => [r && r.acct, r && r.bizNo].forEach(x => { x = String(x == null ? '' : x).trim(); if (x.length > 4) s = s.split(x).join(bpMask(x)); }));
+  return s.replace(/\d[\d -]*\d/g, m => (m.replace(/\D/g, '').length >= 10 ? bpMask(m) : m));
+}
 /* ── 열 정리(10-06) ─────────────────────────────────────────────
    예전 구조(J 생성자 · K 수정자 · L… 수정 내역) → 지금 구조(J 생성자 · K 생성일시 · L 수정자 · M 수정일시 · N… 수정 내역).
    ① 편집 모드(잠금)에서만 · ② 원본을 Backup/BP-Master 에 복사 · ③ 서버 머리글로 다시 예전 구조인지 확인
@@ -3377,7 +3393,9 @@ function bpExportLogs() {
   const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{ wch: 19 }, { wch: 9 }, { wch: 30 }, { wch: 16 }, { wch: 18 }, { wch: 60 }, { wch: 70 }, { wch: 44 }];
   XLSX.utils.book_append_sheet(wb, ws, 'BP-Master 이력');
+  try {   // 파일 생성 실패도 남긴다(10-15)
   XLSX.writeFile(wb, 'BP-Master_이력_' + _bpLog.from.replace(/-/g, '') + '-' + _bpLog.to.replace(/-/g, '') + (_bpLog.kind ? '_' + _bpLog.kind : '') + '.xlsx', { compression: true });
+  } catch (e) { bpLogAdmin('이력 내보내기 실패', { from: _bpLog.from, to: _bpLog.to, kind: _bpLog.kind || '전체', count: rows.length - 1, error: aoErr(e) }); throw e; }
   bpLogAdmin('이력 내보내기', { from: _bpLog.from, to: _bpLog.to, kind: _bpLog.kind || '전체', count: rows.length - 1 });
 }
 
@@ -3393,7 +3411,9 @@ function bpExportList() {
   ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 28 }, { wch: 16 }, { wch: 18 }, { wch: 22 }, { wch: 7 }, { wch: 8 }, { wch: 14 }, { wch: 17 }, { wch: 14 }, { wch: 17 }].concat(Array.from({ length: maxH }, () => ({ wch: 60 })));
   XLSX.utils.book_append_sheet(wb, ws, 'BP Master');
   const d = kstNow(), p = n => String(n).padStart(2, '0');
-  XLSX.writeFile(wb, 'BP-Master_목록_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '.xlsx', { compression: true });   // 압축 저장(09-30) — 같은 내용이 5.2MB → 0.8MB 안팎, 시스템들이 내려받는 시간이 준다
+  try {   // 파일 생성 실패도 남긴다(10-15)
+  XLSX.writeFile(wb, 'BP-Master_목록_' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + '_' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + '.xlsx', { compression: true });
+  } catch (e) { bpLogAdmin('목록 내보내기 실패', { count: rows.length - 1, error: aoErr(e) }); throw e; }   // 압축 저장(09-30) — 같은 내용이 5.2MB → 0.8MB 안팎, 시스템들이 내려받는 시간이 준다
   bpLogAdmin('목록 내보내기', { count: rows.length - 1, file: bpFileLabel((_bp.meta && _bp.meta.name) || BP_MASTER_FILE), sheet: _bp.sheet });
 }
 
@@ -3423,7 +3443,7 @@ function bpLogPasteLater(txt, recs, bulk) {
     const bad = bulk ? bulk.filter(r => r.miss.length) : [];
     bpLogAdmin('SAP(Be1) 붙여넣기', { lines: txt.split(/\r?\n/).filter(l => l.trim()).length, parsed: recs.length,
       codes: recs.map(r => r.code).join(','), invalid: bad.length, invalidCodes: bad.map(r => r.code).join(','),
-      nextRow: bpNextRow(), preview: txt.length > 4000 ? txt.slice(0, 4000) + '…' : txt });
+      nextRow: bpNextRow(), preview: (s => s.length > 4000 ? s.slice(0, 4000) + '…' : s)(bpMaskText(txt, recs)) });   // 10-15: 계좌 · 사업자번호 마스킹
   };
   _bpPasteTimer = setTimeout(_bpPastePending, 1200);
 }
@@ -3860,7 +3880,7 @@ function buildApprovers(cat) {
      Logging_data 에 「결재자 Flex 연동 실패」 로 남겨 IT 가 명부를 고치게 한다.
    입력칸(…-name · …-email)과 상신 로직은 그대로 — 값을 자동으로 채우고 칸을 읽기 전용(회색)으로 둘 뿐이다. */
 const FLEX_SLOTS = [{id: "dev-a1", role: "tl"}, {id: "dev-a2", role: "dh"}, {id: "ccl-a1", role: "dh"}];   // id = 이름/이메일 칸 접두어(id-name · id-email), role: tl(팀장 = G열) · dh(부서장 = H열)
-const FLEX_SYS = "ACC-Others";
+const FLEX_SYS = "Admin";   // 10-15: 예전 "ACC-Others" 는 logAction 의 'ACC-Others/' 접두와 겹쳐 Logging_data/ACC-Others/ACC-Others 에 쌓였다(그 폴더의 옛 기록은 그대로 읽힌다)
 function flexNorm(s){ return String(s||'').trim().toLowerCase().replace(/\s+/g,' '); }
 function flexEmp(){ return (employeeData) || []; }
 function flexByName(name){ const k=flexNorm(name); if(!k||k==='-') return null; return flexEmp().find(e=>flexNorm(e.name)===k)||null; }
@@ -3934,6 +3954,7 @@ async function submitForm(cat) {
   document.getElementById(cat + '-submit').disabled = true;
   loading(true);
   let reqId = null;
+  let _aoLogged = false;   // 상신 기록(10-15) — 한 번만
   try {
     const L = LISTS[cat];
     const fields = cat === 'dev' ? {
@@ -3995,13 +4016,15 @@ async function submitForm(cat) {
       throw new Error('결재선 생성이 완료되지 않아 신청을 자동 철회했습니다.\n잠시 후 다시 상신해 주세요.');
     }
 
-    // 10-06: 상신 · 승인 · 반려 · 철회는 Logging_data 에 남기지 않는다 — IT · GW 와 같은 범위(관리자 탭 · Excel 내보내기 · Flex 연동 실패만).
-    //        결재 흔적은 이미 DEV/CCL _Approvals 리스트(결재자 · 일시 · 의견)와 AdminComments 에 남는다.
+    // 10-15: 상신 · 승인 · 반려 · 철회도 Logging_data 에 남긴다(10-06 의 「남기지 않음」 을 사용자 승인으로 바꿈) — 결재선까지 만든 뒤 한 번.
+    _aoLogged = true;
+    aoAudit(cat, '상신', { 신청번호: title, id: String(reqId), 제목: String(fields.RequestTitle || '').slice(0, 200), 결재단계: approvers.length, 첨부: attachWarn ? '일부 실패' : '' });
     showAlert('상신되었습니다.', title + (attachWarn ? '\n' + attachWarn.trim() : ''));
     resetFormSilent(cat);
     switchTab('my');
     loadBadge();   // 결재자가 본인이거나 결재함을 곧 볼 때 배지가 1분 주기까지 예전 숫자로 남던 것(09-25) — 상신 직후 바로 센다
   } catch (e) {
+    if (!_aoLogged) aoAudit(cat, '상신 실패', { id: reqId ? String(reqId) : '', 오류: aoErr(e) });   // 10-15
     showAlert('오류가 발생했습니다.', e.message, '⚠️');
   } finally {
     _submitting = false;
@@ -4491,15 +4514,26 @@ async function processApproval() {
   closeApprModal();
   loading(true, action + ' 처리 중...');
   const cat = _detail.cat, L = LISTS[cat], reqId = _detail.reqId;
+  // 감사 기록(10-15) — APS 「결재 승인」 · 「결재 반려」 와 같은 모양. 결재행을 쓴 뒤 오류도 남기고, 성공을 남긴 뒤에는 다시 남기지 않는다.
+  let _aoCur = null, _aoReq = null, _aoW = false, _aoLogged = false;
+  const _aoLog = (result, what) => {
+    _aoLogged = true;
+    const f = (_aoCur && _aoCur.fields) || {}, q = (_aoReq && _aoReq.fields) || (_detail && _detail.fields) || {}, dg = aacDelegatorOf(f.ApproverEmail);
+    aoAudit(cat, what || (action === '승인' ? '결재 승인' : '결재 반려'), { 신청번호: q.Title || '', id: String(reqId), 제목: String(q.RequestTitle || '').slice(0, 200), 결과: result,
+      차수: f.ApprovalOrder == null ? '' : f.ApprovalOrder, 역할: String(f.ApproverRole || ''), 결재자: f.ApproverEmail || '',
+      대리: dg ? '예 — ' + (f.ApproverName || dg.name || f.ApproverEmail) + ' 님 대신' : '', 의견: aoLen(comment), 목록: L.apr, 결재행: String(apprId) });
+  };
   try {
     // 이중 결재 방지 — 다른 사람이 먼저 처리했는지 확인
     const cur = await api('/sites/' + siteId + '/lists/' + L.apr + '/items/' + apprId + '?$expand=fields');
+    _aoCur = cur;
     if ((cur.fields.Status || '').trim() !== '대기') {
       alert('이미 처리된 결재입니다.\n화면을 새로 불러옵니다.');
       closeDetail(); loadApr(); loadBadge(); return;
     }
     // 신청 자체가 이미 철회·반려됐는지 확인
     const req = await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId + '?$expand=fields');
+    _aoReq = req;
     const reqSt = (req.fields.Status || '').trim();
     if (reqSt !== '대기') {
       alert('이 신청은 이미 ' + reqSt + ' 상태입니다. 결재할 수 없습니다.');
@@ -4509,6 +4543,7 @@ async function processApproval() {
     const now = new Date().toISOString();
     await api('/sites/' + siteId + '/lists/' + L.apr + '/items/' + apprId, 'PATCH',
       { fields: aacPatchWith({ Status: action, ApprovalDate: now, Comment: comment }, cur.fields) });
+    _aoW = true;
 
     if (action === '반려') {
       await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId, 'PATCH', { fields: { Status: '반려' } });
@@ -4519,6 +4554,7 @@ async function processApproval() {
         .filter(i => ['대기', '대기(잠김)'].includes((i.fields.Status || '').trim()))
         .map(i => api('/sites/' + siteId + '/lists/' + L.apr + '/items/' + i.id, 'PATCH',
           { fields: { Status: '반려(잠김)' } }).catch(() => {})));
+      _aoLog('반려 — 신청 반려');
     } else {
       // 이 건의 결재행만 서버 필터로 조회한다.
       const mine = await apiAll('/sites/' + siteId + '/lists/' + L.apr +
@@ -4528,6 +4564,7 @@ async function processApproval() {
       // 0건이면 조회가 잘못된 것이고, 그대로 '승인완료'로 넘기면 남은 결재자를 건너뛴다.
       if (!rows.length) {
         console.error('[결재] 결재 행 조회 결과가 비어 있음 — 승인완료 전환 중단. RequestID:', reqId);
+        _aoLog('승인 기록 · 다음 단계로 넘기지 못함(결재 행 조회 0건)');
         loading(false);
         alert('승인은 기록되었으나 다음 단계로 넘기지 못했습니다.\n잠시 후 결재함에서 상태를 다시 확인해 주세요.\n계속 같은 증상이면 IT팀에 알려주세요.');
         closeDetail(); loadApr(); loadBadge(); return;
@@ -4536,14 +4573,17 @@ async function processApproval() {
         .sort((a, b) => (a.fields.ApprovalOrder || 0) - (b.fields.ApprovalOrder || 0));
       if (next.length) {
         await api('/sites/' + siteId + '/lists/' + L.apr + '/items/' + next[0].id, 'PATCH', { fields: { Status: '대기' } });
+        _aoLog('승인 — ' + (next[0].fields.ApprovalOrder ?? '') + '차 결재자에게 넘김');
       } else {
         await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId, 'PATCH', { fields: { Status: '승인완료' } });
+        _aoLog('승인 — 최종 승인(신청 승인완료)');
       }
     }
     alert(action + ' 처리되었습니다.');
     closeDetail(); loadApr(); loadBadge();
     if (_currentTab === 'admin') loadAdmin();
   } catch (e) {
+    if (!_aoLogged) { if (_aoW) _aoLog('결재행은 기록됨 · 이후 단계 오류 — ' + aoErr(e)); else _aoLog('처리 안 함 — ' + aoErr(e), action === '승인' ? '결재 승인 실패' : '결재 반려 실패'); }   // 10-15
     alert('오류가 발생했습니다.\n\n' + e.message);
   } finally { loading(false); }
 }
@@ -4553,8 +4593,12 @@ async function withdrawRequest(cat, reqId) {
   if (!confirm('신청을 철회하시겠습니까?\n철회 후에는 되돌릴 수 없습니다.')) return;
   loading(true, '철회 처리 중...');
   const L = LISTS[cat];
+  let _aoReq = null, _aoLogged = false;   // 철회 기록(10-15) — 한 번만
+  const _aoD = () => { const q = (_aoReq && _aoReq.fields) || {}; return { 신청번호: q.Title || '', id: String(reqId), 제목: String(q.RequestTitle || '').slice(0, 200),
+    처리: q.RequesterEmail && String(q.RequesterEmail).toLowerCase() !== String(user.email || '').toLowerCase() ? '관리자 — 신청자 ' + q.RequesterEmail : '본인' }; };
   try {
     const req = await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId + '?$expand=fields');
+    _aoReq = req;
     if ((req.fields.RequesterEmail || '').toLowerCase() !== user.email && !isAdmin()) {
       alert('본인이 신청한 건만 철회할 수 있습니다.'); return;
     }
@@ -4579,11 +4623,14 @@ async function withdrawRequest(cat, reqId) {
                 text: 'Withdrew the request. All approval steps were locked.' });
     await api('/sites/' + siteId + '/lists/' + L.req + '/items/' + reqId, 'PATCH',
       { fields: { Status: '철회', AdminComments: JSON.stringify(logs) } });
+    _aoLogged = true;
+    aoAudit(cat, '철회', Object.assign(_aoD(), { 결과: '철회', 잠근결재행: rows.length }));   // 10-15
 
     alert('철회되었습니다.');
     loadMy(); loadBadge();
     if (_currentTab === 'admin') loadAdmin();
   } catch (e) {
+    if (!_aoLogged) aoAudit(cat, '철회 실패', Object.assign(_aoD(), { 오류: aoErr(e) }));   // 10-15
     alert('오류가 발생했습니다.\n\n' + e.message);
   } finally { loading(false); }
 }
@@ -5027,6 +5074,7 @@ async function exportExcel() {
       '_' + p(n.getUTCHours()) + p(n.getUTCMinutes()) + '.xlsx');
     logAction(L.prefix, 'Excel 내보내기', { 건수: rows.length - 1 });
   } catch (e) {
+    try { logAction(L.prefix, 'Excel 내보내기 실패', { 오류: aoErr(e) }); } catch (_le) {}   // 10-15
     alert('Excel 생성 실패: ' + e.message);
   } finally { loading(false); }
 }
@@ -5098,14 +5146,26 @@ function logAction(systemName, action, detail) {
       const rand = Math.random().toString(36).slice(2, 6);
       const folderPath = `Logging_data/ACC-Others/${systemName}/${dateStr}`;
       if (!(await _ensureLogFolder(driveId, folderPath, t))) return;
-      await fetch(GRAPH + '/drives/' + driveId + '/root:/' + folderPath + '/' + timeStr + '_' + userTag + '_' + rand + '.json:/content', {
+      const _lr = await fetch(GRAPH + '/drives/' + driveId + '/root:/' + folderPath + '/' + timeStr + '_' + userTag + '_' + rand + '.json:/content', {
         method: 'PUT', headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' },
         body: JSON.stringify({ timestampKST: `${dateStr} ${p(now.getUTCHours())}:${p(now.getUTCMinutes())}:${p(now.getUTCSeconds())}`,
           user: rawUser, system: 'ACC-Others/' + systemName, action, detail: detail || {} })
       });
+      // 응답을 보지 않아 저장이 거부돼도(403 · 429 · 500) 흔적이 없었다(10-15, APS 10-10 과 같게) — 콘솔 경고만, 원 기능엔 영향 없음
+      if (!_lr.ok) console.warn('[Log] 기록 실패(무시됨, 원 기능엔 영향 없음): HTTP ' + _lr.status + ' —', systemName, action);
     } catch (e) { console.warn('[Log] 기록 실패(무시됨):', e.message); }
   })();
 }
+/* ══ 결재 기록(10-15) ══
+   DEV · CCL 상신 · 결재 승인/반려 · 철회를 Logging_data/ACC-Others/<DEV|CCL> 에 남긴다. 10-06 에는 「결재 흔적은 _Approvals 목록에 있다」 며 남기지 않았는데,
+   APS 통합 결재함에서 처리한 결재만 Logging_data/APS 에 남아 같은 승인이 어디서 눌렀는지에 따라 남고 안 남았다(10-15 점검 · 사용자 승인).
+   action 이름 · detail 모양은 APS 감사 기록(「결재 승인」 · 「결재 반려」 · 신청번호 · 차수 · 역할 · 결과)에 맞춘다. 의견은 글자 수만, 금액은 남기지 않는다.
+   Graph 쓰기가 끝난 뒤에 남기고, 실패하면 「…실패」(한 행위에 한 번). logAction 은 fire-and-forget. 10-01 제외 규칙(IT 계정)도 그대로. */
+function aoAudit(cat, action, detail) {
+  try { logAction(((LISTS[cat] || {}).prefix) || 'Admin', action, detail); } catch (e) { console.warn('[Log] 기록 호출 실패(무시됨):', e && e.message); }
+}
+function aoErr(e) { return String((e && e.message) || e || '').slice(0, 200); }
+function aoLen(s) { const n = String(s || '').trim().length; return n ? n + '자' : ''; }
 
 </script>
 <!-- 데이터 로딩 카드(APS 공통 · 10-07) -->
