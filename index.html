@@ -913,7 +913,7 @@ button[style*="display:none"]+.pdf-log-note,button[style*="display: none"]+.pdf-
   var av = document.getElementById('aps-av'), av2 = document.getElementById('aps-av2'), nm = document.getElementById('aps-acct-nm');
   function draw() {
     var full = ((src.querySelector('.hdr-user-name') || src).textContent || '').trim();
-    var en = full.match(/\(([A-Za-z][A-Za-z .'-]*)\)\s*$/);                 // 「… (Jimmy Lee)」
+    var en = full.match(/\(([A-Za-z][A-Za-z .'-]*)\)\s*$/);                 // 「… (Gildong Hong)」
     var latin = /^[A-Za-z]/.test(full);                                      // 영문만 있는 이름(John Smith) 은 앞 두 단어 · 두 글자 이니셜
     var short = en ? en[1].trim() : (latin ? full.split(/\s+/).slice(0, 2).join(' ') : (full.split(/\s+/)[0] || ''));
     var ini = (en || latin) ? short.split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() : short.slice(0, 1);
@@ -1638,7 +1638,7 @@ function esc(s) {
 /* ── 대리 처리 표기 (AAC 연동) ────────────────────────────────────────
    AAC(결재 대리 지정)가 대리인이 처리한 결재행의 ApproverRole 뒤에
    '· 대리(이름 <메일>)' 를 덧붙인다. 그 꼬리를 그대로 화면에 뿌리면
-   '1차결재자 · 대리(Jimmy Lee <jimmy.lee@hyosung.com>)' 처럼 날값이 노출된다.
+   '1차결재자 · 대리(Gildong Hong <hong.gildong@hyosung.com>)' 처럼 날값이 노출된다.
    본래 역할만 남기고, 대리였다는 사실은 알약으로 따로 보여준다.
    IT-Ticket(1877행 부근)·Goodwill-Approval·aps 와 같은 표기·같은 색이다.
    대리가 아니면 aacRolePill 이 빈 문자열을 돌려주므로 호출부에 조건이 필요 없다. */
@@ -2127,9 +2127,10 @@ function acoExPerson(cat, uid) {
    employee_search 의 G열(Boss = 직속 상사)이 RD 인 요청자(MC 본인, RD 직속 조직)는 BU 1·2차 결재 없이 RD 한 단계로 간다.
      DEV: Team Leader → MC → CFO  ⇒  RD → CFO
      CCL: Department Head → CFO   ⇒  RD → CFO
-   RD 는 system_config 의 ACC-OTHERS_RD(이름 · 메일). 없으면 이름 'Keuntae Dong' 을 직원 명부에서 찾아 메일을 채운다.
+   RD 는 system_config 의 ACC-OTHERS_RD(B열 이름 · C열 메일). 메일만 있으면 직원 명부에서 이름을, 이름만 있으면 메일을 찾아 채운다.
+   10-16 코드의 실명 기본값을 뺐다 — 키가 없으면 RD 를 알 수 없으므로 규칙을 켜지 않고 일반 결재 라인으로 둔다(콘솔에 남긴다).
    메일을 못 찾으면 규칙을 켜지 않는다(결재자 없는 행을 만들지 않게) — 콘솔에 남긴다. */
-const RD_FIXED = { name: 'Keuntae Dong', email: '', role: 'RD' };
+const RD_FIXED = { name: '', email: '', role: 'RD' };
 let _rdRule = false;
 function rdRuleApplies() {
   const mine = [(user && user.email || ''), (user && user.username || '')].map(x => x.trim().toLowerCase()).filter(Boolean);
@@ -2138,10 +2139,15 @@ function rdRuleApplies() {
   return !!RD_FIXED.name && (rec.boss || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase();
 }
 function applyRdRule() {
-  if (!RD_FIXED.email) {
+  if (!RD_FIXED.email && RD_FIXED.name) {
     const p = employeeData.find(e => (e.name || '').trim().toLowerCase() === RD_FIXED.name.trim().toLowerCase());
     if (p) RD_FIXED.email = p.email;
   }
+  if (!RD_FIXED.name && RD_FIXED.email) {   // 설정에 메일만 있을 때 — G열(Boss) 대조는 이름으로 하므로 명부에서 이름을 찾는다(10-16)
+    const p = employeeData.find(e => (e.email || '').trim().toLowerCase() === RD_FIXED.email.trim().toLowerCase());
+    if (p) RD_FIXED.name = p.name || '';
+  }
+  if (!RD_FIXED.name && !RD_FIXED.email) console.warn('[RD] system_config 에 ACC-OTHERS_RD 가 없어 RD 직속 고정 결재 라인을 쓰지 않는다(일반 결재 라인) — 설정 파일에 ACC-OTHERS_RD 를 추가해 주세요');
   _rdRule = rdRuleApplies() && !!RD_FIXED.email;
   if (rdRuleApplies() && !RD_FIXED.email) console.warn('[RD] 요청자는 RD 직속이지만 RD 메일을 찾지 못해 일반 결재 라인으로 둔다 — system_config ACC-OTHERS_RD 또는 직원 명부 확인');
   document.body.classList.toggle('rd-rule', _rdRule);
@@ -2251,7 +2257,7 @@ async function boot(account) {
     // 접두어 없는 옛 이름도 계속 읽어, 설정 파일을 어느 쪽으로 두어도 동작하게 한다.
     Object.assign(DEV_CFO, cfgVal(cfg, 'ACC-OTHERS_DEV_CFO', cfgVal(cfg, 'DEV_CFO', DEV_CFO)));
     Object.assign(CCL_CFO, cfgVal(cfg, 'ACC-OTHERS_CCL_CFO', cfgVal(cfg, 'CCL_CFO', CCL_CFO)));
-    // RD(상무) — 설정에 있으면 그 값, 없으면 기본 이름으로 두고 직원 명부에서 메일을 찾는다(applyRdRule).
+    // RD(상무) — 설정(ACC-OTHERS_RD)에 있으면 그 값. 없으면 빈 값 → RD 고정 결재 라인을 켜지 않는다(applyRdRule, 10-16).
     Object.assign(RD_FIXED, cfgVal(cfg, 'ACC-OTHERS_RD', RD_FIXED));
 
     // 입장 제한 없음(09-30) — IT · GW 처럼 Hyosung M365 로그인만 하면 누구나 연다. 권한은 관리자 · BP 관리 탭에서만 따로 본다.
@@ -2500,7 +2506,7 @@ function bpSearch() {
 }
 // 열 비율(%) — 조회 탭 10열 · 관리 탭 12열(선택 · 편집 추가). 합 100. 표 폭이 바뀌어도 비율이 같아 쪽을 넘겨도 열이 움직이지 않는다.
 /* 10-06: 생성일시 · 수정일시 두 열을 더하면서 BP 탭만 1600px 로 넓히고(body.wide-bp), 여유가 있던 Name 1 · 한글이름을 조금씩 줄였다.
-   일시 칸(8.3% ≈ 122px)은 「2026-10-06 15:54」 가 잘리지 않는 폭, 이름 칸(6.5% ≈ 96px)은 영문 이름(Hyunju Gong)이 들어가는 폭. 좁은 화면은 표 안에서 가로 스크롤(min-width 1480). */
+   일시 칸(8.3% ≈ 122px)은 「2026-10-06 15:54」 가 잘리지 않는 폭, 이름 칸(6.5% ≈ 96px)은 영문 이름(Gildong Hong)이 들어가는 폭. 좁은 화면은 표 안에서 가로 스크롤(min-width 1480). */
 const BP_COLS_VIEW  = [8, 7, 29, 17, 10, 11, 12.5, 5.5];   // 조회 탭 — 생성 · 수정 네 열 없이 8열(10-06 요청), 합 100                 // 합 100 — Code · 유형 · Name 1 · 한글 · 사업자 · Bank · 계좌 · 상태 · 생성자 · 생성일시 · 수정자 · 수정일시
 const BP_COLS_ADMIN = [2.2, 5.3, 5.3, 15.9, 11.4, 7.2, 7.5, 8, 3.8, 3.8, 6.5, 8.3, 6.5, 8.3];       // 합 100 — 앞에 선택 · 상태 뒤에 편집
 let _bpColsMode = null;
@@ -2829,7 +2835,7 @@ function bpRenderAdminInfo() {
 }
 // Be1 내보내기 열 12개 — 열 이름 · 예시 값 · 우리 파일의 기록 위치를 한 표로. 읽지 않는 열(E-Mail · Creation Date · Concur Employee ID)은 흐리게.
 const BE1_USED = { 0: 'Code', 1: '유형', 2: 'Name 1', 3: '한글이름', 4: '사업자등록번호 ¹', 7: '사업자등록번호', 8: '상태', 10: 'Bank', 11: 'Account no.' };
-const BE1_EXAMPLE = ['C0000371', 'Customer', 'Hong, Gil-dong', '홍길동', 'M26091065', '', '2026-09-23', '', 'No', '', '-1', ''];
+const BE1_EXAMPLE = ['C0000371', 'Customer', 'Hong, Gil-dong', '홍길동', 'M00000000', '', '2026-09-23', '', 'No', '', '-1', ''];
 function bpRenderBe1Cols() {
   const el = document.getElementById('be1-cols'); if (!el || el.childElementCount) return;
   const x = i => (i in BE1_USED ? '' : ' x');
