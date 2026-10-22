@@ -2371,7 +2371,8 @@ async function boot(account) {
       return;
     }
     _configLoaded = true;
-    ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP']);
+    // 10-23(E-09): 공통 관리자 ADMIN_SP_1 · _2 … 도 관리자 명단에 — 설정 파일에는 번호 붙은 키만 있다(APS 10-10 과 같은 기준)
+    ADMIN_EMAILS = cfgEmails(cfg, ['ACC-OTHERS_ADMIN_1', 'ADMIN_SP', ...cfgSeqKeys(cfg, 'ADMIN_SP_')]);
     IT_EMAILS    = cfgEmails(cfg, ['ACC-OTHERS_IT_1', 'ACC-OTHERS_IT']);
     // BP Master 관리자(09-28) — ACC-OTHERS_ADMIN_N(ACC Others 관리자)과 BP 전담 키 ACC-OTHERS_ADMIN-BP_N 에 적힌 사람만.
     //   IT(ACC-OTHERS_IT_N) · ADMIN_SP 는 자동으로 들어가지 않는다 — 필요하면 위 키에 적는다. (옛 표기 ACC-OTHERS_BP_ADMIN_N 도 읽는다)
